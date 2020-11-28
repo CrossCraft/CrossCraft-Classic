@@ -58,12 +58,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\States\MainState.h" />
     <ClInclude Include="src\States\SplashState.h" />
     <ClInclude Include="src\Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\States\MainState.cpp" />
     <ClCompile Include="src\States\SplashState.cpp" />
   </ItemGroup>

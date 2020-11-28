@@ -1,7 +1,8 @@
 TARGET = classic
 OBJS = src/Main.o \
 src/States/SplashState.o \
-src/States/MainState.o
+src/States/MainState.o \
+src/Player.o
 
 INCDIR = $(PSPPATH)/include
 INCDIR += Stardust-Engine/Platform/include Stardust-Engine/Deps/include Stardust-Engine/Script/include Stardust-Engine/Utilities/include Stardust-Engine/Core/include

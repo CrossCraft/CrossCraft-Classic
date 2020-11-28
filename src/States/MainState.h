@@ -6,6 +6,7 @@
 #include <GFX/2D/Sprite.h>
 #include <GFX/UI/TextRenderer.h>
 #include <Audio/AudioClip.h>
+#include "../Player.h"
 
 using namespace Stardust;
 
@@ -25,4 +26,9 @@ public:
 
 private:
 
+	void uiPass();
+	void mainPass();
+
+	GFX::UI::TextRenderer* textRenderer;
+	Player* player;
 };

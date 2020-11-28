@@ -28,6 +28,7 @@ auto main() -> int {
 
 #if CURRENT_PLATFORM != PLATFORM_PSP 
 	Platform::PC::g_Window->setTitle("CrossCraft Classic");
+	Platform::PC::g_Window->setVsync(true);
 #endif
 
 	setup_logger();
