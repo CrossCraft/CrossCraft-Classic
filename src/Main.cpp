@@ -7,7 +7,6 @@
  *********************************************************************/
 #include <iostream>
 #include <Utilities/Logger.h>
-#include "Client.h"
 #include <GFX/RenderCore.h>
 #include <Core/StateManager.h>
 #include "States/SplashState.h"
@@ -22,14 +21,13 @@ inline auto setup_logger() -> void {
 
 	Utilities::app_Logger->currentLevel = Utilities::LOGGER_LEVEL_DEBUG;
 	Utilities::detail::core_Logger->currentLevel = Utilities::LOGGER_LEVEL_DEBUG;
-	Utilities::app_Logger->info("KOF Client Start!");
 }
 
 auto main() -> int {
 	Platform::initPlatform();
 
 #if CURRENT_PLATFORM != PLATFORM_PSP 
-	Platform::PC::g_Window->setTitle("Kingdom Of Flesh");
+	Platform::PC::g_Window->setTitle("CrossCraft Classic");
 #endif
 
 	setup_logger();

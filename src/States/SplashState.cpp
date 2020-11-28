@@ -1,6 +1,6 @@
 #include "SplashState.h"
 #include <Utilities/Logger.h>
-#include "MenuState.h"
+#include "MainState.h"
 
 SplashState::SplashState() : sprt(), tex(0)
 {
@@ -32,13 +32,13 @@ void SplashState::resume()
 {
 }
 
-MenuState* menu;
+MainState* menu;
 void SplashState::update(Core::GameStateManager* st)
 {
 	Utilities::g_AppTimer.deltaTime();
 	if (Utilities::g_AppTimer.elapsed() >= 4) {
 		Utilities::app_Logger->info("End of Splash!");
-		menu = new MenuState();
+		menu = new MainState();
 		menu->init();
 		st->changeState(menu);
 	}

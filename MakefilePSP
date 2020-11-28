@@ -1,6 +1,5 @@
 TARGET = classic
 OBJS = src/Main.o \
-src/Client.o \
 src/States/SplashState.o \
 src/States/MainState.o
 
