@@ -1,0 +1,27 @@
+TARGET = classic
+OBJS = src/Main.o \
+src/Client.o \
+src/States/SplashState.o \
+src/States/MainState.o
+
+INCDIR = $(PSPPATH)/include
+INCDIR += Stardust-Engine/Platform/include Stardust-Engine/Deps/include Stardust-Engine/Script/include Stardust-Engine/Utilities/include Stardust-Engine/Core/include
+CFLAGS = -O3 -G0 -mpreferred-stack-boundary=4 -ffast-math -fno-rtti -DSINGLE_THREADED -gdwarf-2 -DCURRENT_PLATFORM=PLATFORM_PSP
+CXXFLAGS = -std=gnu++17
+ASFLAGS = $(CFLAGS)
+
+BUILD_PRX = 1
+PSP_FW_VERSION=371
+PSP_LARGE_MEMORY = 1
+
+LIBDIR += Stardust-Engine/Deps/lib/psp/ Stardust-Engine/Stardust/lib/psp
+LDFLAGS =
+LIBS= -lstardust -llua54 -lintraFont -lpspaudiolib -loslaudio -lpspaudio -lpspaudiocodec -lz -lpspgum_vfpu -lpspgu -lstdc++ -lpsprtc -lpspctrl -lm -lpspvfpu -lpspsdk -lpsppower -lpsphttp -lpspmath #Intrafont, PNG, Zlib, JSON, etc.
+
+EXTRA_TARGETS = EBOOT.PBP
+PSP_EBOOT_TITLE = CrossCraft Classic
+PSP_EBOOT_ICON = NULL
+PSP_EBOOT_PIC1 = NULL
+
+PSPSDK=$(shell psp-config --pspsdk-path)
+include $(PSPSDK)/lib/build.mak

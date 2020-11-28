@@ -1,0 +1,3 @@
+[submodule "Stardust-Engine"]
+	path = Stardust-Engine
+	url = https://github.com/IridescentRose/Stardust-Engine
