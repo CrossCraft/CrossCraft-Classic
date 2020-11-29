@@ -11,12 +11,15 @@ void MainState::init() {
 	textRenderer = new GFX::UI::TextRenderer();
 	textRenderer->init("./assets/font.pgf");
 	textRenderer->setStyle({ 255, 255, 255, 255, 1.0f, TEXT_RENDERER_CENTER, TEXT_RENDERER_CENTER, 0.0f, 0 });
+
+	world = new World();
 }
 
 void MainState::cleanup() {
 	textRenderer->cleanup();
 	delete textRenderer;
 	delete player;
+	delete world;
 }
 
 void MainState::enter() {
@@ -37,7 +40,7 @@ void MainState::update(Core::GameStateManager* st) {
 }
 
 void MainState::uiPass() {
-	textRenderer->setStyle({ 255, 255, 255, 255, 1.0f, TEXT_RENDERER_CENTER, TEXT_RENDERER_LEFT, 0.0f, 0 });
+	textRenderer->setStyle({ 255, 255, 255, 255, 0.5f, TEXT_RENDERER_CENTER, TEXT_RENDERER_LEFT, 0.0f, 0 });
 	textRenderer->draw("X/Y/Z: ", { 0, 12 });
 
 	textRenderer->draw(std::to_string(player->pos.x), { 0, 12 + 12 * 1 });
@@ -49,14 +52,19 @@ void MainState::uiPass() {
 	textRenderer->draw(std::to_string(player->rot.y), { 0, 12 + 12 * 7 });
 
 	player->draw();
+	world->update();
 }
 
 void MainState::mainPass(){
-	GFX::g_RenderCore->bindCamera(player->cam);
-	GFX::g_RenderCore->set3DMode();
+	world->draw();
 }
 
 void MainState::draw(Core::GameStateManager* st) {
+
+	//MAIN PASS
+	GFX::g_RenderCore->bindCamera(player->cam);
+	GFX::g_RenderCore->set3DMode();
+	mainPass();
 
 
 	//UI PASS

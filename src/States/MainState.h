@@ -7,6 +7,7 @@
 #include <GFX/UI/TextRenderer.h>
 #include <Audio/AudioClip.h>
 #include "../Player.h"
+#include "../World.h"
 
 using namespace Stardust;
 
@@ -31,4 +32,5 @@ private:
 
 	GFX::UI::TextRenderer* textRenderer;
 	Player* player;
+	World* world;
 };

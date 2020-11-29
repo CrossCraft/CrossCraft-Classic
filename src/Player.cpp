@@ -5,7 +5,7 @@ template<typename T>
 constexpr auto DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player() {
-	pos = { 0.f, 0.f, 0.f };
+	pos = { 0.f, 80.f, 0.f };
 	rot = { 0.f, 0.f };
 	vel = { 0.0, 0.0, 0.0 };
 
@@ -24,15 +24,20 @@ void Player::update(double dt) {
 	auto aX = Utilities::KeyStrength(PSP_CTRL_ANALOG_X);
 	auto aY = Utilities::KeyStrength(PSP_CTRL_ANALOG_Y);
 
-	rot.x += aY * rotSpeed * dt;
-	rot.y += aX * rotSpeed * dt;
+	if (aX > 0.4f || aX < -0.4f) {
+		rot.y += aX * rotSpeed * dt;
+	}
+
+	if (aY > 0.4f || aY < -0.4f) {
+		rot.x -= aY * rotSpeed * dt;
+	}
 #else
 	if (Utilities::KeyHold(GLFW_KEY_UP) || Utilities::KeyPressed(GLFW_KEY_UP)) {
-		rot.x += rotSpeed * dt;
+		rot.x -= rotSpeed * dt;
 	}
 
 	if (Utilities::KeyHold(GLFW_KEY_DOWN) || Utilities::KeyPressed(GLFW_KEY_DOWN)) {
-		rot.x -= rotSpeed * dt;
+		rot.x += rotSpeed * dt;
 	}
 
 	if (Utilities::KeyHold(GLFW_KEY_LEFT) || Utilities::KeyPressed(GLFW_KEY_LEFT)) {
@@ -73,13 +78,13 @@ void Player::update(double dt) {
 	}
 
 	if (Utilities::KeyHold(GLFW_KEY_A) || Utilities::KeyPressed(GLFW_KEY_A) || Utilities::KeyHold(PSP_CTRL_SQUARE) || Utilities::KeyPressed(PSP_CTRL_SQUARE)) {
-		vel.x += sinf(DEGTORAD(rot.y + 270)) * playerSpeed * static_cast<float>(dt) / 10.0f * 0.7f;
-		vel.z += cosf(DEGTORAD(rot.y + 270)) * playerSpeed * static_cast<float>(dt) / 10.0f * 0.7f;
+		vel.x += sinf(DEGTORAD(-rot.y + 270)) * playerSpeed * static_cast<float>(dt) / 10.0f * 0.7f;
+		vel.z += cosf(DEGTORAD(-rot.y + 270)) * playerSpeed * static_cast<float>(dt) / 10.0f * 0.7f;
 	}
 
 	if (Utilities::KeyHold(GLFW_KEY_D) || Utilities::KeyPressed(GLFW_KEY_D) || Utilities::KeyHold(PSP_CTRL_CIRCLE) || Utilities::KeyPressed(PSP_CTRL_CIRCLE)) {
-		vel.x -= sinf(DEGTORAD(rot.y + 270)) * playerSpeed * static_cast<float>(dt) / 10.0f * 0.7f;
-		vel.z -= cosf(DEGTORAD(rot.y + 270)) * playerSpeed * static_cast<float>(dt) / 10.0f * 0.7f;
+		vel.x -= sinf(DEGTORAD(-rot.y + 270)) * playerSpeed * static_cast<float>(dt) / 10.0f * 0.7f;
+		vel.z -= cosf(DEGTORAD(-rot.y + 270)) * playerSpeed * static_cast<float>(dt) / 10.0f * 0.7f;
 	}
 
 	pos += vel;
@@ -97,9 +102,14 @@ void Player::update(double dt) {
 
 	//Camera
 
-	cam->pos = pos;
-	cam->rot = { rot.x, rot.y, 0.f };
+#if CURRENT_PLATFORM == PLATFORM_PSP
+	cam->pos = -pos;
+	cam->rot = glm::vec3(-rot.x, rot.y, 0.f);
+#else 
 
+	cam->pos = pos;
+	cam->rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
+#endif
 	cam->update();
 }
 

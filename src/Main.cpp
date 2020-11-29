@@ -10,6 +10,7 @@
 #include <GFX/RenderCore.h>
 #include <Core/StateManager.h>
 #include "States/SplashState.h"
+#include "Types.h"
 
 using namespace Stardust;
 
@@ -34,7 +35,7 @@ auto main() -> int {
 	setup_logger();
 
 	GFX::g_RenderCore->setDefault2DMode();
-	GFX::g_RenderCore->setClearColor(0.1f, 0.0f, 0.1f, 1.0f);
+	GFX::g_RenderCore->setClearColor(static_cast<u8>(0x97), 0xD5, 0xFF, 0xFF);
 
 	Core::GameStateManager gsm;
 	SplashState* splash = new SplashState();

@@ -2,7 +2,10 @@ TARGET = classic
 OBJS = src/Main.o \
 src/States/SplashState.o \
 src/States/MainState.o \
-src/Player.o
+src/Player.o \
+src/ChunkMesh.o \
+src/ChunkStack.o \
+src/World.o
 
 INCDIR = $(PSPPATH)/include
 INCDIR += Stardust-Engine/Platform/include Stardust-Engine/Deps/include Stardust-Engine/Script/include Stardust-Engine/Utilities/include Stardust-Engine/Core/include
@@ -12,7 +15,7 @@ ASFLAGS = $(CFLAGS)
 
 BUILD_PRX = 1
 PSP_FW_VERSION=371
-PSP_LARGE_MEMORY = 1
+PSP_LARGE_MEMORY = 0
 
 LIBDIR += Stardust-Engine/Deps/lib/psp/ Stardust-Engine/Stardust/lib/psp
 LDFLAGS =

@@ -48,6 +48,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -58,16 +59,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\ChunkMesh.h" />
+    <ClInclude Include="src\ChunkStack.h" />
+    <ClInclude Include="src\FastNoiseLite.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\States\MainState.h" />
     <ClInclude Include="src\States\SplashState.h" />
     <ClInclude Include="src\Types.h" />
+    <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ChunkMesh.cpp" />
+    <ClCompile Include="src\ChunkStack.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\States\MainState.cpp" />
     <ClCompile Include="src\States\SplashState.cpp" />
+    <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
