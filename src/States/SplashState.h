@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   SplashState.h
+ * \brief  Splash Screen
+ * 
+ * \author Iridescence - Nathan Bourgeois <iridescentrosesfall@gmail.com>
+ * \date   December 2020
+ *********************************************************************/
 #pragma once
 #include <Core/GameState.h>
 #include <NonCopy.h>
@@ -7,6 +14,9 @@
 
 using namespace Stardust;
 
+/**
+ * Our splash state.
+ */
 class SplashState : public Core::GameState, NonCopyable, NonMovable {
 public:
 	SplashState();

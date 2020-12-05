@@ -1,6 +1,21 @@
+/*****************************************************************//**
+ * \file   world.cpp
+ * \brief  The Main File
+ *
+ * \author Iridescence - Nathan Bourgeois <iridescentrosesfall@gmail.com>
+ * \date   December 2020
+ *********************************************************************/
 #pragma once
 #include <stdint.h>
 #include "ChunkStack.h"
+#include "Player.h"
+#include <map>
+#include <memory>
+#include "Vec3.h"
+
+/**
+ * Blocks are just u8 - 255 max.
+ */
 typedef uint8_t block_t;
 
 //0 - air
@@ -44,17 +59,42 @@ typedef uint8_t block_t;
 
 class ChunkStack;
 
+
+/**
+ * This contains our entire world.
+ */
 class World {
 public:
 
-	World();
+	World(std::shared_ptr<Player> p);
 	~World();
 
+	/**
+	 * Performs an update... does the job of tick updates too.
+	 */
 	void update();
+
+	/**
+	 * Performs a draw.
+	 */
 	void draw();
 
+	/**
+	 * The world of blocks.
+	 */
 	block_t worldData[128 * 128 * 128];
+
+	/**
+	 * Texture ID of terrain atlas.
+	 */
 	unsigned int terrain_atlas;
 
-	std::vector<ChunkStack*> mesh;
+	/**
+	 * Chunk Stacks for our mesh.
+	 */
+	std::map<Vector3i, ChunkStack*> mesh;
+	std::shared_ptr<Player> player;
+	glm::ivec2 lastPlayerPos;
+	std::vector<Vector3i> remainingGeneration;
+	int updatesTilNext;
 };

@@ -44,7 +44,7 @@ void SplashState::update(Core::GameStateManager* st)
 	}
 }
 
-void SplashState::draw(Core::GameStateManager* st)
+void SplashState::draw(Core::GameStateManager*)
 {
 	sprt->draw();
 }

@@ -7,19 +7,16 @@ MainState::MainState() {
 }
 
 void MainState::init() {
-	player = new Player();
-	textRenderer = new GFX::UI::TextRenderer();
+	player = std::make_shared<Player>();
+	textRenderer = std::make_unique<GFX::UI::TextRenderer>();
 	textRenderer->init("./assets/font.pgf");
 	textRenderer->setStyle({ 255, 255, 255, 255, 1.0f, TEXT_RENDERER_CENTER, TEXT_RENDERER_CENTER, 0.0f, 0 });
 
-	world = new World();
+	world = std::make_unique<World>(player);
 }
 
 void MainState::cleanup() {
 	textRenderer->cleanup();
-	delete textRenderer;
-	delete player;
-	delete world;
 }
 
 void MainState::enter() {
@@ -34,7 +31,7 @@ void MainState::resume() {
 
 }
 
-void MainState::update(Core::GameStateManager* st) {
+void MainState::update(Core::GameStateManager*) {
 	double dt = Utilities::g_AppTimer.deltaTime();
 	player->update(dt);
 }
@@ -59,7 +56,7 @@ void MainState::mainPass(){
 	world->draw();
 }
 
-void MainState::draw(Core::GameStateManager* st) {
+void MainState::draw(Core::GameStateManager*) {
 
 	//MAIN PASS
 	GFX::g_RenderCore->bindCamera(player->cam);

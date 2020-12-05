@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   MainState.h
+ * \brief  The main game
+ * 
+ * \author Iridescence - Nathan Bourgeois <iridescentrosesfall@gmail.com>
+ * \date   December 2020
+ *********************************************************************/
 #pragma once
 #include <Core/GameState.h>
 #include <NonCopy.h>
@@ -11,6 +18,9 @@
 
 using namespace Stardust;
 
+/**
+ * Our game state.
+ */
 class MainState : public Core::GameState, NonCopyable, NonMovable {
 public:
 	MainState();
@@ -30,7 +40,7 @@ private:
 	void uiPass();
 	void mainPass();
 
-	GFX::UI::TextRenderer* textRenderer;
-	Player* player;
-	World* world;
+	std::unique_ptr<GFX::UI::TextRenderer> textRenderer;
+	std::shared_ptr<Player> player;
+	std::unique_ptr<World> world;
 };

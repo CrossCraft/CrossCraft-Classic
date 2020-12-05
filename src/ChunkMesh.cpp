@@ -35,11 +35,37 @@ constexpr float LIGHT_TOP = 1.0f;
 constexpr float LIGHT_SIDE = 0.8f;
 constexpr float LIGHT_BOT = 0.6f;
 
-ChunkMesh::ChunkMesh(int x, int y, int z)
+ChunkMesh::ChunkMesh(int x, int y, int z) : idx_counter(0), tidx_counter(0)
 {
 	cX = x;
 	cY = y;
 	cZ = z;
+}
+
+ChunkMesh::~ChunkMesh(){
+	model.deleteData();
+	tmodel.deleteData();
+	
+	idx_counter = 0;
+	mesh.color.clear();
+	mesh.color.shrink_to_fit();
+	mesh.indices.clear();
+	mesh.indices.shrink_to_fit();
+	mesh.position.clear();
+	mesh.position.shrink_to_fit();
+	mesh.uv.clear();
+	mesh.uv.shrink_to_fit();
+
+	tidx_counter = 0;
+
+	tmesh.color.clear();
+	tmesh.color.shrink_to_fit();
+	tmesh.indices.clear();
+	tmesh.indices.shrink_to_fit();
+	tmesh.position.clear();
+	tmesh.position.shrink_to_fit();
+	tmesh.uv.clear();
+	tmesh.uv.shrink_to_fit();
 }
 
 struct SurroundPos {
@@ -66,6 +92,12 @@ void ChunkMesh::generate(const World* wrld){
 	mesh.indices.clear();
 	mesh.position.clear();
 	mesh.uv.clear();
+
+	tidx_counter = 0;
+	tmesh.color.clear();
+	tmesh.indices.clear();
+	tmesh.position.clear();
+	tmesh.uv.clear();
 
 	for (int z = 0; z < 16; z++) {
 		for (int x = 0; x < 16; x++) {
@@ -99,6 +131,7 @@ void ChunkMesh::generate(const World* wrld){
 	}
 
 	model.addData(mesh);
+	tmodel.addData(tmesh);
 }
 
 void ChunkMesh::draw(){
@@ -112,7 +145,7 @@ void ChunkMesh::draw(){
 }
 #include <memory>
 std::array<float, 8> getTexCoord(uint8_t idx, float lv) {
-	auto atlas = std::make_unique<GFX::TextureAtlas>(8);
+	auto atlas = std::make_unique<GFX::TextureAtlas>(static_cast<short>(8));
 
 	if (idx == 1) {
 		if (lv == 1.0f) {
@@ -134,41 +167,77 @@ std::array<float, 8> getTexCoord(uint8_t idx, float lv) {
 		return atlas->getTexture(4);
 	}
 
+	if (idx == 7) {
+		return atlas->getTexture(37);
+	}
+
 	return atlas->getTexture(idx);
+}
+
+void ChunkMesh::drawTransparent()
+{
+	GFX::translateModelMatrix(glm::vec3(cX * 16, (cY * 16) - 1.0f / 8.0f, cZ * 16));
+
+	tmodel.bind();
+	tmodel.draw();
+
+	GFX::clearModelMatrix();
 }
 
 void ChunkMesh::tryAddFace(const World* wrld, std::array<float, 12> data, uint8_t blk, glm::vec3 pos, glm::vec3 posCheck, float lightVal){
 	if (!((posCheck.x == 16 && cX == 8) || (posCheck.x == -1 && cX == 0) || (posCheck.y == -1 && cY == 0) || (posCheck.y == 16 && cY == 8) || (posCheck.z == -1 && cZ == 0) || (posCheck.z == 16 && cZ == 8))) {
-		int idx = (((posCheck.y + cY * 16) * 128) + (posCheck.z + cZ * 16)) * 128 + (posCheck.x + cX * 16);
+		int idx = static_cast<int>((((posCheck.y + cY * 16) * 128) + (posCheck.z + cZ * 16)) * 128 + (posCheck.x + cX * 16));
 		
 		int blkCheck = wrld->worldData[idx];
 		
-		if (blkCheck == 0) {
-			addFaceToMesh(data, getTexCoord(blk, lightVal), pos, lightVal);
+		if (blkCheck == 0 || blkCheck == 7) {
+			if (blk == 7 && blkCheck != 7) {
+				addFaceToMesh(data, getTexCoord(blk, lightVal), pos, lightVal, true);
+			}
+
+			if (blk != 7) {
+				addFaceToMesh(data, getTexCoord(blk, lightVal), pos, lightVal, false);
+			}
 		}
 	}
 }
 
-void ChunkMesh::addFaceToMesh(std::array<float, 12> data, std::array<float, 8> uv, glm::vec3 pos, float lightVal){
-	mesh.uv.insert(mesh.uv.end(), uv.begin(), uv.end());
+void ChunkMesh::addFaceToMesh(std::array<float, 12> data, std::array<float, 8> uv, glm::vec3 pos, float lightVal, bool trans){
+	
+	auto* m = &mesh;
 
-	for (int i = 0, idx = 0; i < 4; i++) {
-		mesh.position.push_back(data[idx++] + pos.x);
-		mesh.position.push_back(data[idx++] + pos.y);
-		mesh.position.push_back(data[idx++] + pos.z);
+	if (trans) {
+		m = &tmesh;
 	}
 
-	mesh.color.insert(mesh.color.end(), {
+	m->uv.insert(m->uv.end(), uv.begin(), uv.end());
+
+	for (int i = 0, idx = 0; i < 4; i++) {
+		m->position.push_back(data[idx++] + pos.x);
+		m->position.push_back(data[idx++] + pos.y);
+		m->position.push_back(data[idx++] + pos.z);
+	}
+
+	m->color.insert(m->color.end(), {
 		lightVal, lightVal, lightVal, 1.0f,
 		lightVal, lightVal, lightVal, 1.0f,
 		lightVal, lightVal, lightVal, 1.0f,
 		lightVal, lightVal, lightVal, 1.0f,
 		});
 
-	mesh.indices.insert(mesh.indices.end(), {
-		idx_counter, idx_counter + 1, idx_counter + 2,
-		idx_counter + 2, idx_counter + 3, idx_counter,
-		});
+	if(trans){
+		m->indices.insert(m->indices.end(), {
+			tidx_counter, tidx_counter + 1, tidx_counter + 2,
+			tidx_counter + 2, tidx_counter + 3, tidx_counter,
+			});
+		tidx_counter += 4;
+	}
+	else {
+		m->indices.insert(m->indices.end(), {
+			idx_counter, idx_counter + 1, idx_counter + 2,
+			idx_counter + 2, idx_counter + 3, idx_counter,
+			});
+		idx_counter += 4;
+	}
 
-	idx_counter += 4;
 }
