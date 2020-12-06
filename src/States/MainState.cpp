@@ -33,7 +33,7 @@ void MainState::resume() {
 
 void MainState::update(Core::GameStateManager*) {
 	double dt = Utilities::g_AppTimer.deltaTime();
-	player->update(dt);
+	world->update(dt);
 }
 
 void MainState::uiPass() {
@@ -49,7 +49,6 @@ void MainState::uiPass() {
 	textRenderer->draw(std::to_string(player->rot.y), { 0, 12 + 12 * 7 });
 
 	player->draw();
-	world->update();
 }
 
 void MainState::mainPass(){

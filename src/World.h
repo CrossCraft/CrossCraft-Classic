@@ -57,8 +57,8 @@ typedef uint8_t block_t;
 //36 - white
 //37 - bedrock
 
+class Player;
 class ChunkStack;
-
 
 /**
  * This contains our entire world.
@@ -72,12 +72,14 @@ public:
 	/**
 	 * Performs an update... does the job of tick updates too.
 	 */
-	void update();
+	void update(double dt);
 
 	/**
 	 * Performs a draw.
 	 */
 	void draw();
+
+	block_t getBlock(int x, int y, int z);
 
 	/**
 	 * The world of blocks.

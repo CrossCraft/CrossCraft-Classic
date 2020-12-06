@@ -62,16 +62,13 @@ World::World(std::shared_ptr<Player> p){
 	Utilities::app_Logger->info("Generated world in: " + std::to_string(wt));
 
 	terrain_atlas = GFX::g_TextureManager->loadTex("./assets/terrain.png", GFX_FILTER_NEAREST, GFX_FILTER_NEAREST, false);
-
-	double mt = Utilities::g_AppTimer.deltaTime();
-	Utilities::app_Logger->info("Generated 1 chunk in: " + std::to_string(mt));
 }
 
 World::~World()
 {
 }
 
-void World::update() {
+void World::update(double dt) {
 	glm::ivec2 v = { static_cast<int>(player->pos.x - 8) / 16, static_cast<int>(player->pos.z - 8) / 16};
 
 	if (v != lastPlayerPos) {
@@ -119,14 +116,14 @@ void World::update() {
 			}
 		}
 
-		updatesTilNext = 12;
+		updatesTilNext = 6;
 		lastPlayerPos = v;
 	}
 
 	updatesTilNext--;
 
 	if (updatesTilNext < 0 && remainingGeneration.size() > 0) {
-		updatesTilNext = 12;
+		updatesTilNext = 6;
 
 		if (mesh.find(remainingGeneration[0]) == mesh.end()) {
 			auto chk = remainingGeneration[0];
@@ -141,6 +138,7 @@ void World::update() {
 		remainingGeneration.erase(remainingGeneration.begin());
 	}
 
+	player->update(dt, this);
 }
 
 void World::draw() {
@@ -155,4 +153,10 @@ void World::draw() {
 	for (auto& [pos, chunk] : mesh) {
 		chunk->drawTransparent();
 	}
+}
+
+block_t World::getBlock(int x, int y, int z)
+{
+	int idx = ((y * 128) + z) * 128 + x;
+	return worldData[idx];
 }

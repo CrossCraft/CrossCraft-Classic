@@ -59,6 +59,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\AABB.h" />
     <ClInclude Include="src\ChunkMesh.h" />
     <ClInclude Include="src\ChunkStack.h" />
     <ClInclude Include="src\FastNoiseLite.h" />
