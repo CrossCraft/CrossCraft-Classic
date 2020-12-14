@@ -9,6 +9,7 @@
 #include "ChunkMesh.h"
 #include "World.h"
 #include <array>
+#include "AABB.h"
 
 class World;
 class ChunkMesh;
@@ -23,4 +24,6 @@ public:
 
 	std::array<ChunkMesh*, 8> stack;
 	int cX, cY;
+
+	AABB box;
 };

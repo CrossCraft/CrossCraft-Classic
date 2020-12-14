@@ -87,6 +87,8 @@ struct SurroundPos {
 };
 
 void ChunkMesh::generate(const World* wrld){
+	const int numFace = 8192;
+
 	idx_counter = 0;
 	mesh.color.clear();
 	mesh.indices.clear();
@@ -99,36 +101,60 @@ void ChunkMesh::generate(const World* wrld){
 	tmesh.position.clear();
 	tmesh.uv.clear();
 
-	for (int z = 0; z < 16; z++) {
-		for (int x = 0; x < 16; x++) {
-			for (int y = 0; y < 16; y++) {
-				int idx = (((y + cY * 16) * 128) + (z + cZ * 16)) * 128 + (x + cX * 16);
+	int ourCidx = ((cY * 8) + cZ) * 8 + cX;
+	
+	if (!wrld->metaData[ourCidx].isEmpty && !wrld->metaData[ourCidx].isFull) {
+		mesh.color.reserve(16 * numFace);
+		mesh.indices.reserve(6 * numFace);
+		mesh.position.reserve(4 * numFace);
+		mesh.uv.reserve(4 * numFace);
 
-				uint8_t blk = wrld->worldData[idx];
 
-				if (blk == 0) {
-					continue;
+		tmesh.color.reserve(16 * numFace);
+		tmesh.indices.reserve(6 * numFace);
+		tmesh.position.reserve(4 * numFace);
+		tmesh.uv.reserve(4 * numFace);
+
+		for (int z = 0; z < 16; z++) {
+			for (int x = 0; x < 16; x++) {
+				for (int y = 0; y < 16; y++) {
+					int idx = (((y + cY * 16) * 128) + (z + cZ * 16)) * 128 + (x + cX * 16);
+
+					uint8_t blk = wrld->worldData[idx];
+
+					if (blk == 0) {
+						continue;
+					}
+
+					if (blk >= 10 && blk <= 14) {
+						//ADD X TO MESH
+						continue;
+					}
+
+					SurroundPos surround;
+					surround.update(x, y, z);
+
+					tryAddFace(wrld, bottomFace, blk, { x, y, z }, surround.down, LIGHT_BOT);
+					tryAddFace(wrld, topFace, blk, { x, y, z }, surround.up, LIGHT_TOP);
+
+					tryAddFace(wrld, leftFace, blk, { x, y, z }, surround.left, LIGHT_SIDE);
+					tryAddFace(wrld, rightFace, blk, { x, y, z }, surround.right, LIGHT_SIDE);
+
+					tryAddFace(wrld, frontFace, blk, { x, y, z }, surround.front, LIGHT_SIDE);
+					tryAddFace(wrld, backFace, blk, { x, y, z }, surround.back, LIGHT_SIDE);
 				}
-
-				if (blk >= 10 && blk <= 14) {
-					//ADD X TO MESH
-					continue;
-				}
-
-				SurroundPos surround;
-				surround.update(x, y, z);
-
-				tryAddFace(wrld, bottomFace, blk, { x, y, z }, surround.down, LIGHT_BOT);
-				tryAddFace(wrld, topFace, blk, { x, y, z }, surround.up, LIGHT_TOP);
-
-				tryAddFace(wrld, leftFace, blk, { x, y, z }, surround.left, LIGHT_SIDE);
-				tryAddFace(wrld, rightFace, blk, { x, y, z }, surround.right, LIGHT_SIDE);
-
-				tryAddFace(wrld, frontFace, blk, { x, y, z }, surround.front, LIGHT_SIDE);
-				tryAddFace(wrld, backFace, blk, { x, y, z }, surround.back, LIGHT_SIDE);
 			}
 		}
 	}
+
+	mesh.color.shrink_to_fit();
+	mesh.indices.shrink_to_fit();
+	mesh.position.shrink_to_fit();
+	mesh.uv.shrink_to_fit();
+	tmesh.color.shrink_to_fit();
+	tmesh.indices.shrink_to_fit();
+	tmesh.position.shrink_to_fit();
+	tmesh.uv.shrink_to_fit();
 
 	model.addData(mesh);
 	tmodel.addData(tmesh);

@@ -9,7 +9,7 @@ src/World.o
 
 INCDIR = $(PSPPATH)/include
 INCDIR += Stardust-Engine/Platform/include Stardust-Engine/Deps/include Stardust-Engine/Script/include Stardust-Engine/Utilities/include Stardust-Engine/Core/include
-CFLAGS = -O3 -G0 -mpreferred-stack-boundary=4 -ffast-math -fno-rtti -DSINGLE_THREADED -gdwarf-2 -DCURRENT_PLATFORM=PLATFORM_PSP
+CFLAGS = -Ofast -G0 -mpreferred-stack-boundary=4 -ffast-math -fno-rtti -DSINGLE_THREADED -gdwarf-2 -DCURRENT_PLATFORM=PLATFORM_PSP
 CXXFLAGS = -std=gnu++17
 ASFLAGS = $(CFLAGS)
 

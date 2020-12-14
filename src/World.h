@@ -60,6 +60,11 @@ typedef uint8_t block_t;
 class Player;
 class ChunkStack;
 
+struct ChunkMeshMeta {
+	bool isEmpty;
+	bool isFull;
+};
+
 /**
  * This contains our entire world.
  */
@@ -85,6 +90,11 @@ public:
 	 * The world of blocks.
 	 */
 	block_t worldData[128 * 128 * 128];
+
+	/**
+	 * World Metadata.
+	 */
+	ChunkMeshMeta metaData[8 * 8 * 8];
 
 	/**
 	 * Texture ID of terrain atlas.

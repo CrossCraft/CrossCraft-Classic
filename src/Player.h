@@ -10,6 +10,7 @@
 #include <GFX/3D/Camera.h>
 #include "World.h"
 #include "AABB.h"
+#include "Frustum.h"
 
 using namespace Stardust;
 
@@ -40,9 +41,10 @@ public:
 	GFX::Render3D::Camera* cam;
 	bool onGround;
 
-	void collide(World* world, const glm::vec3& vel, float dt);
+	glm::mat4 proj;
+	glm::mat4 view;
 
-	//AABB box;
+	ViewFrustum m_frustum;
 
 private:
 	glm::vec3 vel;

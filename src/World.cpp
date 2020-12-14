@@ -11,7 +11,7 @@ World::World(std::shared_ptr<Player> p){
 	player = p;
 	lastPlayerPos = { -1, -1 };
 	FastNoiseLite noise;
-	noise.SetSeed(rand());
+	//noise.SetSeed(rand());
 	noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	float* heightMap = new float[128 * 128];
 	memset(worldData, 0, 128 * 128 * 128);
@@ -23,12 +23,25 @@ World::World(std::shared_ptr<Player> p){
 		}
 	}
 
+
+	for (int z = 0; z < 8; z++) {
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+				int idx = ((y * 8) + z) * 8 + x;
+				metaData[idx].isEmpty = true;
+				metaData[idx].isFull = true;
+			}
+		}
+	}
+
 	for (int z = 0; z < 128; z++) {
 		for (int x = 0; x < 128; x++) {
 			int height = static_cast<int>(heightMap[z * 128 + x]);
 
 			for (int y = 0; y < 128; y++) {
 				int idx = ((y * 128) + z) * 128 + x;
+
+				int cidx = (( (y/16) * 8) + (z/16)) * 8 + (x/16);
 
 				if (y < height) {
 					if (y == 0) {
@@ -40,6 +53,10 @@ World::World(std::shared_ptr<Player> p){
 					else if (y < height) {
 						worldData[idx] = 3; //dirt
 					}
+
+					if (metaData[cidx].isEmpty) {
+						metaData[cidx].isEmpty = false;
+					}
 				} else if (y == height) {
 					if (y < 63) {
 						worldData[idx] = 3; //dirt
@@ -47,11 +64,27 @@ World::World(std::shared_ptr<Player> p){
 					else {
 						worldData[idx] = 1; //grass
 					}
+
+
+					if (metaData[cidx].isEmpty) {
+						metaData[cidx].isEmpty = false;
+					}
 				}
 				else if (y <= 63) {
 					worldData[idx] = 7;
+
+					if (metaData[cidx].isEmpty) {
+						metaData[cidx].isEmpty = false;
+					}
+
+					if (metaData[cidx].isFull) {
+						metaData[cidx].isFull = false;
+					}
 				}
 				else {
+					if (metaData[cidx].isFull) {
+						metaData[cidx].isFull = false;
+					}
 					continue;
 				}
 			}
@@ -116,22 +149,27 @@ void World::update(double dt) {
 			}
 		}
 
-		updatesTilNext = 6;
+		updatesTilNext = 3;
 		lastPlayerPos = v;
 	}
 
 	updatesTilNext--;
 
 	if (updatesTilNext < 0 && remainingGeneration.size() > 0) {
-		updatesTilNext = 6;
+		updatesTilNext = 3;
 
 		if (mesh.find(remainingGeneration[0]) == mesh.end()) {
 			auto chk = remainingGeneration[0];
 			//NOT FOUND
 			if (chk.x >= 0 && chk.x < 8 && chk.y >= 0 && chk.y < 8) {
+				Utilities::g_AppTimer.deltaTime();
+
 				ChunkStack* chunk = new ChunkStack(chk.x, chk.y);
 				chunk->generate(this);
 				mesh.emplace(chk, std::move(chunk));
+
+				auto tt = Utilities::g_AppTimer.deltaTime();
+				Utilities::app_Logger->info("GENERATED IN " + std::to_string(tt));
 			}
 		}
 
@@ -147,11 +185,15 @@ void World::draw() {
 	//Draw world
 
 	for (auto& [pos, chunk] : mesh) {
-		chunk->draw();
+		if (player->m_frustum.isBoxInFrustum(chunk->box)) {
+			chunk->draw();
+		}
 	}
 
 	for (auto& [pos, chunk] : mesh) {
-		chunk->drawTransparent();
+		if (player->m_frustum.isBoxInFrustum(chunk->box)) {
+			chunk->drawTransparent();
+		}
 	}
 }
 

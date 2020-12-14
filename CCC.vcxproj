@@ -63,6 +63,7 @@
     <ClInclude Include="src\ChunkMesh.h" />
     <ClInclude Include="src\ChunkStack.h" />
     <ClInclude Include="src\FastNoiseLite.h" />
+    <ClInclude Include="src\Frustum.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\States\MainState.h" />
     <ClInclude Include="src\States\SplashState.h" />
@@ -73,6 +74,7 @@
   <ItemGroup>
     <ClCompile Include="src\ChunkMesh.cpp" />
     <ClCompile Include="src\ChunkStack.cpp" />
+    <ClCompile Include="src\Frustum.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\States\MainState.cpp" />

@@ -1,6 +1,6 @@
 #include "ChunkStack.h"
 
-ChunkStack::ChunkStack(int x, int y)
+ChunkStack::ChunkStack(int x, int y) : box({16, 128, 16})
 {
 	cX = x;
 	cY = y;

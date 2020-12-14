@@ -1,8 +1,9 @@
 #include "Player.h"
 #include <Utilities/Input.h>
+#include <glm/gtx/projection.hpp>
 
 template<typename T>
-constexpr auto DEGTORAD(T x) { return x / 180.0f * 3.14159; }
+constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player() {
 	pos = { 64.f, 80.f, 64.f };
@@ -11,6 +12,8 @@ Player::Player() {
 
 	cam = new GFX::Render3D::Camera(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.2f, 255.0f);
 	onGround = false;
+
+	proj = glm::perspective(70.0f, 16.0f / 9.0f, 0.2f, 255.0f);
 }
 
 Player::~Player() {
@@ -244,6 +247,13 @@ void Player::update(double dt, World* wrld) {
 	cam->rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
 #endif
 	cam->update();
+
+	view = glm::mat4(1.0f);
+	view = glm::rotate(view, DEGTORAD<float>(rot.x), { 1, 0, 0 });
+	view = glm::rotate(view, DEGTORAD<float>(-rot.y/2.0f), { 0, 1, 0 });
+	view = glm::translate(view, pos);
+
+	m_frustum.update(proj * view);
 }
 
 void Player::draw() {
