@@ -1,63 +1,21 @@
-/*****************************************************************//**
- * \file   main.cpp
- * \brief  The Main File
- *
- * \author Iridescence - Nathan Bourgeois <iridescentrosesfall@gmail.com>
- * \date   November 2020
- *********************************************************************/
-#include <iostream>
-#include <Utilities/Logger.h>
-#include <GFX/RenderCore.h>
-#include <Core/StateManager.h>
-#include "States/SplashState.h"
-#include "Types.h"
+#include <Stardust-Celeste.hpp>
 
-using namespace Stardust;
+using namespace Stardust_Celeste;
 
-inline auto setup_logger() -> void {
-	Utilities::app_Logger->autoFlush = true;
-	Utilities::app_Logger->toConsole = true;
-	Utilities::detail::core_Logger->autoFlush = true;
-	Utilities::detail::core_Logger->toConsole = true;
+class GameApplication : public Core::Application {
+  public:
+    void on_start() override {
+		SC_APP_INFO("TEST!");
+    }
 
-	Utilities::app_Logger->currentLevel = Utilities::LOGGER_LEVEL_DEBUG;
-	Utilities::detail::core_Logger->currentLevel = Utilities::LOGGER_LEVEL_DEBUG;
-}
+  private:
+};
 
-auto main() -> int {
-	Platform::initPlatform();
+Core::Application *CreateNewSCApp() {
+    Core::AppConfig config;
+	config.headless = false;
+	
+    Core::PlatformLayer::get().initialize(config);
 
-#if CURRENT_PLATFORM != PLATFORM_PSP 
-	Platform::PC::g_Window->setTitle("CrossCraft Classic");
-	Platform::PC::g_Window->setVsync(true);
-#endif
-
-	setup_logger();
-
-	GFX::g_RenderCore->setDefault2DMode();
-	GFX::g_RenderCore->setClearColor(static_cast<u8>(0x97), 0xD5, 0xFF, 0xFF);
-
-	Core::GameStateManager gsm;
-	SplashState* splash = new SplashState();
-	splash->init();
-
-	gsm.changeState(splash);
-
-	while (gsm.isRunning()
-#if CURRENT_PLATFORM != PLATFORM_PSP 
-		&& !Platform::PC::g_Window->shouldClose()
-#endif
-		) {
-		GFX::g_RenderCore->beginFrame();
-		GFX::g_RenderCore->clear();
-
-		gsm.update();
-		gsm.draw();
-
-		GFX::g_RenderCore->endFrame();
-		Platform::platformUpdate();
-	}
-
-	Platform::exitPlatform();
-	return 0;
+    return new GameApplication();
 }
