@@ -1,13 +1,6 @@
-/*****************************************************************//**
- * \file   ChunkMesh.h
- * \brief  Chunk Mesh object.
- * 
- * \author Iridescence - Nathan Bourgeois <iridescentrosesfall@gmail.com>
- * \date   December 2020
- *********************************************************************/
 #pragma once
-#include <GFX/GFXWrapper.h>
 #include "World.h"
+#include <GFX/GFXWrapper.h>
 
 using namespace Stardust;
 
@@ -17,46 +10,47 @@ class World;
  * Chunk mesh object.
  */
 class ChunkMesh {
-public:
-	/**
-	 * Creates a mesh.
-	 * 
-	 * \param x - Chunk X
-	 * \param y - Chunk Y
-	 * \param z - Chunk Z
-	 */
-	ChunkMesh(int x, int y, int z);
-	~ChunkMesh();
-	
-	/**
-	 * Generates a mesh. If it already exists, then it will be recreated.
-	 * 
-	 * \param wrld - World to get data from
-	 */
-	void generate(const World* wrld);
+  public:
+    /**
+     * Creates a mesh.
+     *
+     * \param x - Chunk X
+     * \param y - Chunk Y
+     * \param z - Chunk Z
+     */
+    ChunkMesh(int x, int y, int z);
+    ~ChunkMesh();
 
-	/**
-	 * Draws to screen assuming atlas is bound.
-	 * 
-	 */
-	void draw();
+    /**
+     * Generates a mesh. If it already exists, then it will be recreated.
+     *
+     * \param wrld - World to get data from
+     */
+    void generate(const World *wrld);
 
-	/**
-	 * Draws transparent objects after.
-	 */
-	void drawTransparent();
+    /**
+     * Draws to screen assuming atlas is bound.
+     *
+     */
+    void draw();
 
-private:
-	void tryAddFace(const World* wrld, std::array<float, 12> data, uint8_t blk, glm::vec3 pos, glm::vec3 posCheck, float lightVal);
-	void addFaceToMesh(std::array<float, 12> data, std::array<float, 8> uv, glm::vec3 pos, float lightVal, bool trans);
-	GFX::Mesh mesh;
-	GFX::Model model;
+    /**
+     * Draws transparent objects after.
+     */
+    void drawTransparent();
 
+  private:
+    void tryAddFace(const World *wrld, std::array<float, 12> data, uint8_t blk,
+                    glm::vec3 pos, glm::vec3 posCheck, float lightVal);
+    void addFaceToMesh(std::array<float, 12> data, std::array<float, 8> uv,
+                       glm::vec3 pos, float lightVal, bool trans);
+    GFX::Mesh mesh;
+    GFX::Model model;
 
-	GFX::Mesh tmesh;
-	GFX::Model tmodel;
+    GFX::Mesh tmesh;
+    GFX::Model tmodel;
 
-	int cX, cY, cZ;
-	unsigned int idx_counter;
-	unsigned int tidx_counter;
+    int cX, cY, cZ;
+    unsigned int idx_counter;
+    unsigned int tidx_counter;
 };

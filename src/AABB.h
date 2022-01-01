@@ -1,19 +1,12 @@
 #pragma once
-#include <glm/glm.hpp>
+#include <glm.hpp>
 
 struct AABB {
-    AABB(const glm::vec3& dim)
-        : dimensions(dim)
-    {
-    }
+    AABB(const glm::vec3 &dim) : dimensions(dim) {}
 
-    void update(const glm::vec3& location)
-    {
-        position = location;
-    }
+    void update(const glm::vec3 &location) { position = location; }
 
-    glm::vec3 getVN(const glm::vec3& normal) const
-    {
+    glm::vec3 getVN(const glm::vec3 &normal) const {
         glm::vec3 res = position;
 
         if (normal.x < 0) {
@@ -29,8 +22,7 @@ struct AABB {
         return res;
     }
 
-    glm::vec3 getVP(const glm::vec3& normal) const
-    {
+    glm::vec3 getVP(const glm::vec3 &normal) const {
         glm::vec3 res = position;
 
         if (normal.x > 0) {

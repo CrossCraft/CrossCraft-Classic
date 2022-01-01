@@ -13,7 +13,7 @@ endif()
 
 add_subdirectory(ext/Stardust-Celeste Stardust)
 
-add_executable(CrossCraft-Classic src/Main.cpp)
+add_executable(CrossCraft-Classic src/Main.cpp src/Gamestate.cpp)
 target_include_directories(CrossCraft-Classic PUBLIC ../include/ ../ext/Stardust-Celeste/ext/glm/glm/)
 target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste)
 
