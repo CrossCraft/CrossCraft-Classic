@@ -1,0 +1,87 @@
+name: CrossCraft
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+
+  Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          sudo apt update
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+          git submodule update --init --recursive --remote
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: CrossCraft-Linux
+          path: |
+            build/CrossCraft-Classic
+            assets/
+            LICENSE
+            README.md
+
+  Windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          git submodule update --init --recursive --remote
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 .
+          cmake --build . --config Release
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: CrossCraft-Windows
+          path: |
+            Release\CrossCraft-Classic.exe
+            assets\
+            LICENSE
+            README.md
+
+  PSP:
+    runs-on: ubuntu-latest
+    container: pspdev/pspdev:latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apk add bash cmake git gmp mpc1 mpfr4 make glew sdl2 binutils libc6-compat
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Build
+        run: |
+          git submodule update --init --recursive --remote
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$PSPDEV/psp/share/pspdev.cmake ..
+          make
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Stardust-Celeste-PSP
+          path: |
+            build/EBOOT.PBP
+            assets/
+            LICENSE
+            README.md
