@@ -26,12 +26,14 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
           make
+          cd ..
+          mv build/CrossCraft-Classic CrossCraft-Classic
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
           name: CrossCraft-Linux
           path: |
-            build/CrossCraft-Classic
+            CrossCraft-Classic
             assets/
             LICENSE
             README.md
@@ -47,12 +49,13 @@ jobs:
           git submodule update --init --recursive --remote
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 .
           cmake --build . --config Release
+          move Release\CrossCraft-Classic.exe CrossCraft-Classic.exe
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
           name: CrossCraft-Windows
           path: |
-            Release\CrossCraft-Classic.exe
+            CrossCraft-Classic.exe
             assets\
             LICENSE
             README.md
@@ -64,7 +67,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          apk add bash cmake git gmp mpc1 mpfr4 make glew sdl2 binutils libc6-compat
+          apk add bash cmake git gmp mpc1 mpfr4 make
       
       - name: Checkout
         uses: actions/checkout@v2
@@ -76,12 +79,16 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$PSPDEV/psp/share/pspdev.cmake ..
           make
+          cd ..
+          mv build/EBOOT.PBP EBOOT.PBP
+          mv build/CrossCraft-Classic.prx CrossCraft-Classic.prx
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Stardust-Celeste-PSP
+          name: CrossCraft-PSP
           path: |
-            build/EBOOT.PBP
+            EBOOT.PBP
+            CrossCraft-Classic.prx
             assets/
             LICENSE
             README.md
