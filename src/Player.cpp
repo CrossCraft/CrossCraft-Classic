@@ -33,7 +33,26 @@ void Player::update(float dt) {
 
     float playerSpeed = 4.3f;
 
-    // TODO: Change Player Velocity
+    using namespace Utilities::Input;
+    if (get_action_state(Action::Forward)) {
+        vel.x += -sinf(DEGTORAD(-rot.y)) * playerSpeed;
+        vel.z += -cosf(DEGTORAD(-rot.y)) * playerSpeed;
+    }
+
+    if (get_action_state(Action::Backward)) {
+        vel.x += sinf(DEGTORAD(-rot.y)) * playerSpeed;
+        vel.z += cosf(DEGTORAD(-rot.y)) * playerSpeed;
+    }
+
+    if (get_action_state(Action::Left)) {
+        vel.x += sinf(DEGTORAD(-rot.y + 90.f)) * playerSpeed;
+        vel.z += cosf(DEGTORAD(-rot.y + 90.f)) * playerSpeed;
+    }
+
+    if (get_action_state(Action::Right)) {
+        vel.x += -sinf(DEGTORAD(-rot.y + 90.f)) * playerSpeed;
+        vel.z += -cosf(DEGTORAD(-rot.y + 90.f)) * playerSpeed;
+    }
 
     pos += vel * dt;
 
