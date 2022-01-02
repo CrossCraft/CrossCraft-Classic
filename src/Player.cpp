@@ -13,7 +13,15 @@ void Player::update(float dt) {
 
     float rotSpeed = 50.0f;
 
-    // TODO: Rotate cam
+    using namespace Utilities::Input;
+    float cX, cY;
+    get_cursor_pos(cX, cY);
+
+    cX = (cX - 0.5f) * 2;
+    cY = (cY - 0.5f) * 2;
+
+    rot.x += cX * rotSpeed * dt;
+    rot.y += cY * rotSpeed * dt;
 
     if (rot.y > 360.0f) {
         rot.y -= 360.0f;
@@ -33,7 +41,6 @@ void Player::update(float dt) {
 
     float playerSpeed = 4.3f;
 
-    using namespace Utilities::Input;
     if (get_action_state(Action::Forward)) {
         vel.x += -sinf(DEGTORAD(-rot.y)) * playerSpeed;
         vel.z += -cosf(DEGTORAD(-rot.y)) * playerSpeed;
