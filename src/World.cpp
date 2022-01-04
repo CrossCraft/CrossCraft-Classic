@@ -70,6 +70,10 @@ void World::generate() {
 
   NoiseSettings settings = {2, 1.0f, 2.0f, 0.42f, 4.5f, 0.0f, 0.15f, 0.85f};
 
+#if PSP
+  auto start_time = sceKernelGetSystemTimeLow();
+#endif
+
   for (int x = 0; x < 256; x++) {
     for (int z = 0; z < 256; z++) {
       hmap[x * 256 + z] = get_noise(x, z, &settings);
@@ -88,6 +92,12 @@ void World::generate() {
       }
     }
   }
+
+#if PSP
+  auto end = sceKernelGetSystemTimeLow();
+  auto res = end - start_time;
+  printf("[Test]: Took %u microseconds!\n", res);
+#endif
 
   free(hmap);
 }
