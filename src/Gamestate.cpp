@@ -5,6 +5,7 @@ namespace CrossCraft {
 
 void GameState::on_start() {
   world = create_scopeptr<World>(create_refptr<Player>());
+  world->generate();
 }
 void GameState::on_cleanup() {}
 

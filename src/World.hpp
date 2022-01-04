@@ -1,5 +1,6 @@
 #pragma once
 #include "Player.hpp"
+#include <FastNoiseLite.h>
 #include <Utilities/Types.hpp>
 #include <map>
 #include <memory>
@@ -9,10 +10,24 @@ namespace CrossCraft {
 
 typedef uint8_t block_t;
 
+struct NoiseSettings {
+  uint8_t octaves;
+  float amplitude;
+  float frequency;
+  float persistence;
+  float mod_freq;
+  float offset;
+
+  float range_min;
+  float range_max;
+};
+
 class World {
 public:
   World(RefPtr<Player> p);
   ~World();
+
+  auto get_noise(float x, float y, NoiseSettings *settings) -> float;
 
   auto update(double dt) -> void;
   auto draw() -> void;
@@ -25,7 +40,8 @@ private:
   RefPtr<Player> player;
   glm::ivec2 lastPlayerPos;
   unsigned int terrain_atlas;
-  block_t worldData[256 * 64 * 256];
+  FastNoiseLite fsl;
+  block_t *worldData;
 };
 
 } // namespace CrossCraft
