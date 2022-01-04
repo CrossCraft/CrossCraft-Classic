@@ -43,29 +43,10 @@ ChunkMesh::ChunkMesh(int x, int y, int z) : idx_counter(0), tidx_counter(0) {
 }
 
 ChunkMesh::~ChunkMesh() {
-  // model.deleteData();
-  // tmodel.deleteData();
-  //
-  // idx_counter = 0;
-  // mesh.color.clear();
-  // mesh.color.shrink_to_fit();
-  // mesh.indices.clear();
-  // mesh.indices.shrink_to_fit();
-  // mesh.position.clear();
-  // mesh.position.shrink_to_fit();
-  // mesh.uv.clear();
-  // mesh.uv.shrink_to_fit();
-  //
-  // tidx_counter = 0;
-  //
-  // tmesh.color.clear();
-  // tmesh.color.shrink_to_fit();
-  // tmesh.indices.clear();
-  // tmesh.indices.shrink_to_fit();
-  // tmesh.position.clear();
-  // tmesh.position.shrink_to_fit();
-  // tmesh.uv.clear();
-  // tmesh.uv.shrink_to_fit();
+  mesh.delete_data();
+  transMesh.delete_data();
+  idx_counter = 0;
+  tidx_counter = 0;
 }
 
 struct SurroundPos {
@@ -166,13 +147,23 @@ void ChunkMesh::generate(const World *wrld) {
 }
 
 void ChunkMesh::draw() {
-  //  GFX::translateModelMatrix({cX * 16, cY * 16, cZ * 16});
-  //
-  //  model.bind();
-  //  model.draw();
-  //
-  //  GFX::clearModelMatrix();
+  Rendering::RenderContext::get().matrix_translate({cX * 16, cY * 16, cZ * 16});
+
+  mesh.bind();
+  mesh.draw();
+
+  Rendering::RenderContext::get().matrix_clear();
 }
+
+void ChunkMesh::drawTransparent() {
+  Rendering::RenderContext::get().matrix_translate({cX * 16, cY * 16, cZ * 16});
+
+  transMesh.bind();
+  transMesh.draw();
+
+  Rendering::RenderContext::get().matrix_clear();
+}
+
 #include <memory>
 std::array<float, 8> getTexCoord(uint8_t idx, float lv) {
   // auto atlas = std::make_unique<GFX::TextureAtlas>(static_cast<short>(8));
@@ -200,16 +191,6 @@ std::array<float, 8> getTexCoord(uint8_t idx, float lv) {
   // }
   //
   // return atlas->getTexture(idx);
-}
-
-void ChunkMesh::drawTransparent() {
-  // GFX::translateModelMatrix(
-  //     glm::vec3(cX * 16, (cY * 16) - 1.0f / 8.0f, cZ * 16));
-  //
-  // tmodel.bind();
-  // tmodel.draw();
-  //
-  // GFX::clearModelMatrix();
 }
 
 void ChunkMesh::tryAddFace(const World *wrld, std::array<float, 12> data,
