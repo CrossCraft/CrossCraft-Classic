@@ -1,4 +1,4 @@
-#include "Player.hpp"
+#include "World.hpp"
 #include <Core/Application.hpp>
 
 using namespace Stardust_Celeste;
@@ -6,18 +6,18 @@ using namespace Stardust_Celeste;
 namespace CrossCraft {
 
 class GameState : public Core::ApplicationState {
-  public:
-    GameState() = default;
-    ~GameState() = default;
+public:
+  GameState() = default;
+  ~GameState() = default;
 
-    void on_start();
-    void on_cleanup();
+  void on_start();
+  void on_cleanup();
 
-    void on_update(Core::Application *app, double dt);
-    void on_draw(Core::Application *app, double dt);
+  void on_update(Core::Application *app, double dt);
+  void on_draw(Core::Application *app, double dt);
 
-  private:
-    Player player;
+private:
+  ScopePtr<World> world;
 };
 
 } // namespace CrossCraft

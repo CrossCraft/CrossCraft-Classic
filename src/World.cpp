@@ -1,204 +1,47 @@
-#include "World.h"
-#include "FastNoiseLite.h"
+#include "World.hpp"
+#include <FastNoiseLite.h>
+#include <Rendering/Rendering.hpp>
 #include <iostream>
-#include <GFX/RenderCore.h>
-#include <Utilities/Timer.h>
-#include <Utilities/Logger.h>
 
-using namespace Stardust;
+namespace CrossCraft {
+World::World(std::shared_ptr<Player> p) {
+  player = p;
+  lastPlayerPos = {-1, -1};
 
-World::World(std::shared_ptr<Player> p){
-	player = p;
-	lastPlayerPos = { -1, -1 };
-	FastNoiseLite noise;
-	//noise.SetSeed(rand());
-	noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	float* heightMap = new float[128 * 128];
-	memset(worldData, 0, 128 * 128 * 128);
-	updatesTilNext = 0;
-
-	for (int y = 0; y < 128; y++) {
-		for (int x = 0; x < 128; x++) {
-			heightMap[y * 128 + x] = (noise.GetNoise(static_cast<float>(x) * 4.0f, static_cast<float>(y) * 4.0f) + 1.0f) / 2.0f * 24.0f + 52.0f;
-		}
-	}
-
-
-	for (int z = 0; z < 8; z++) {
-		for (int x = 0; x < 8; x++) {
-			for (int y = 0; y < 8; y++) {
-				int idx = ((y * 8) + z) * 8 + x;
-				metaData[idx].isEmpty = true;
-				metaData[idx].isFull = true;
-			}
-		}
-	}
-
-	for (int z = 0; z < 128; z++) {
-		for (int x = 0; x < 128; x++) {
-			int height = static_cast<int>(heightMap[z * 128 + x]);
-
-			for (int y = 0; y < 128; y++) {
-				int idx = ((y * 128) + z) * 128 + x;
-
-				int cidx = (( (y/16) * 8) + (z/16)) * 8 + (x/16);
-
-				if (y < height) {
-					if (y == 0) {
-						worldData[idx] = 37; //bedrock
-					}
-					else if (y > 0 && y < height - 3) {
-						worldData[idx] = 2; //stone
-					}
-					else if (y < height) {
-						worldData[idx] = 3; //dirt
-					}
-
-					if (metaData[cidx].isEmpty) {
-						metaData[cidx].isEmpty = false;
-					}
-				} else if (y == height) {
-					if (y < 63) {
-						worldData[idx] = 3; //dirt
-					}
-					else {
-						worldData[idx] = 1; //grass
-					}
-
-
-					if (metaData[cidx].isEmpty) {
-						metaData[cidx].isEmpty = false;
-					}
-				}
-				else if (y <= 63) {
-					worldData[idx] = 7;
-
-					if (metaData[cidx].isEmpty) {
-						metaData[cidx].isEmpty = false;
-					}
-
-					if (metaData[cidx].isFull) {
-						metaData[cidx].isFull = false;
-					}
-				}
-				else {
-					if (metaData[cidx].isFull) {
-						metaData[cidx].isFull = false;
-					}
-					continue;
-				}
-			}
-		}
-	}
-	double wt = Utilities::g_AppTimer.deltaTime();
-	delete[] heightMap;
-	Utilities::app_Logger->info("Generated world in: " + std::to_string(wt));
-
-	terrain_atlas = GFX::g_TextureManager->loadTex("./assets/terrain.png", GFX_FILTER_NEAREST, GFX_FILTER_NEAREST, false);
+  terrain_atlas = Rendering::TextureManager::get().load_texture(
+      "./assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+      false);
 }
 
-World::~World()
-{
-}
+World::~World() {}
 
 void World::update(double dt) {
-	glm::ivec2 v = { static_cast<int>(player->pos.x - 8) / 16, static_cast<int>(player->pos.z - 8) / 16};
-
-	if (v != lastPlayerPos) {
-		glm::vec2 topLeft = { v.x - 2, v.y - 2 };
-		glm::vec2 botRight = { v.x + 2, v.y + 2 };
-
-		std::vector<Vector3i> needed;
-		needed.clear();
-		std::vector<Vector3i> excess;
-		excess.clear();
-
-		for (int x = topLeft.x; x <= botRight.x; x++) {
-			for (int z = topLeft.y; z <= botRight.y; z++) {
-				needed.push_back({ x, z, 0 });
-			}
-		}
-
-		for (auto& [pos, chunk] : mesh) {
-			bool need = false;
-			for (auto& v : needed) {
-				if (v == pos) {
-					//Is needed
-					need = true;
-				}
-			}
-
-			if (!need) {
-				excess.push_back(pos);
-			}
-		}
-
-		//DIE OLD ONES!
-		for (const auto& chk : excess) {
-			delete mesh[chk];
-			mesh.erase(chk);
-		}
-
-		//Make new
-		for (const auto& chk : needed) {
-			if (mesh.find(chk) == mesh.end()) {
-				//NOT FOUND
-				if (chk.x >= 0 && chk.x < 8 && chk.y >= 0 && chk.y < 8) {
-					remainingGeneration.push_back(chk);
-				}
-			}
-		}
-
-		updatesTilNext = 3;
-		lastPlayerPos = v;
-	}
-
-	updatesTilNext--;
-
-	if (updatesTilNext < 0 && remainingGeneration.size() > 0) {
-		updatesTilNext = 3;
-
-		if (mesh.find(remainingGeneration[0]) == mesh.end()) {
-			auto chk = remainingGeneration[0];
-			//NOT FOUND
-			if (chk.x >= 0 && chk.x < 8 && chk.y >= 0 && chk.y < 8) {
-				Utilities::g_AppTimer.deltaTime();
-
-				ChunkStack* chunk = new ChunkStack(chk.x, chk.y);
-				chunk->generate(this);
-				mesh.emplace(chk, std::move(chunk));
-
-				auto tt = Utilities::g_AppTimer.deltaTime();
-				Utilities::app_Logger->info("GENERATED IN " + std::to_string(tt));
-			}
-		}
-
-		remainingGeneration.erase(remainingGeneration.begin());
-	}
-
-	player->update(dt, this);
+  player->update(static_cast<float>(dt));
+  // TODO: Update world meshes
 }
+
+void World::generate() {}
 
 void World::draw() {
+  player->draw();
+  // GFX::g_TextureManager->bindTex(terrain_atlas);
+  //  Draw world
 
-	GFX::g_TextureManager->bindTex(terrain_atlas);
-	//Draw world
+  // for (auto &[pos, chunk] : mesh) {
+  //   if (player->m_frustum.isBoxInFrustum(chunk->box)) {
+  //     chunk->draw();
+  //   }
+  // }
 
-	for (auto& [pos, chunk] : mesh) {
-		if (player->m_frustum.isBoxInFrustum(chunk->box)) {
-			chunk->draw();
-		}
-	}
-
-	for (auto& [pos, chunk] : mesh) {
-		if (player->m_frustum.isBoxInFrustum(chunk->box)) {
-			chunk->drawTransparent();
-		}
-	}
+  // for (auto &[pos, chunk] : mesh) {
+  //  if (player->m_frustum.isBoxInFrustum(chunk->box)) {
+  //    chunk->drawTransparent();
+  //  }
+  //}
 }
 
-block_t World::getBlock(int x, int y, int z)
-{
-	int idx = ((y * 128) + z) * 128 + x;
-	return worldData[idx];
+block_t World::getBlock(int x, int y, int z) {
+  int idx = ((y * 128) + z) * 128 + x;
+  return worldData[idx];
 }
+} // namespace CrossCraft
