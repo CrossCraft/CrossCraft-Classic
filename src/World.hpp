@@ -1,4 +1,5 @@
 #pragma once
+#include "ChunkStack.hpp"
 #include "Player.hpp"
 #include <FastNoiseLite.h>
 #include <Utilities/Types.hpp>
@@ -9,6 +10,7 @@
 namespace CrossCraft {
 
 typedef uint8_t block_t;
+class ChunkStack;
 
 struct NoiseSettings {
   uint8_t octaves;
@@ -35,13 +37,14 @@ public:
   auto generate() -> void;
 
   auto getBlock(int x, int y, int z) -> block_t;
+  block_t *worldData;
 
 private:
+  ChunkStack *stack;
   RefPtr<Player> player;
   glm::ivec2 lastPlayerPos;
   unsigned int terrain_atlas;
   FastNoiseLite fsl;
-  block_t *worldData;
 };
 
 } // namespace CrossCraft

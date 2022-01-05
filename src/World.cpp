@@ -16,18 +16,20 @@ World::World(std::shared_ptr<Player> p) {
       false);
 
   fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-  fsl.SetFrequency(0.001f);
+  fsl.SetFrequency(0.001f * 5.f);
   fsl.SetSeed(time(NULL));
 
   // Zero the array
   worldData =
       reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
+
+  stack = new ChunkStack(0, 0);
 }
 
 World::~World() {}
 
 void World::update(double dt) {
-  // player->update(static_cast<float>(dt));
+  player->update(static_cast<float>(dt));
 
   // TODO: Update world meshes
 }
@@ -93,6 +95,8 @@ void World::generate() {
     }
   }
 
+  stack->generate(this);
+
 #if PSP
   auto end = sceKernelGetSystemTimeLow();
   auto res = end - start_time;
@@ -104,21 +108,8 @@ void World::generate() {
 
 void World::draw() {
   player->draw();
-  // Rendering::TextureManager::get().bind_texture(terrain_atlas);
-
-  //  Draw world
-
-  // for (auto &[pos, chunk] : mesh) {
-  //   if (player->m_frustum.isBoxInFrustum(chunk->box)) {
-  //     chunk->draw();
-  //   }
-  // }
-
-  // for (auto &[pos, chunk] : mesh) {
-  //  if (player->m_frustum.isBoxInFrustum(chunk->box)) {
-  //    chunk->drawTransparent();
-  //  }
-  //}
+  Rendering::TextureManager::get().bind_texture(terrain_atlas);
+  stack->draw();
 }
 
 block_t World::getBlock(int x, int y, int z) {
