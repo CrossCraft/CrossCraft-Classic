@@ -61,5 +61,7 @@
         "map": "cpp"
     },
     "editor.formatOnSave": true,
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "clang-format.fallbackStyle": "Chromium",
+    "clang-format.language.cpp.style": "{IndentWidth: 4}"
 }

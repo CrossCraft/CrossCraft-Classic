@@ -8,112 +8,115 @@
 
 namespace CrossCraft {
 World::World(std::shared_ptr<Player> p) {
-  player = p;
-  lastPlayerPos = {-1, -1};
+    player = p;
+    lastPlayerPos = {-1, -1};
 
-  terrain_atlas = Rendering::TextureManager::get().load_texture(
-      "./assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-      false);
+    terrain_atlas = Rendering::TextureManager::get().load_texture(
+        "./assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        true);
+    fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    fsl.SetFrequency(0.001f * 5.f);
+    fsl.SetSeed(time(NULL));
 
-  fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-  fsl.SetFrequency(0.001f * 5.f);
-  fsl.SetSeed(time(NULL));
+    // Zero the array
+    worldData =
+        reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
 
-  // Zero the array
-  worldData =
-      reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
-
-  stack = new ChunkStack(0, 0);
+    stack = new ChunkStack(0, 0);
 }
 
-World::~World() {}
+World::~World() {
+    Rendering::TextureManager::get().delete_texture(terrain_atlas);
+    free(worldData);
+    delete stack;
+}
 
 void World::update(double dt) {
-  player->update(static_cast<float>(dt));
+    player->update(static_cast<float>(dt));
 
-  // TODO: Update world meshes
+    // TODO: Update world meshes
 }
 
 inline auto range_map(float &input, float curr_range_min, float curr_range_max,
                       float range_min, float range_max) -> void {
-  input = (input - curr_range_min) * (range_max - range_min) /
-              (curr_range_max - curr_range_min) +
-          range_min;
+    input = (input - curr_range_min) * (range_max - range_min) /
+                (curr_range_max - curr_range_min) +
+            range_min;
 }
 
 auto World::get_noise(float x, float y, NoiseSettings *settings) -> float {
 
-  float amp = settings->amplitude;
-  float freq = settings->frequency;
+    float amp = settings->amplitude;
+    float freq = settings->frequency;
 
-  float sum_noise = 0.0f;
-  float sum_amp = 0.0f;
+    float sum_noise = 0.0f;
+    float sum_amp = 0.0f;
 
-  for (auto i = 0; i < settings->octaves; i++) {
-    auto noise = fsl.GetNoise(x * freq, y * freq);
+    for (auto i = 0; i < settings->octaves; i++) {
+        auto noise = fsl.GetNoise(x * freq, y * freq);
 
-    noise *= amp;
-    sum_noise += noise;
-    sum_amp += amp;
+        noise *= amp;
+        sum_noise += noise;
+        sum_amp += amp;
 
-    amp *= settings->persistence;
-    freq *= settings->mod_freq;
-  }
+        amp *= settings->persistence;
+        freq *= settings->mod_freq;
+    }
 
-  auto divided = sum_noise / sum_amp;
-  range_map(divided, -1.0f, 1.0f, settings->range_min, settings->range_max);
+    auto divided = sum_noise / sum_amp;
+    range_map(divided, -1.0f, 1.0f, settings->range_min, settings->range_max);
 
-  return divided;
+    return divided;
 }
 
 void World::generate() {
 
-  float *hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
+    float *hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
 
-  NoiseSettings settings = {2, 1.0f, 2.0f, 0.42f, 4.5f, 0.0f, 0.15f, 0.85f};
+    NoiseSettings settings = {2, 1.0f, 2.0f, 0.42f, 4.5f, 0.0f, 0.15f, 0.85f};
 
 #if PSP
-  auto start_time = sceKernelGetSystemTimeLow();
+    auto start_time = sceKernelGetSystemTimeLow();
 #endif
 
-  for (int x = 0; x < 256; x++) {
-    for (int z = 0; z < 256; z++) {
-      hmap[x * 256 + z] = get_noise(x, z, &settings);
+    for (int x = 0; x < 256; x++) {
+        for (int z = 0; z < 256; z++) {
+            hmap[x * 256 + z] = get_noise(x, z, &settings);
+        }
     }
-  }
 
 #if PSP
-  sceKernelDcacheWritebackInvalidateAll();
+    sceKernelDcacheWritebackInvalidateAll();
 #endif
 
-  for (int x = 0; x < 256; x++) {
-    for (int z = 0; z < 256; z++) {
-      int h = hmap[x * 256 + z] * 64.f;
-      for (int y = 0; y < h; y++) {
-        worldData[(x * 256 * 64) + (z * 64) + y] = 1;
-      }
+    for (int x = 0; x < 256; x++) {
+        for (int z = 0; z < 256; z++) {
+            int h = hmap[x * 256 + z] * 64.f;
+            for (int y = 0; y < h; y++) {
+                worldData[(x * 256 * 64) + (z * 64) + y] = 1;
+            }
+        }
     }
-  }
 
-  stack->generate(this);
+    stack->generate(this);
 
 #if PSP
-  auto end = sceKernelGetSystemTimeLow();
-  auto res = end - start_time;
-  printf("[Test]: Took %u microseconds!\n", res);
+    auto end = sceKernelGetSystemTimeLow();
+    auto res = end - start_time;
+    printf("[Test]: Took %u microseconds!\n", res);
 #endif
 
-  free(hmap);
+    free(hmap);
 }
 
 void World::draw() {
-  player->draw();
-  Rendering::TextureManager::get().bind_texture(terrain_atlas);
-  stack->draw();
+    player->draw();
+    Rendering::TextureManager::get().bind_texture(terrain_atlas);
+    stack->draw();
 }
 
 block_t World::getBlock(int x, int y, int z) {
-  int idx = ((y * 128) + z) * 128 + x;
-  return worldData[idx];
+    int idx = ((y * 128) + z) * 128 + x;
+    return worldData[idx];
 }
 } // namespace CrossCraft

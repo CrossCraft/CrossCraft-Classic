@@ -7,18 +7,18 @@ using namespace Stardust_Celeste;
 namespace CrossCraft {
 
 class Player {
-public:
-  Player();
-  ~Player() = default;
+  public:
+    Player();
+    ~Player() = default;
 
-  auto update(float dt) -> void;
-  auto draw() -> void{};
+    auto update(float dt) -> void;
+    auto draw() -> void{};
 
-private:
-  glm::vec3 pos;
-  glm::vec2 rot;
-  glm::vec3 vel;
+  private:
+    glm::vec3 pos;
+    glm::vec2 rot;
+    glm::vec3 vel;
 
-  Rendering::Camera cam;
+    Rendering::Camera cam;
 };
 } // namespace CrossCraft
