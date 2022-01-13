@@ -123,7 +123,15 @@ void World::update(double dt) {
         }
     }
 }
-
+/**
+ * @brief Remap floats into a range
+ *
+ * @param input To be remapped
+ * @param curr_range_min Current Min
+ * @param curr_range_max Current Max
+ * @param range_min New Range Min
+ * @param range_max New Range Max
+ */
 inline auto range_map(float &input, float curr_range_min, float curr_range_max,
                       float range_min, float range_max) -> void {
     input = (input - curr_range_min) * (range_max - range_min) /
@@ -139,6 +147,7 @@ auto World::get_noise(float x, float y, NoiseSettings *settings) -> float {
     float sum_noise = 0.0f;
     float sum_amp = 0.0f;
 
+    // Create octaves
     for (auto i = 0; i < settings->octaves; i++) {
         auto noise = fsl.GetNoise(x * freq, y * freq);
 
@@ -150,24 +159,29 @@ auto World::get_noise(float x, float y, NoiseSettings *settings) -> float {
         freq *= settings->mod_freq;
     }
 
+    // Reset range
     auto divided = sum_noise / sum_amp;
+
+    // Map to the new range;
     range_map(divided, -1.0f, 1.0f, settings->range_min, settings->range_max);
 
     return divided;
 }
 
 void World::generate() {
-
+    // Create a height map
     float *hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
 
     NoiseSettings settings = {2, 1.0f, 2.0f, 0.42f, 4.5f, 0.0f, 0.15f, 0.85f};
 
+    // Generate HMAP
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
             hmap[x * 256 + z] = get_noise(x, z, &settings);
         }
     }
 
+    // Generate world data / fill data
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
             int h = hmap[x * 256 + z] * 64.f;
@@ -177,17 +191,20 @@ void World::generate() {
         }
     }
 
+    // Destroy height map
     free(hmap);
 }
 
 void World::draw() {
-
+    // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
+    // Draw opaque
     for (auto const &[key, val] : chunks) {
         val->draw();
     }
 
+    // Draw transparent
     for (auto const &[key, val] : chunks) {
         val->draw_transparent();
     }
@@ -196,6 +213,7 @@ void World::draw() {
 }
 
 block_t World::getBlock(int x, int y, int z) {
+    // Get a block
     int idx = ((y * 128) + z) * 128 + x;
     return worldData[idx];
 }

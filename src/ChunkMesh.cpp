@@ -36,13 +36,11 @@ constexpr uint32_t LIGHT_TOP = 0xFFFFFFFF;
 constexpr uint32_t LIGHT_SIDE = 0xFFDDDDDD;
 constexpr uint32_t LIGHT_BOT = 0xFFBBBBBB;
 
-ChunkMesh::ChunkMesh(int x, int y, int z) : idx_counter(0), tidx_counter(0) {
-    cX = x;
-    cY = y;
-    cZ = z;
-}
+ChunkMesh::ChunkMesh(int x, int y, int z)
+    : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z) {}
 
 ChunkMesh::~ChunkMesh() {
+    // Delete data
     mesh.delete_data();
     transMesh.delete_data();
     idx_counter = 0;
@@ -58,6 +56,7 @@ struct SurroundPos {
     glm::vec3 back;
 
     void update(int x, int y, int z) {
+        // Set all vectors
         up = {x, y + 1, z};
         down = {x, y - 1, z};
         left = {x - 1, y, z};
@@ -70,6 +69,8 @@ struct SurroundPos {
 void ChunkMesh::reset_allocate() {
     // Max number of faces
     const int numFace = 8192;
+
+    // Clear
     idx_counter = 0;
     m_verts.clear();
     m_index.clear();
@@ -78,34 +79,36 @@ void ChunkMesh::reset_allocate() {
     t_verts.clear();
     t_index.clear();
 
+    // Allocate memory
     m_verts.reserve(4 * numFace);
     m_index.reserve(6 * numFace);
 
     t_verts.reserve(4 * numFace);
     t_index.reserve(6 * numFace);
-
-    SC_APP_INFO("Generating Chunk Mesh at ({},{},{})", cX, cY, cZ);
 }
 
 void ChunkMesh::finalize_mesh() {
 
+    // Cleanup memory
     m_verts.shrink_to_fit();
     m_index.shrink_to_fit();
 
     t_verts.shrink_to_fit();
     t_index.shrink_to_fit();
 
+    // Add data
     mesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
                   m_index.size());
     transMesh.add_data(t_verts.data(), t_verts.size(), t_index.data(),
                        t_index.size());
-
-    auto l = m_index.size();
-    SC_APP_INFO("Mesh Generated! I: {}", l);
 }
 
 void ChunkMesh::generate(const World *wrld) {
+
+    // Reset + Allocate
     reset_allocate();
+
+    // Loop over the mesh
     for (int x = 0; x < 16; x++) {
         for (int z = 0; z < 16; z++) {
             for (int y = 0; y < 16; y++) {
@@ -113,14 +116,18 @@ void ChunkMesh::generate(const World *wrld) {
                 int idx = ((x + cX * 16) * 256 * 64) + ((z + cZ * 16) * 64) +
                           (y + cY * 16);
 
+                // Get block
                 block_t blk = wrld->worldData[idx];
 
-                if (blk == 0) {
+                // Skip air
+                if (blk == 0)
                     continue;
-                }
 
+                // Update surrounding positions
                 SurroundPos surround;
                 surround.update(x, y, z);
+
+                // Add 6 faces
 
                 try_add_face(wrld, bottomFace, blk, {x, y, z}, surround.down,
                              LIGHT_BOT);
@@ -139,13 +146,17 @@ void ChunkMesh::generate(const World *wrld) {
             }
         }
     }
+
+    // Finalize the mesh
     finalize_mesh();
 }
 
 void ChunkMesh::draw() {
+    // Set matrix
     Rendering::RenderContext::get().matrix_translate(
         {cX * 16, cY * 16, cZ * 16});
 
+    // Draw
     if (mesh.get_index_count() > 0) {
         mesh.bind();
         mesh.draw();
@@ -155,9 +166,11 @@ void ChunkMesh::draw() {
 }
 
 void ChunkMesh::draw_transparent() {
+    // Set matrix
     Rendering::RenderContext::get().matrix_translate(
         {cX * 16, cY * 16, cZ * 16});
 
+    // Draw
     if (transMesh.get_index_count() > 0) {
         transMesh.bind();
         transMesh.draw();
@@ -168,6 +181,13 @@ void ChunkMesh::draw_transparent() {
 
 #include <memory>
 
+/**
+ * @brief Get the Texture coords
+ *
+ * @param sideCount Number of tiles on XY
+ * @param index Index of tile to get
+ * @return std::array<float, 8>
+ */
 inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
     int row = index / (int)sideCount.x;
     int column = index % (int)sideCount.y;
@@ -182,6 +202,13 @@ inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
     return {x, y, w, y, w, h, x, h};
 }
 
+/**
+ * @brief Get the Tex Coord from a block ID and lightvalue
+ *
+ * @param idx Index
+ * @param lv Light Value
+ * @return std::array<float, 8>
+ */
 std::array<float, 8> getTexCoord(uint8_t idx, float lv) {
     return getTexture({16, 16}, 0);
 }
@@ -189,13 +216,17 @@ std::array<float, 8> getTexCoord(uint8_t idx, float lv) {
 void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
                              uint8_t blk, glm::vec3 pos, glm::vec3 posCheck,
                              uint32_t lightVal) {
-    if (!((posCheck.x == 16 && cX == 8) || (posCheck.x == -1 && cX == 0) ||
-          (posCheck.y == -1 && cY == 0) || (posCheck.y == 16 && cY == 8) ||
-          (posCheck.z == -1 && cZ == 0) || (posCheck.z == 16 && cZ == 8))) {
 
+    // Bounds check
+    if (!((posCheck.x == 16 && cX == 16) || (posCheck.x == -1 && cX == 0) ||
+          (posCheck.y == -1 && cY == 0) || (posCheck.y == 16 && cY == 16) ||
+          (posCheck.z == -1 && cZ == 0) || (posCheck.z == 16 && cZ == 16))) {
+
+        // Calculate block index to peek
         int idx = ((posCheck.x + cX * 16) * 256 * 64) +
                   ((posCheck.z + cZ * 16) * 64) + (posCheck.y + cY * 16);
 
+        // Add face to mesh
         if (wrld->worldData[idx] == 0) {
             add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lightVal,
                              false);
@@ -207,19 +238,23 @@ void ChunkMesh::add_face_to_mesh(std::array<float, 12> data,
                                  std::array<float, 8> uv, glm::vec3 pos,
                                  uint32_t lightVal, bool trans) {
 
+    // Set data objects
     auto *m = &m_verts;
     auto *mi = &m_index;
     auto *idc = &idx_counter;
 
+    // If transparent - set data
     if (trans) {
         m = &t_verts;
         mi = &t_index;
         idc = &tidx_counter;
     }
 
+    // Create color
     Rendering::Color c;
     c.color = lightVal;
 
+    // Push Back Verts
     for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
 
         m->push_back(Rendering::Vertex{
@@ -232,6 +267,7 @@ void ChunkMesh::add_face_to_mesh(std::array<float, 12> data,
         });
     }
 
+    // Push Back Indices
     mi->push_back((*idc));
     mi->push_back((*idc) + 1);
     mi->push_back((*idc) + 2);
