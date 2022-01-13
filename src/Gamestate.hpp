@@ -1,3 +1,13 @@
+/**
+ * @file Gamestate.hpp
+ * @author Nathan Bourgeois (iridescentrosesfall@gmail.com)
+ * @brief Current Game State
+ * @version 0.1
+ * @date 2022-01-12
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
 #include "World.hpp"
 #include <Core/Application.hpp>
 
@@ -5,6 +15,10 @@ using namespace Stardust_Celeste;
 
 namespace CrossCraft {
 
+/**
+ * @brief Game State Class
+ *
+ */
 class GameState : public Core::ApplicationState {
   public:
     GameState() = default;

@@ -1,23 +1,27 @@
 #include "Gamestate.hpp"
 #include <Stardust-Celeste.hpp>
 
-#if PSP
-#include <psppower.h>
-#endif
-
 using namespace Stardust_Celeste;
 
+/**
+ * @brief Class to run the game state
+ *
+ */
 class GameApplication : public Core::Application {
   public:
+    /**
+     * @brief On Start override
+     */
     void on_start() override {
+
+        // Create new Game State
         state = create_refptr<CrossCraft::GameState>();
+        // Set to our state
         this->set_state(state);
 
+        // Set the background color
         Rendering::Color clearcol;
-        clearcol.rgba.r = 0x97;
-        clearcol.rgba.g = 0xD5;
-        clearcol.rgba.b = 0xFF;
-        clearcol.rgba.a = 0xFF;
+        clearcol.color = 0xFFFFD597;
 
         Rendering::RenderContext::get().set_color(clearcol);
     }
@@ -26,15 +30,20 @@ class GameApplication : public Core::Application {
     RefPtr<CrossCraft::GameState> state;
 };
 
+/**
+ * @brief Create a New Stardust Celeste Application object
+ *
+ * @return Core::Application*
+ */
 Core::Application *CreateNewSCApp() {
+
+    // Configure the engine
     Core::AppConfig config;
     config.headless = false;
+    config.render_settings.title = "CrossCraft-Classic";
 
     Core::PlatformLayer::get().initialize(config);
 
-#if PSP
-    scePowerSetClockFrequency(333, 333, 166);
-#endif
-
+    // Return the game
     return new GameApplication();
 }

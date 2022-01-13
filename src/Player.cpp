@@ -12,62 +12,66 @@ Player::Player()
 
 void Player::update(float dt) {
 
-    float rotSpeed = 50.0f;
-
     using namespace Utilities::Input;
-    float cX, cY;
-    get_cursor_pos(cX, cY);
-
-    cX = (cX - 0.5f) * 2.f;
-    cY = (cY - 0.5f) * 2.f;
-
-    rot.y += cX * rotSpeed * dt / 50.f;
-    rot.x += cY * rotSpeed * dt / 50.f;
-
-    if (rot.y > 360.0f) {
-        rot.y -= 360.0f;
-    }
-
-    if (rot.y < 0.0f) {
-        rot.y += 360.0f;
-    }
-
-    if (rot.x < -89.9f) {
-        rot.x = -89.9f;
-    }
-
-    if (rot.x > 89.9f) {
-        rot.x = 89.9f;
-    }
-
     dt /= 50.0f;
-    float playerSpeed = 4.3f;
 
-    vel = glm::vec3(0.f, 0.f, 0.f);
+    // Rotate player
+    {
+        const auto rotSpeed = 50.0f;
+        float cX, cY;
+        get_cursor_pos(cX, cY);
 
-    if (get_action_state(Action::Forward)) {
-        vel.x += -sinf(DEGTORAD(-rot.y)) * playerSpeed * dt;
-        vel.z += -cosf(DEGTORAD(-rot.y)) * playerSpeed * dt;
+        cX = (cX - 0.5f) * 2.f;
+        cY = (cY - 0.5f) * 2.f;
+
+        rot.y += cX * rotSpeed * dt;
+        rot.x += cY * rotSpeed * dt;
+
+        if (rot.y > 360.0f) {
+            rot.y -= 360.0f;
+        }
+
+        if (rot.y < 0.0f) {
+            rot.y += 360.0f;
+        }
+
+        if (rot.x < -89.9f) {
+            rot.x = -89.9f;
+        }
+
+        if (rot.x > 89.9f) {
+            rot.x = 89.9f;
+        }
     }
 
-    if (get_action_state(Action::Backward)) {
-        vel.x += sinf(DEGTORAD(-rot.y)) * playerSpeed * dt;
-        vel.z += cosf(DEGTORAD(-rot.y)) * playerSpeed * dt;
+    // Move player on actions
+    {
+        const auto playerSpeed = 4.3f;
+        vel = glm::vec3(0.f, 0.f, 0.f);
+
+        if (get_action_state(Action::Forward)) {
+            vel.x += -sinf(DEGTORAD(-rot.y)) * playerSpeed * dt;
+            vel.z += -cosf(DEGTORAD(-rot.y)) * playerSpeed * dt;
+        }
+
+        if (get_action_state(Action::Backward)) {
+            vel.x += sinf(DEGTORAD(-rot.y)) * playerSpeed * dt;
+            vel.z += cosf(DEGTORAD(-rot.y)) * playerSpeed * dt;
+        }
+
+        if (get_action_state(Action::Left)) {
+            vel.x += -sinf(DEGTORAD(-rot.y + 90.f)) * playerSpeed * dt;
+            vel.z += -cosf(DEGTORAD(-rot.y + 90.f)) * playerSpeed * dt;
+        }
+
+        if (get_action_state(Action::Right)) {
+            vel.x += sinf(DEGTORAD(-rot.y + 90.f)) * playerSpeed * dt;
+            vel.z += cosf(DEGTORAD(-rot.y + 90.f)) * playerSpeed * dt;
+        }
     }
 
-    if (get_action_state(Action::Left)) {
-        vel.x += -sinf(DEGTORAD(-rot.y + 90.f)) * playerSpeed * dt;
-        vel.z += -cosf(DEGTORAD(-rot.y + 90.f)) * playerSpeed * dt;
-    }
-
-    if (get_action_state(Action::Right)) {
-        vel.x += sinf(DEGTORAD(-rot.y + 90.f)) * playerSpeed * dt;
-        vel.z += cosf(DEGTORAD(-rot.y + 90.f)) * playerSpeed * dt;
-    }
-
+    // Update camera and position
     pos += vel;
-
-    // Camera
     cam.pos = -pos;
     cam.rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
     cam.update();

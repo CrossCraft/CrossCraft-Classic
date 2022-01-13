@@ -1,3 +1,13 @@
+/**
+ * @file World.hpp
+ * @author Nathan Bourgeois (iridescentrosesfall@gmail.com)
+ * @brief The World
+ * @version 0.1
+ * @date 2022-01-12
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
 #pragma once
 #include "ChunkStack.hpp"
 #include "Player.hpp"
@@ -14,6 +24,10 @@ namespace CrossCraft {
 typedef uint8_t block_t;
 class ChunkStack;
 
+/**
+ * @brief Describes a noise profile for the world generator
+ *
+ */
 struct NoiseSettings {
     uint8_t octaves;
     float amplitude;
@@ -26,22 +40,71 @@ struct NoiseSettings {
     float range_max;
 };
 
+/**
+ * @brief The world
+ *
+ */
 class World {
   public:
+    /**
+     * @brief Construct a new World object
+     *
+     * @param p Player to use
+     */
     World(RefPtr<Player> p);
+
+    /**
+     * @brief Destroy the World object
+     *
+     */
     ~World();
 
+    /**
+     * @brief Update (checks chunks, run chunk updates, tick updates);
+     *
+     * @param dt Delta Time
+     */
     auto update(double dt) -> void;
+
+    /**
+     * @brief Draw the world
+     *
+     */
     auto draw() -> void;
 
+    /**
+     * @brief Generate the entire world with perlin noise
+     *
+     */
     auto generate() -> void;
 
+    /**
+     * @brief Get a block
+     *
+     * @param x X Position
+     * @param y Y Position
+     * @param z Z position
+     * @return block_t
+     */
     auto getBlock(int x, int y, int z) -> block_t;
     block_t *worldData;
 
   private:
+    /**
+     * @brief Get noise from a position and settings
+     *
+     * @param x X position
+     * @param y Y position
+     * @param settings Noise profile
+     * @return float
+     */
     auto get_noise(float x, float y, NoiseSettings *settings) -> float;
 
+    /**
+     * @brief Get the needed chunks
+     *
+     * @return std::vector<glm::ivec2>
+     */
     auto get_needed_chunks() -> std::vector<glm::ivec2>;
 
     std::map<int, ChunkStack *> chunks;

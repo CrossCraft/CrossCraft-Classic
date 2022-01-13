@@ -22,7 +22,6 @@ if(WIN32)
 endif()
 
 if(PSP)
-target_link_libraries(CrossCraft-Classic psppower)
 create_pbp_file(
     TARGET CrossCraft-Classic
     TITLE CrossCraft-Classic
