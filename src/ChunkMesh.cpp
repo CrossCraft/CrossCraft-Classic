@@ -33,8 +33,8 @@ const std::array<float, 12> xFace2{
 };
 
 constexpr uint32_t LIGHT_TOP = 0xFFFFFFFF;
-constexpr uint32_t LIGHT_SIDE = 0xFFAAAAAA;
-constexpr uint32_t LIGHT_BOT = 0xFF777777;
+constexpr uint32_t LIGHT_SIDE = 0xFFDDDDDD;
+constexpr uint32_t LIGHT_BOT = 0xFFBBBBBB;
 
 ChunkMesh::ChunkMesh(int x, int y, int z) : idx_counter(0), tidx_counter(0) {
     cX = x;
@@ -95,8 +95,10 @@ void ChunkMesh::finalize_mesh() {
     t_verts.shrink_to_fit();
     t_index.shrink_to_fit();
 
-    mesh.add_data(m_verts.data(), m_index.data(), m_index.size());
-    transMesh.add_data(t_verts.data(), t_index.data(), t_index.size());
+    mesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
+                  m_index.size());
+    transMesh.add_data(t_verts.data(), t_verts.size(), t_index.data(),
+                       t_index.size());
 
     auto l = m_index.size();
     SC_APP_INFO("Mesh Generated! I: {}", l);
@@ -144,8 +146,10 @@ void ChunkMesh::draw() {
     Rendering::RenderContext::get().matrix_translate(
         {cX * 16, cY * 16, cZ * 16});
 
-    mesh.bind();
-    mesh.draw();
+    if (mesh.get_index_count() > 0) {
+        mesh.bind();
+        mesh.draw();
+    }
 
     Rendering::RenderContext::get().matrix_clear();
 }
@@ -154,8 +158,10 @@ void ChunkMesh::draw_transparent() {
     Rendering::RenderContext::get().matrix_translate(
         {cX * 16, cY * 16, cZ * 16});
 
-    transMesh.bind();
-    transMesh.draw();
+    if (transMesh.get_index_count() > 0) {
+        transMesh.bind();
+        transMesh.draw();
+    }
 
     Rendering::RenderContext::get().matrix_clear();
 }
@@ -212,7 +218,7 @@ void ChunkMesh::add_face_to_mesh(std::array<float, 12> data,
     }
 
     Rendering::Color c;
-    c.color = 0xFFFFFFFF;
+    c.color = lightVal;
 
     for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
 

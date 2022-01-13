@@ -14,6 +14,8 @@ class Player {
     auto update(float dt) -> void;
     auto draw() -> void{};
 
+    inline auto get_pos() -> glm::vec3 { return pos; }
+
   private:
     glm::vec3 pos;
     glm::vec2 rot;

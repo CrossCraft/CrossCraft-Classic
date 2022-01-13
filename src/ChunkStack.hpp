@@ -2,7 +2,7 @@
 #include "ChunkMesh.hpp"
 #include "World.hpp"
 #include <array>
-
+#include <glm.hpp>
 namespace CrossCraft {
 
 class World;
@@ -15,8 +15,11 @@ class ChunkStack {
 
     void generate(World *wrld);
     void draw();
-    void drawTransparent();
+    void draw_transparent();
 
+    inline auto get_chunk_pos() -> glm::ivec2 { return {cX, cZ}; }
+
+  private:
     std::array<ChunkMesh *, 4> stack;
     int cX, cZ;
 };

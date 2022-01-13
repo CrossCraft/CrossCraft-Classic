@@ -29,7 +29,7 @@ void ChunkStack::draw() {
     }
 }
 
-void ChunkStack::drawTransparent() {
+void ChunkStack::draw_transparent() {
     for (int i = 0; i < 4; i++) {
         stack[i]->draw_transparent();
     }

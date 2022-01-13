@@ -3,9 +3,11 @@
 #include "Player.hpp"
 #include <FastNoiseLite.h>
 #include <Utilities/Types.hpp>
+#include <glm.hpp>
 #include <map>
 #include <memory>
 #include <stdint.h>
+#include <vector>
 
 namespace CrossCraft {
 
@@ -29,8 +31,6 @@ class World {
     World(RefPtr<Player> p);
     ~World();
 
-    auto get_noise(float x, float y, NoiseSettings *settings) -> float;
-
     auto update(double dt) -> void;
     auto draw() -> void;
 
@@ -40,9 +40,15 @@ class World {
     block_t *worldData;
 
   private:
-    ChunkStack *stack;
+    auto get_noise(float x, float y, NoiseSettings *settings) -> float;
+
+    auto get_needed_chunks() -> std::vector<glm::ivec2>;
+
+    std::map<int, ChunkStack *> chunks;
+
+    glm::ivec2 pchunk_pos;
+
     RefPtr<Player> player;
-    glm::ivec2 lastPlayerPos;
     unsigned int terrain_atlas;
     FastNoiseLite fsl;
 };
