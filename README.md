@@ -1,6 +1,6 @@
 <div align=center><h1>CrossCraft-Classic</h1></div>
 
-<div align=center style="display:inline-block"><img src="https://img.shields.io/github/workflow/status/CrossCraft/CrossCraft-Classic/crosscraft?style=for-the-badge&logo=github&label=Classic" height=36px> <img src="https://forthebadge.com/images/badges/made-with-c-plus-plus.svg"> <img src="https://forthebadge.com/images/badges/open-source.svg"></div>
+<div align=center style="display:inline-block"><img src="https://img.shields.io/github/workflow/status/CrossCraft/CrossCraft-Classic/CrossCraft?style=for-the-badge&logo=github&label=Classic" height=36px> <img src="https://forthebadge.com/images/badges/made-with-c-plus-plus.svg"> <img src="https://forthebadge.com/images/badges/open-source.svg"></div>
 
 ---
 
