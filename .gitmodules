@@ -1,3 +1,6 @@
-[submodule "Stardust-Engine"]
-	path = Stardust-Engine
-	url = https://github.com/IridescentRose/Stardust-Engine
+[submodule "ext/Stardust-Celeste"]
+	path = ext/Stardust-Celeste
+	url = https://github.com/Iridescence-Technologies/Stardust-Celeste.git
+[submodule "ext/FNL"]
+	path = ext/FNL
+	url = https://github.com/Auburn/FastNoiseLite.git

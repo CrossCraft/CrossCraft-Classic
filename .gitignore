@@ -354,3 +354,5 @@ MigrationBackup/
 *.sfo
 *.PBP
 *.o
+build
+build-psp

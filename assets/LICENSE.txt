@@ -1,0 +1,23 @@
+CrossCraft Classic uses assets both derived and used 
+from the Unity and Pixel Perfection Community Edition
+resource packs.
+
+Pixel Perfection Community Edition was used to provide
+the block destroy states from terrain.png, as well as
+the entirety of particles.png and particles.png. Any
+other texture file is from Unity unless stated other-
+wise. 
+
+Unity by CyanideX is licensed under a Creative Commons 
+Attribution-NonCommercial-ShareAlike 4.0 International 
+License.
+
+Pixel Perfection Community Edition is licensed under a
+Creative Commons Attribution Share Alike 4.0 Internat-
+ional licence.
+
+Unity Download: 
+https://www.curseforge.com/minecraft/texture-packs/unity
+
+Pixel Perfection Community Edition Download:
+https://github.com/Athemis/PixelPerfectionCE

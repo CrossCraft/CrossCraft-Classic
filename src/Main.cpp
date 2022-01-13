@@ -1,63 +1,40 @@
-/*****************************************************************//**
- * \file   main.cpp
- * \brief  The Main File
- *
- * \author Iridescence - Nathan Bourgeois <iridescentrosesfall@gmail.com>
- * \date   November 2020
- *********************************************************************/
-#include <iostream>
-#include <Utilities/Logger.h>
-#include <GFX/RenderCore.h>
-#include <Core/StateManager.h>
-#include "States/SplashState.h"
-#include "Types.h"
+#include "Gamestate.hpp"
+#include <Stardust-Celeste.hpp>
 
-using namespace Stardust;
-
-inline auto setup_logger() -> void {
-	Utilities::app_Logger->autoFlush = true;
-	Utilities::app_Logger->toConsole = true;
-	Utilities::detail::core_Logger->autoFlush = true;
-	Utilities::detail::core_Logger->toConsole = true;
-
-	Utilities::app_Logger->currentLevel = Utilities::LOGGER_LEVEL_DEBUG;
-	Utilities::detail::core_Logger->currentLevel = Utilities::LOGGER_LEVEL_DEBUG;
-}
-
-auto main() -> int {
-	Platform::initPlatform();
-
-#if CURRENT_PLATFORM != PLATFORM_PSP 
-	Platform::PC::g_Window->setTitle("CrossCraft Classic");
-	Platform::PC::g_Window->setVsync(true);
+#if PSP
+#include <psppower.h>
 #endif
 
-	setup_logger();
+using namespace Stardust_Celeste;
 
-	GFX::g_RenderCore->setDefault2DMode();
-	GFX::g_RenderCore->setClearColor(static_cast<u8>(0x97), 0xD5, 0xFF, 0xFF);
+class GameApplication : public Core::Application {
+  public:
+    void on_start() override {
+        state = create_refptr<CrossCraft::GameState>();
+        this->set_state(state);
 
-	Core::GameStateManager gsm;
-	SplashState* splash = new SplashState();
-	splash->init();
+        Rendering::Color clearcol;
+        clearcol.rgba.r = 0x97;
+        clearcol.rgba.g = 0xD5;
+        clearcol.rgba.b = 0xFF;
+        clearcol.rgba.a = 0xFF;
 
-	gsm.changeState(splash);
+        Rendering::RenderContext::get().set_color(clearcol);
+    }
 
-	while (gsm.isRunning()
-#if CURRENT_PLATFORM != PLATFORM_PSP 
-		&& !Platform::PC::g_Window->shouldClose()
+  private:
+    RefPtr<CrossCraft::GameState> state;
+};
+
+Core::Application *CreateNewSCApp() {
+    Core::AppConfig config;
+    config.headless = false;
+
+    Core::PlatformLayer::get().initialize(config);
+
+#if PSP
+    scePowerSetClockFrequency(333, 333, 166);
 #endif
-		) {
-		GFX::g_RenderCore->beginFrame();
-		GFX::g_RenderCore->clear();
 
-		gsm.update();
-		gsm.draw();
-
-		GFX::g_RenderCore->endFrame();
-		Platform::platformUpdate();
-	}
-
-	Platform::exitPlatform();
-	return 0;
+    return new GameApplication();
 }

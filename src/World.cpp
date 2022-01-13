@@ -1,204 +1,203 @@
-#include "World.h"
-#include "FastNoiseLite.h"
+#include "World.hpp"
+#include <Rendering/Rendering.hpp>
 #include <iostream>
-#include <GFX/RenderCore.h>
-#include <Utilities/Timer.h>
-#include <Utilities/Logger.h>
 
-using namespace Stardust;
+#if PSP
+#include <pspkernel.h>
+#endif
 
-World::World(std::shared_ptr<Player> p){
-	player = p;
-	lastPlayerPos = { -1, -1 };
-	FastNoiseLite noise;
-	//noise.SetSeed(rand());
-	noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	float* heightMap = new float[128 * 128];
-	memset(worldData, 0, 128 * 128 * 128);
-	updatesTilNext = 0;
+namespace CrossCraft {
+World::World(std::shared_ptr<Player> p) {
+    player = p;
+    pchunk_pos = {-1, -1};
 
-	for (int y = 0; y < 128; y++) {
-		for (int x = 0; x < 128; x++) {
-			heightMap[y * 128 + x] = (noise.GetNoise(static_cast<float>(x) * 4.0f, static_cast<float>(y) * 4.0f) + 1.0f) / 2.0f * 24.0f + 52.0f;
-		}
-	}
+    terrain_atlas = Rendering::TextureManager::get().load_texture(
+        "./assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        true);
+    fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    fsl.SetFrequency(0.001f * 5.f);
+    fsl.SetSeed(time(NULL));
 
+    // Zero the array
+    worldData =
+        reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
 
-	for (int z = 0; z < 8; z++) {
-		for (int x = 0; x < 8; x++) {
-			for (int y = 0; y < 8; y++) {
-				int idx = ((y * 8) + z) * 8 + x;
-				metaData[idx].isEmpty = true;
-				metaData[idx].isFull = true;
-			}
-		}
-	}
-
-	for (int z = 0; z < 128; z++) {
-		for (int x = 0; x < 128; x++) {
-			int height = static_cast<int>(heightMap[z * 128 + x]);
-
-			for (int y = 0; y < 128; y++) {
-				int idx = ((y * 128) + z) * 128 + x;
-
-				int cidx = (( (y/16) * 8) + (z/16)) * 8 + (x/16);
-
-				if (y < height) {
-					if (y == 0) {
-						worldData[idx] = 37; //bedrock
-					}
-					else if (y > 0 && y < height - 3) {
-						worldData[idx] = 2; //stone
-					}
-					else if (y < height) {
-						worldData[idx] = 3; //dirt
-					}
-
-					if (metaData[cidx].isEmpty) {
-						metaData[cidx].isEmpty = false;
-					}
-				} else if (y == height) {
-					if (y < 63) {
-						worldData[idx] = 3; //dirt
-					}
-					else {
-						worldData[idx] = 1; //grass
-					}
-
-
-					if (metaData[cidx].isEmpty) {
-						metaData[cidx].isEmpty = false;
-					}
-				}
-				else if (y <= 63) {
-					worldData[idx] = 7;
-
-					if (metaData[cidx].isEmpty) {
-						metaData[cidx].isEmpty = false;
-					}
-
-					if (metaData[cidx].isFull) {
-						metaData[cidx].isFull = false;
-					}
-				}
-				else {
-					if (metaData[cidx].isFull) {
-						metaData[cidx].isFull = false;
-					}
-					continue;
-				}
-			}
-		}
-	}
-	double wt = Utilities::g_AppTimer.deltaTime();
-	delete[] heightMap;
-	Utilities::app_Logger->info("Generated world in: " + std::to_string(wt));
-
-	terrain_atlas = GFX::g_TextureManager->loadTex("./assets/terrain.png", GFX_FILTER_NEAREST, GFX_FILTER_NEAREST, false);
+    chunks.clear();
 }
 
-World::~World()
-{
+World::~World() {
+    Rendering::TextureManager::get().delete_texture(terrain_atlas);
+    free(worldData);
+
+    for (auto const &[key, val] : chunks) {
+        if (val)
+            delete val;
+    }
+    chunks.clear();
+}
+
+const auto RENDER_DISTANCE_DIAMETER = 6.f;
+
+auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
+    auto rad = RENDER_DISTANCE_DIAMETER / 2.f;
+
+    std::vector<glm::ivec2> needed_chunks;
+    for (auto x = -rad; x < rad; x++) {
+        for (auto y = -rad; y < rad; y++) {
+            // Now bound check
+            auto bx = x + pchunk_pos.x;
+            auto by = y + pchunk_pos.y;
+
+            if (bx >= 0 && bx < 16 && by >= 0 && by < 16) {
+                // Okay - this is in bounds - now, we check if in radius
+                auto dx = (bx - pchunk_pos.x);
+                dx *= dx;
+
+                auto dy = (by - pchunk_pos.y);
+                dy *= dy;
+
+                auto d = dx + dy;
+
+                // If distance <= radius
+                if (d <= rad * rad) {
+                    needed_chunks.push_back({bx, by});
+                }
+            }
+        }
+    }
+    return needed_chunks;
 }
 
 void World::update(double dt) {
-	glm::ivec2 v = { static_cast<int>(player->pos.x - 8) / 16, static_cast<int>(player->pos.z - 8) / 16};
+    player->update(static_cast<float>(dt));
 
-	if (v != lastPlayerPos) {
-		glm::vec2 topLeft = { v.x - 2, v.y - 2 };
-		glm::vec2 botRight = { v.x + 2, v.y + 2 };
+    // TODO: Update world meshes
+    auto ppos = player->get_pos();
+    glm::ivec2 new_pos = {static_cast<int>(ppos.x) / 16,
+                          static_cast<int>(ppos.z) / 16};
 
-		std::vector<Vector3i> needed;
-		needed.clear();
-		std::vector<Vector3i> excess;
-		excess.clear();
+    if (pchunk_pos != new_pos) {
+        pchunk_pos = new_pos;
 
-		for (int x = topLeft.x; x <= botRight.x; x++) {
-			for (int z = topLeft.y; z <= botRight.y; z++) {
-				needed.push_back({ x, z, 0 });
-			}
-		}
+        // Get what's needed
+        auto needed = get_needed_chunks();
 
-		for (auto& [pos, chunk] : mesh) {
-			bool need = false;
-			for (auto& v : needed) {
-				if (v == pos) {
-					//Is needed
-					need = true;
-				}
-			}
+        // Check what we have - what we still need
 
-			if (!need) {
-				excess.push_back(pos);
-			}
-		}
+        std::map<int, ChunkStack *> existing_chunks;
+        std::vector<glm::ivec2> to_generate;
 
-		//DIE OLD ONES!
-		for (const auto& chk : excess) {
-			delete mesh[chk];
-			mesh.erase(chk);
-		}
+        for (auto &ipos : needed) {
+            uint16_t x = ipos.x;
+            uint16_t y = ipos.y;
+            uint32_t id = x << 16 | (y & 0x00FF);
 
-		//Make new
-		for (const auto& chk : needed) {
-			if (mesh.find(chk) == mesh.end()) {
-				//NOT FOUND
-				if (chk.x >= 0 && chk.x < 8 && chk.y >= 0 && chk.y < 8) {
-					remainingGeneration.push_back(chk);
-				}
-			}
-		}
+            if (chunks.find(id) != chunks.end()) {
+                // move to existing
+                existing_chunks.emplace(id, chunks[id]);
+                chunks.erase(id);
+            } else {
+                // needs generated
+                to_generate.push_back(ipos);
+            }
+        }
 
-		updatesTilNext = 3;
-		lastPlayerPos = v;
-	}
+        // Remaining can be released
+        for (auto &[key, value] : chunks) {
+            delete value;
+        }
+        chunks.clear();
 
-	updatesTilNext--;
+        // Now merge existing into blank map
+        chunks.merge(existing_chunks);
 
-	if (updatesTilNext < 0 && remainingGeneration.size() > 0) {
-		updatesTilNext = 3;
+        // Generate remaining
+        for (auto &ipos : to_generate) {
+            ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
+            stack->generate(this);
 
-		if (mesh.find(remainingGeneration[0]) == mesh.end()) {
-			auto chk = remainingGeneration[0];
-			//NOT FOUND
-			if (chk.x >= 0 && chk.x < 8 && chk.y >= 0 && chk.y < 8) {
-				Utilities::g_AppTimer.deltaTime();
+            uint16_t x = ipos.x;
+            uint16_t y = ipos.y;
+            uint32_t id = x << 16 | (y & 0x00FF);
+            chunks.emplace(id, stack);
+        }
+    }
+}
 
-				ChunkStack* chunk = new ChunkStack(chk.x, chk.y);
-				chunk->generate(this);
-				mesh.emplace(chk, std::move(chunk));
+inline auto range_map(float &input, float curr_range_min, float curr_range_max,
+                      float range_min, float range_max) -> void {
+    input = (input - curr_range_min) * (range_max - range_min) /
+                (curr_range_max - curr_range_min) +
+            range_min;
+}
 
-				auto tt = Utilities::g_AppTimer.deltaTime();
-				Utilities::app_Logger->info("GENERATED IN " + std::to_string(tt));
-			}
-		}
+auto World::get_noise(float x, float y, NoiseSettings *settings) -> float {
 
-		remainingGeneration.erase(remainingGeneration.begin());
-	}
+    float amp = settings->amplitude;
+    float freq = settings->frequency;
 
-	player->update(dt, this);
+    float sum_noise = 0.0f;
+    float sum_amp = 0.0f;
+
+    for (auto i = 0; i < settings->octaves; i++) {
+        auto noise = fsl.GetNoise(x * freq, y * freq);
+
+        noise *= amp;
+        sum_noise += noise;
+        sum_amp += amp;
+
+        amp *= settings->persistence;
+        freq *= settings->mod_freq;
+    }
+
+    auto divided = sum_noise / sum_amp;
+    range_map(divided, -1.0f, 1.0f, settings->range_min, settings->range_max);
+
+    return divided;
+}
+
+void World::generate() {
+
+    float *hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
+
+    NoiseSettings settings = {2, 1.0f, 2.0f, 0.42f, 4.5f, 0.0f, 0.15f, 0.85f};
+
+    for (int x = 0; x < 256; x++) {
+        for (int z = 0; z < 256; z++) {
+            hmap[x * 256 + z] = get_noise(x, z, &settings);
+        }
+    }
+
+    for (int x = 0; x < 256; x++) {
+        for (int z = 0; z < 256; z++) {
+            int h = hmap[x * 256 + z] * 64.f;
+            for (int y = 0; y < h; y++) {
+                worldData[(x * 256 * 64) + (z * 64) + y] = 1;
+            }
+        }
+    }
+
+    free(hmap);
 }
 
 void World::draw() {
 
-	GFX::g_TextureManager->bindTex(terrain_atlas);
-	//Draw world
+    Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
-	for (auto& [pos, chunk] : mesh) {
-		if (player->m_frustum.isBoxInFrustum(chunk->box)) {
-			chunk->draw();
-		}
-	}
+    for (auto const &[key, val] : chunks) {
+        val->draw();
+    }
 
-	for (auto& [pos, chunk] : mesh) {
-		if (player->m_frustum.isBoxInFrustum(chunk->box)) {
-			chunk->drawTransparent();
-		}
-	}
+    for (auto const &[key, val] : chunks) {
+        val->draw_transparent();
+    }
+
+    player->draw();
 }
 
-block_t World::getBlock(int x, int y, int z)
-{
-	int idx = ((y * 128) + z) * 128 + x;
-	return worldData[idx];
+block_t World::getBlock(int x, int y, int z) {
+    int idx = ((y * 128) + z) * 128 + x;
+    return worldData[idx];
 }
+
+} // namespace CrossCraft

@@ -1,0 +1,94 @@
+name: CrossCraft
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+
+  Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          sudo apt update
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+          git submodule update --init --recursive --remote
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make
+          cd ..
+          mv build/CrossCraft-Classic CrossCraft-Classic
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: CrossCraft-Linux
+          path: |
+            CrossCraft-Classic
+            assets/
+            LICENSE
+            README.md
+
+  Windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          git submodule update --init --recursive --remote
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 .
+          cmake --build . --config Release
+          move Release\CrossCraft-Classic.exe CrossCraft-Classic.exe
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: CrossCraft-Windows
+          path: |
+            CrossCraft-Classic.exe
+            assets\
+            LICENSE
+            README.md
+
+  PSP:
+    runs-on: ubuntu-latest
+    container: pspdev/pspdev:latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apk add bash cmake git gmp mpc1 mpfr4 make
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Build
+        run: |
+          git submodule update --init --recursive --remote
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$PSPDEV/psp/share/pspdev.cmake ..
+          make
+          cd ..
+          mv build/EBOOT.PBP EBOOT.PBP
+          mv build/CrossCraft-Classic.prx CrossCraft-Classic.prx
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: CrossCraft-PSP
+          path: |
+            EBOOT.PBP
+            CrossCraft-Classic.prx
+            assets/
+            LICENSE
+            README.md
