@@ -186,7 +186,24 @@ void World::generate() {
         for (int z = 0; z < 256; z++) {
             int h = hmap[x * 256 + z] * 64.f;
             for (int y = 0; y < h; y++) {
-                worldData[(x * 256 * 64) + (z * 64) + y] = 1;
+                auto idx = (x * 256 * 64) + (z * 64) + y;
+                if (y < (h - 4))
+                    worldData[idx] = 1;
+                else if (y >= (h - 4) && y < (h - 1))
+                    worldData[idx] = 3;
+                else {
+                    if (h < 32)
+                        worldData[idx] = 3;
+                    else
+                        worldData[idx] = 2;
+                }
+            }
+
+            if (h < 32) {
+                for (int y = h; y < 32; y++) {
+                    auto idx = (x * 256 * 64) + (z * 64) + y;
+                    worldData[idx] = 8;
+                }
             }
         }
     }

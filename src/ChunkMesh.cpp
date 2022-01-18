@@ -199,7 +199,7 @@ inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
     float h = y + sizeY;
     float w = x + sizeX;
 
-    return {x, y, w, y, w, h, x, h};
+    return {x, h, w, h, w, y, x, y};
 }
 
 /**
@@ -209,8 +209,24 @@ inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
  * @param lv Light Value
  * @return std::array<float, 8>
  */
-std::array<float, 8> getTexCoord(uint8_t idx, float lv) {
-    return getTexture({16, 16}, 0);
+std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
+    auto vec = glm::vec2(16, 16);
+
+    if (idx == 1)
+        return getTexture(vec, 1);
+    else if (idx == 3)
+        return getTexture(vec, 2);
+    else if (idx == 2) {
+        if (lv == LIGHT_SIDE)
+            return getTexture(vec, 3);
+        else if (lv == LIGHT_BOT)
+            return getTexture(vec, 2);
+        else
+            return getTexture(vec, 0);
+    } else if (idx == 8)
+        return getTexture(vec, 14);
+
+    return getTexture(vec, idx);
 }
 
 void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
@@ -227,9 +243,15 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
                   ((posCheck.z + cZ * 16) * 64) + (posCheck.y + cY * 16);
 
         // Add face to mesh
-        if (wrld->worldData[idx] == 0) {
-            add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lightVal,
-                             false);
+        if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8) {
+            if (blk == 8 && wrld->worldData[idx] != 8) {
+                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos,
+                                 lightVal, true);
+            } else {
+                if (blk != 8)
+                    add_face_to_mesh(data, getTexCoord(blk, lightVal), pos,
+                                     lightVal, false);
+            }
         }
     }
 }
