@@ -33,8 +33,8 @@ const std::array<float, 12> xFace2{
 };
 
 constexpr uint32_t LIGHT_TOP = 0xFFFFFFFF;
-constexpr uint32_t LIGHT_SIDE = 0xFFDDDDDD;
-constexpr uint32_t LIGHT_BOT = 0xFFBBBBBB;
+constexpr uint32_t LIGHT_SIDE = 0xFFCCCCCC;
+constexpr uint32_t LIGHT_BOT = 0xFFAAAAAA;
 
 ChunkMesh::ChunkMesh(int x, int y, int z)
     : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z) {}
@@ -101,6 +101,10 @@ void ChunkMesh::finalize_mesh() {
                   m_index.size());
     transMesh.add_data(t_verts.data(), t_verts.size(), t_index.data(),
                        t_index.size());
+
+#if PSP
+    sceKernelDcacheWritebackInvalidateAll();
+#endif
 }
 
 void ChunkMesh::generate(const World *wrld) {

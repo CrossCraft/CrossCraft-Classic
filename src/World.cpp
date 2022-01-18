@@ -36,7 +36,11 @@ World::~World() {
     chunks.clear();
 }
 
-const auto RENDER_DISTANCE_DIAMETER = 6.f;
+#if PSP
+const auto RENDER_DISTANCE_DIAMETER = 5.f;
+#else
+const auto RENDER_DISTANCE_DIAMETER = 16.f;
+#endif
 
 auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
     auto rad = RENDER_DISTANCE_DIAMETER / 2.f;
