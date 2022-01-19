@@ -13,8 +13,6 @@ Player::Player()
 void Player::update(float dt) {
 
     using namespace Utilities::Input;
-    dt /= 50.0f;
-
     // Rotate player
     {
         const auto rotSpeed = 50.0f;

@@ -238,9 +238,9 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
                              uint32_t lightVal) {
 
     // Bounds check
-    if (!((posCheck.x == 16 && cX == 16) || (posCheck.x == -1 && cX == 0) ||
-          (posCheck.y == -1 && cY == 0) || (posCheck.y == 16 && cY == 16) ||
-          (posCheck.z == -1 && cZ == 0) || (posCheck.z == 16 && cZ == 16))) {
+    if (!((posCheck.x == 16 && cX == 15) || (posCheck.x == -1 && cX == 0) ||
+          (posCheck.y == -1 && cY == 0) || (posCheck.y == 16 && cY == 15) ||
+          (posCheck.z == -1 && cZ == 0) || (posCheck.z == 16 && cZ == 15))) {
 
         // Calculate block index to peek
         int idx = ((posCheck.x + cX * 16) * 256 * 64) +
