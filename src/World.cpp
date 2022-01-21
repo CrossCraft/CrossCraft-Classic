@@ -4,6 +4,8 @@
 
 #if PSP
 #include <pspkernel.h>
+#else
+#include <glad/glad.hpp>
 #endif
 
 namespace CrossCraft {
@@ -16,7 +18,8 @@ World::World(std::shared_ptr<Player> p) {
         true);
     fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     fsl.SetFrequency(0.001f * 5.f);
-    fsl.SetSeed(time(NULL));
+    seed = time(NULL);
+    fsl.SetSeed(seed);
 
     // Zero the array
     worldData =
@@ -172,9 +175,54 @@ auto World::get_noise(float x, float y, NoiseSettings *settings) -> float {
     return divided;
 }
 
+auto getIdx(int x, int y, int z) -> uint32_t {
+    if (x < 0 || x > 256 || y > 64 || y < 0 || z < 0 || z > 256)
+        return 0;
+    return (x * 256 * 64) + (z * 64) + y;
+}
+
+auto World::generate_tree(int x, int z, int hash) -> void {
+    x *= 8;
+    z *= 8;
+
+    x += (hash % 8);
+    z += (hash * z) % 8;
+
+    int h = hmap[x * 256 + z] * 64.f;
+
+    if (h < 32)
+        return;
+
+    int tree_height = rand() % 3 + 4;
+
+    for (int i = 0; i < tree_height + 1; i++) {
+        // lower layer
+        if (i > tree_height - 4 && i < tree_height - 1) {
+            for (int tx = -2; tx < 3; tx++)
+                for (int tz = -2; tz < 3; tz++)
+                    worldData[getIdx(x + tx, h + i, z + tz)] = 18;
+        } else if (i >= tree_height - 1 && i < tree_height) {
+            for (int tx = -1; tx < 2; tx++)
+                for (int tz = -1; tz < 2; tz++)
+                    worldData[getIdx(x + tx, h + i, z + tz)] = 18;
+        } else if (i == tree_height) {
+            worldData[getIdx(x - 1, h + i, z)] = 18;
+            worldData[getIdx(x + 1, h + i, z)] = 18;
+            worldData[getIdx(x, h + i, z)] = 18;
+            worldData[getIdx(x, h + i, z + 1)] = 18;
+            worldData[getIdx(x, h + i, z - 1)] = 18;
+        }
+
+        // write the log
+        if (i < tree_height) {
+            worldData[getIdx(x, h + i, z)] = 17;
+        }
+    }
+}
+
 void World::generate() {
     // Create a height map
-    float *hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
+    hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
 
     NoiseSettings settings = {2, 1.0f, 2.0f, 0.42f, 4.5f, 0.0f, 0.15f, 0.85f};
 
@@ -209,6 +257,19 @@ void World::generate() {
                     worldData[idx] = 8;
                 }
             }
+        }
+    }
+
+    for (int x = 0; x < 32; x++) {
+        for (int z = 0; z < 32; z++) {
+
+            srand((x | 1) << z * ~seed);
+            uint8_t res = rand() % 10;
+
+            if (res < 6)
+                continue;
+
+            generate_tree(x, z, res);
         }
     }
 

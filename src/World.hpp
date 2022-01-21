@@ -107,6 +107,12 @@ class World {
      */
     auto get_needed_chunks() -> std::vector<glm::ivec2>;
 
+    /**
+     * @brief Generates a tree given X, Z, and the hash
+     *
+     */
+    auto generate_tree(int x, int z, int hash) -> void;
+
     std::map<int, ChunkStack *> chunks;
 
     glm::ivec2 pchunk_pos;
@@ -114,6 +120,8 @@ class World {
     RefPtr<Player> player;
     unsigned int terrain_atlas;
     FastNoiseLite fsl;
+    float *hmap;
+    uint32_t seed;
 };
 
 } // namespace CrossCraft

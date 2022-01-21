@@ -229,6 +229,13 @@ std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
             return getTexture(vec, 0);
     } else if (idx == 8)
         return getTexture(vec, 14);
+    else if (idx == 17) {
+        if (lv == LIGHT_TOP || lv == LIGHT_BOT)
+            return getTexture(vec, 21);
+        else
+            return getTexture(vec, 20);
+    } else if (idx == 18)
+        return getTexture(vec, 22);
 
     return getTexture(vec, idx);
 }
@@ -247,8 +254,12 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
                   ((posCheck.z + cZ * 16) * 64) + (posCheck.y + cY * 16);
 
         // Add face to mesh
-        if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8) {
+        if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8 ||
+            wrld->worldData[idx] == 18) {
             if (blk == 8 && wrld->worldData[idx] != 8) {
+                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos,
+                                 lightVal, true);
+            } else if (blk == 18) {
                 add_face_to_mesh(data, getTexCoord(blk, lightVal), pos,
                                  lightVal, true);
             } else {
