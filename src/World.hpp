@@ -78,16 +78,8 @@ class World {
      */
     auto generate() -> void;
 
-    /**
-     * @brief Get a block
-     *
-     * @param x X Position
-     * @param y Y Position
-     * @param z Z position
-     * @return block_t
-     */
-    auto getBlock(int x, int y, int z) -> block_t;
     block_t *worldData;
+    block_t *lightData;
 
   private:
     /**

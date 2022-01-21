@@ -34,7 +34,11 @@ const std::array<float, 12> xFace2{
 
 constexpr uint32_t LIGHT_TOP = 0xFFFFFFFF;
 constexpr uint32_t LIGHT_SIDE = 0xFFCCCCCC;
-constexpr uint32_t LIGHT_BOT = 0xFFAAAAAA;
+constexpr uint32_t LIGHT_BOT = 0xFF999999;
+
+constexpr uint32_t LIGHT_TOP_DARK = 0xFFDDDDDD;
+constexpr uint32_t LIGHT_SIDE_DARK = 0xFFAAAAAA;
+constexpr uint32_t LIGHT_BOT_DARK = 0xFF777777;
 
 ChunkMesh::ChunkMesh(int x, int y, int z)
     : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z) {}
@@ -253,19 +257,33 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
         int idx = ((posCheck.x + cX * 16) * 256 * 64) +
                   ((posCheck.z + cZ * 16) * 64) + (posCheck.y + cY * 16);
 
+        int idxl = ((pos.x + cX * 16) * 256 * 64) + ((pos.z + cZ * 16) * 64) +
+                   (pos.y + cY * 16);
+
+        auto lv = lightVal;
+
+        if (!wrld->lightData[idxl]) {
+            if (lv == LIGHT_TOP)
+                lv = LIGHT_TOP_DARK;
+            else if (lv == LIGHT_SIDE)
+                lv = LIGHT_SIDE_DARK;
+            else
+                lv = LIGHT_BOT_DARK;
+        }
+
         // Add face to mesh
         if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8 ||
             wrld->worldData[idx] == 18) {
             if (blk == 8 && wrld->worldData[idx] != 8) {
-                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos,
-                                 lightVal, true);
+                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
+                                 true);
             } else if (blk == 18) {
-                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos,
-                                 lightVal, true);
+                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
+                                 true);
             } else {
                 if (blk != 8)
-                    add_face_to_mesh(data, getTexCoord(blk, lightVal), pos,
-                                     lightVal, false);
+                    add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
+                                     false);
             }
         }
     }

@@ -24,6 +24,8 @@ World::World(std::shared_ptr<Player> p) {
     // Zero the array
     worldData =
         reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
+    lightData =
+        reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
 
     chunks.clear();
 }
@@ -273,6 +275,19 @@ void World::generate() {
         }
     }
 
+    for (int x = 0; x < 256; x++) {
+        for (int z = 0; z < 256; z++) {
+            for (int y = 255; y >= 0; y--) {
+                auto idx = (x * 256 * 64) + (z * 64) + y;
+                if (worldData[idx] == 0)
+                    continue;
+
+                lightData[idx] = 1;
+                break;
+            }
+        }
+    }
+
     // Destroy height map
     free(hmap);
 }
@@ -292,12 +307,6 @@ void World::draw() {
     }
 
     player->draw();
-}
-
-block_t World::getBlock(int x, int y, int z) {
-    // Get a block
-    int idx = ((y * 128) + z) * 128 + x;
-    return worldData[idx];
 }
 
 } // namespace CrossCraft
