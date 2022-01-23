@@ -257,12 +257,11 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
         int idx = ((posCheck.x + cX * 16) * 256 * 64) +
                   ((posCheck.z + cZ * 16) * 64) + (posCheck.y + cY * 16);
 
-        int idxl = ((pos.x + cX * 16) * 256 * 64) + ((pos.z + cZ * 16) * 64) +
-                   (pos.y + cY * 16);
+        int idxl = ((pos.x + cX * 16) * 256 * 4) + ((pos.z + cZ * 16) * 4) + cY;
 
         auto lv = lightVal;
 
-        if (!wrld->lightData[idxl]) {
+        if (!((wrld->lightData[idxl] >> (int)pos.y) & 1)) {
             if (lv == LIGHT_TOP)
                 lv = LIGHT_TOP_DARK;
             else if (lv == LIGHT_SIDE)

@@ -79,7 +79,7 @@ class World {
     auto generate() -> void;
 
     block_t *worldData;
-    block_t *lightData;
+    uint16_t *lightData;
 
   private:
     /**

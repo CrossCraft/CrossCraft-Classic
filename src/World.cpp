@@ -25,7 +25,7 @@ World::World(std::shared_ptr<Player> p) {
     worldData =
         reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
     lightData =
-        reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
+        reinterpret_cast<uint16_t *>(calloc(256 * 4 * 256, sizeof(uint16_t)));
 
     chunks.clear();
 }
@@ -277,12 +277,13 @@ void World::generate() {
 
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
-            for (int y = 255; y >= 0; y--) {
+            for (int y = 63; y >= 0; y--) {
                 auto idx = (x * 256 * 64) + (z * 64) + y;
                 if (worldData[idx] == 0)
                     continue;
 
-                lightData[idx] = 1;
+                auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
+                lightData[idx2] |= 1 << (y % 16);
                 break;
             }
         }
