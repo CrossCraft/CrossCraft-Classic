@@ -178,7 +178,7 @@ auto World::get_noise(float x, float y, NoiseSettings *settings) -> float {
 }
 
 auto getIdx(int x, int y, int z) -> uint32_t {
-    if (x < 0 || x > 256 || y > 64 || y < 0 || z < 0 || z > 256)
+    if (x < 0 || x >= 256 || y >= 64 || y < 0 || z < 0 || z >= 256)
         return 0;
     return (x * 256 * 64) + (z * 64) + y;
 }
