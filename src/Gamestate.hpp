@@ -31,7 +31,10 @@ class GameState : public Core::ApplicationState {
     void on_update(Core::Application *app, double dt);
     void on_draw(Core::Application *app, double dt);
 
+    static void quit(std::any d);
+
   private:
+    Core::Application *ref;
     ScopePtr<World> world;
     Utilities::Controller *psp_controller;
     Utilities::Controller *key_controller;

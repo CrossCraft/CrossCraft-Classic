@@ -23,6 +23,10 @@ void GameState::on_start() {
                                 {Player::move_right, world->player.get()});
     psp_controller->add_command((int)Input::PSPButtons::Cross,
                                 {Player::move_backward, world->player.get()});
+    psp_controller->add_command((int)Input::PSPButtons::Select,
+                                {Player::move_down, world->player.get()});
+    psp_controller->add_command((int)Input::PSPButtons::Up,
+                                {Player::move_up, world->player.get()});
 
     key_controller->add_command((int)Input::Keys::W,
                                 {Player::move_forward, world->player.get()});
@@ -32,6 +36,10 @@ void GameState::on_start() {
                                 {Player::move_right, world->player.get()});
     key_controller->add_command((int)Input::Keys::S,
                                 {Player::move_backward, world->player.get()});
+    key_controller->add_command((int)Input::Keys::Space,
+                                {Player::move_up, world->player.get()});
+    key_controller->add_command((int)Input::Keys::LShift,
+                                {Player::move_down, world->player.get()});
 
     Input::add_controller(psp_controller);
     Input::add_controller(key_controller);
@@ -41,7 +49,19 @@ void GameState::on_start() {
 }
 void GameState::on_cleanup() {}
 
+void GameState::quit(std::any d) {
+    auto app = std::any_cast<Core::Application *>(d);
+    app->exit();
+}
+
 void GameState::on_update(Core::Application *app, double dt) {
+
+    if (!ref) {
+        ref = app;
+
+        psp_controller->add_command((int)Input::PSPButtons::Start, {quit, ref});
+        key_controller->add_command((int)Input::Keys::Escape, {quit, ref});
+    }
 
     // Update the world
     world->update(dt);

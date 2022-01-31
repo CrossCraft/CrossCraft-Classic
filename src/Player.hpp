@@ -60,6 +60,9 @@ class Player {
     static auto move_left(std::any p) -> void;
     static auto move_right(std::any p) -> void;
 
+    static auto move_up(std::any p) -> void;
+    static auto move_down(std::any p) -> void;
+
   private:
     glm::vec3 pos;
     glm::vec2 rot;

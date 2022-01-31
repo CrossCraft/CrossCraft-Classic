@@ -34,6 +34,16 @@ auto Player::move_right(std::any d) -> void {
     p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
 }
 
+auto Player::move_up(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    p->vel.y += playerSpeed;
+}
+
+auto Player::move_down(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    p->vel.y -= playerSpeed;
+}
+
 void Player::update(float dt) {
     using namespace Utilities::Input;
     // Rotate player
