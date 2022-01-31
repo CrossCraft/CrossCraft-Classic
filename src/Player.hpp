@@ -10,6 +10,7 @@
  */
 #pragma once
 #include <Rendering/Camera.hpp>
+#include <any>
 #include <glm.hpp>
 
 using namespace Stardust_Celeste;
@@ -53,6 +54,11 @@ class Player {
      * @return glm::vec3
      */
     inline auto get_pos() -> glm::vec3 { return pos; }
+
+    static auto move_forward(std::any p) -> void;
+    static auto move_backward(std::any p) -> void;
+    static auto move_left(std::any p) -> void;
+    static auto move_right(std::any p) -> void;
 
   private:
     glm::vec3 pos;

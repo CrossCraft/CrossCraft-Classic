@@ -10,6 +10,7 @@
  */
 #include "World.hpp"
 #include <Core/Application.hpp>
+#include <Utilities/Input.hpp>
 
 using namespace Stardust_Celeste;
 
@@ -32,6 +33,8 @@ class GameState : public Core::ApplicationState {
 
   private:
     ScopePtr<World> world;
+    Utilities::Controller *psp_controller;
+    Utilities::Controller *key_controller;
 };
 
 } // namespace CrossCraft

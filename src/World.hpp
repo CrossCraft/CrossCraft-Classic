@@ -80,6 +80,7 @@ class World {
 
     block_t *worldData;
     uint16_t *lightData;
+    RefPtr<Player> player;
 
   private:
     /**
@@ -109,7 +110,6 @@ class World {
 
     glm::ivec2 pchunk_pos;
 
-    RefPtr<Player> player;
     unsigned int terrain_atlas;
     FastNoiseLite fsl;
     float *hmap;
