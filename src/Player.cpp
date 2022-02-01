@@ -76,7 +76,6 @@ void Player::update(float dt) {
     if (rot.x > 89.9f) {
         rot.x = 89.9f;
     }
-    set_cursor_center();
 
     // Update camera and position
     pos += vel * dt;
@@ -85,6 +84,8 @@ void Player::update(float dt) {
     cam.update();
 
     vel = glm::vec3(0.f, 0.f, 0.f);
+
+    set_cursor_center();
 }
 
 } // namespace CrossCraft

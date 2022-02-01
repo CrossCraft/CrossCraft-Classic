@@ -310,4 +310,14 @@ void World::draw() {
     player->draw();
 }
 
+auto World::dig(std::any d) -> void {
+    auto w = std::any_cast<World *>(d);
+    SC_CORE_INFO("DIG!");
+}
+
+auto World::place(std::any d) -> void {
+    auto w = std::any_cast<World *>(d);
+    SC_CORE_INFO("PLACE!");
+}
+
 } // namespace CrossCraft

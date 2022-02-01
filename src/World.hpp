@@ -82,6 +82,9 @@ class World {
     uint16_t *lightData;
     RefPtr<Player> player;
 
+    static auto dig(std::any d) -> void;
+    static auto place(std::any d) -> void;
+
   private:
     /**
      * @brief Get noise from a position and settings

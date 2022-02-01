@@ -1,6 +1,7 @@
 #include "Gamestate.hpp"
 #include <Stardust-Celeste.hpp>
 #include <Utilities/Controllers/KeyboardController.hpp>
+#include <Utilities/Controllers/MouseController.hpp>
 #include <Utilities/Controllers/PSPController.hpp>
 
 namespace CrossCraft {
@@ -14,6 +15,7 @@ void GameState::on_start() {
 
     psp_controller = new Input::PSPController();
     key_controller = new Input::KeyboardController();
+    mouse_controller = new Input::MouseController();
 
     psp_controller->add_command((int)Input::PSPButtons::Triangle,
                                 {Player::move_forward, world->player.get()});
@@ -27,6 +29,10 @@ void GameState::on_start() {
                                 {Player::move_down, world->player.get()});
     psp_controller->add_command((int)Input::PSPButtons::Up,
                                 {Player::move_up, world->player.get()});
+    psp_controller->add_command((int)Input::PSPButtons::LTrigger,
+                                {World::dig, world.get()});
+    psp_controller->add_command((int)Input::PSPButtons::RTrigger,
+                                {World::place, world.get()});
 
     key_controller->add_command((int)Input::Keys::W,
                                 {Player::move_forward, world->player.get()});
@@ -40,9 +46,14 @@ void GameState::on_start() {
                                 {Player::move_up, world->player.get()});
     key_controller->add_command((int)Input::Keys::LShift,
                                 {Player::move_down, world->player.get()});
+    mouse_controller->add_command((int)Input::MouseButtons::Left,
+                                  {World::dig, world.get()});
+    mouse_controller->add_command((int)Input::MouseButtons::Right,
+                                  {World::place, world.get()});
 
     Input::add_controller(psp_controller);
     Input::add_controller(key_controller);
+    Input::add_controller(mouse_controller);
 
     Input::set_differential_mode("Mouse", true);
     Input::set_differential_mode("PSP", true);
