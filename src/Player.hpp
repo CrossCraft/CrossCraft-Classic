@@ -55,6 +55,13 @@ class Player {
      */
     inline auto get_pos() -> glm::vec3 { return pos; }
 
+    /**
+     * @brief Get the rotation
+     *
+     * @return glm::vec3
+     */
+    inline auto get_rot() -> glm::vec2 { return rot; }
+
     static auto move_forward(std::any p) -> void;
     static auto move_backward(std::any p) -> void;
     static auto move_left(std::any p) -> void;

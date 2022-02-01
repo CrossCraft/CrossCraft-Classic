@@ -47,8 +47,18 @@ ChunkMesh::~ChunkMesh() {
     // Delete data
     mesh.delete_data();
     transMesh.delete_data();
+
     idx_counter = 0;
+    m_verts.clear();
+    m_verts.shrink_to_fit();
+    m_index.clear();
+    m_index.shrink_to_fit();
+
     tidx_counter = 0;
+    t_verts.clear();
+    t_verts.shrink_to_fit();
+    t_index.clear();
+    t_index.shrink_to_fit();
 }
 
 struct SurroundPos {
@@ -77,11 +87,15 @@ void ChunkMesh::reset_allocate() {
     // Clear
     idx_counter = 0;
     m_verts.clear();
+    m_verts.shrink_to_fit();
     m_index.clear();
+    m_index.shrink_to_fit();
 
     tidx_counter = 0;
     t_verts.clear();
+    t_verts.shrink_to_fit();
     t_index.clear();
+    t_index.shrink_to_fit();
 
     // Allocate memory
     m_verts.reserve(4 * numFace);
@@ -89,6 +103,9 @@ void ChunkMesh::reset_allocate() {
 
     t_verts.reserve(4 * numFace);
     t_index.reserve(6 * numFace);
+
+    mesh.delete_data();
+    transMesh.delete_data();
 }
 
 void ChunkMesh::finalize_mesh() {

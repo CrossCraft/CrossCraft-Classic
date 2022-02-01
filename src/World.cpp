@@ -1,5 +1,6 @@
 #include "World.hpp"
 #include <Rendering/Rendering.hpp>
+#include <gtx/rotate_vector.hpp>
 #include <iostream>
 
 #if PSP
@@ -310,9 +311,49 @@ void World::draw() {
     player->draw();
 }
 
+template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 auto World::dig(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
-    SC_CORE_INFO("DIG!");
+    auto pos = w->player->get_pos();
+    auto default_vec = glm::vec3(0, 0, 1);
+
+    default_vec = glm::rotateX(default_vec, DEGTORAD(w->player->get_rot().x));
+    default_vec =
+        glm::rotateY(default_vec, DEGTORAD(-w->player->get_rot().y + 180));
+
+    const float REACH_DISTANCE = 4.0f;
+    default_vec *= REACH_DISTANCE;
+
+    const u32 NUM_STEPS = 50;
+
+    for (u32 i = 0; i < NUM_STEPS; i++) {
+        float percentage =
+            static_cast<float>(i) / static_cast<float>(NUM_STEPS);
+
+        auto cast_pos = pos + (default_vec * percentage);
+
+        auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
+                               static_cast<s32>(cast_pos.y),
+                               static_cast<s32>(cast_pos.z));
+
+        if (ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
+            ivec.z >= 0 && ivec.z < 256) {
+            u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+            auto blk = w->worldData[idx];
+
+            if (blk != 0) {
+                uint16_t x = ivec.x / 16;
+                uint16_t y = ivec.z / 16;
+                uint32_t id = x << 16 | (y & 0x00FF);
+
+                w->worldData[idx] = 0;
+
+                w->chunks[id]->generate(w);
+
+                break;
+            }
+        }
+    }
 }
 
 auto World::place(std::any d) -> void {
