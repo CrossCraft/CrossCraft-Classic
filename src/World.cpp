@@ -350,6 +350,39 @@ auto World::dig(std::any d) -> void {
 
                 w->chunks[id]->generate(w);
 
+                auto localX = ivec.x % 16;
+                auto localZ = ivec.z % 16;
+
+                bool xMod = true;
+                auto nX = x;
+                if (localX == 0) {
+                    nX -= 1;
+                } else if (localX == 15) {
+                    nX += 1;
+                } else {
+                    xMod = false;
+                }
+
+                if (xMod) {
+                    uint32_t idxx = nX << 16 | (y & 0x00FF);
+                    w->chunks[idxx]->generate(w);
+                }
+
+                bool zMod = true;
+                auto nY = y;
+                if (localZ == 0) {
+                    nY -= 1;
+                } else if (localZ == 15) {
+                    nY += 1;
+                } else {
+                    zMod = false;
+                }
+
+                if (zMod) {
+                    uint32_t idzz = x << 16 | (nY & 0x00FF);
+                    w->chunks[idzz]->generate(w);
+                }
+
                 break;
             }
         }
