@@ -348,6 +348,26 @@ auto World::dig(std::any d) -> void {
 
                 w->worldData[idx] = 0;
 
+                // Update Lighting
+                {
+                    // Clear
+                    for (int i = 0; i < 4; i++) {
+                        auto idx2 = (ivec.x * 256 * 4) + (ivec.z * 4) + i;
+                        w->lightData[idx2] = 0;
+                    }
+
+                    // Retrace
+                    for (int y = 63; y >= 0; y--) {
+                        auto idx = (ivec.x * 256 * 64) + (ivec.z * 64) + y;
+                        if (w->worldData[idx] == 0)
+                            continue;
+
+                        auto idx2 = (ivec.x * 256 * 4) + (ivec.z * 4) + y / 16;
+                        w->lightData[idx2] |= 1 << (y % 16);
+                        break;
+                    }
+                }
+
                 w->chunks[id]->generate(w);
 
                 auto localX = ivec.x % 16;
