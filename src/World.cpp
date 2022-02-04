@@ -399,7 +399,7 @@ auto World::dig(std::any d) -> void {
                 }
 
                 if (zMod) {
-                    uint32_t idzz = x << 16 | (nY & 0x00FF);
+                    uint32_t idzz = 0 | x << 16 | (nY & 0x00FF);
                     w->chunks[idzz]->generate(w);
                 }
 
