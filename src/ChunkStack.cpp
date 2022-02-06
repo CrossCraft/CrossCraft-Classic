@@ -16,6 +16,32 @@ ChunkStack::~ChunkStack() {
     }
 }
 
+/**
+ * @brief Update Chunk
+ *
+ * @param wrld The world to reference
+ */
+void ChunkStack::chunk_update(World *wrld) {
+    // Update this chunk
+
+    // Check regens for all
+    for (int i = 0; i < 4; i++)
+        if (stack[i]->needsRegen)
+            stack[i]->generate(wrld);
+}
+
+/**
+ * @brief Random Tick Update
+ *
+ * @param wrld The world to reference
+ */
+void ChunkStack::rtick_update(World *wrld) {
+    // RTick each section
+    for (int i = 0; i < 4; i++) {
+        stack[i]->rtick(wrld);
+    }
+}
+
 void ChunkStack::generate(World *wrld) {
     // Generate meshes
     for (int i = 0; i < 4; i++) {

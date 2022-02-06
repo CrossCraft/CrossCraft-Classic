@@ -51,10 +51,19 @@ class ChunkMesh {
     void draw();
 
     /**
+     * @brief Random Ticks the section
+     *
+     * @param wrld
+     */
+    void rtick(World *wrld);
+
+    /**
      * @brief Draw the transparency layer
      *
      */
     void draw_transparent();
+
+    bool needsRegen;
 
   private:
     /**
@@ -85,6 +94,7 @@ class ChunkMesh {
                           glm::vec3 pos, uint32_t lightVal, bool trans);
 
     int cX, cY, cZ;
+    int rtcounter;
 
     uint16_t idx_counter;
     std::vector<Rendering::Vertex> m_verts;

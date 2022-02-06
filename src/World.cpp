@@ -11,6 +11,8 @@
 
 namespace CrossCraft {
 World::World(std::shared_ptr<Player> p) {
+    rtick = 0;
+    tick_counter = 0;
     player = p;
     pchunk_pos = {-1, -1};
 
@@ -81,7 +83,23 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
 void World::update(double dt) {
     player->update(static_cast<float>(dt));
 
-    // TODO: Update world meshes
+    tick_counter += dt;
+
+    if (tick_counter > 0.05) {
+        tick_counter = 0;
+
+        for (auto &[key, value] : chunks) {
+            rtick++;
+            if (rtick % 3 == 0) {
+                // Random tick
+                value->rtick_update(this);
+            }
+
+            // Chunk Updates
+            value->chunk_update(this);
+        }
+    }
+
     auto ppos = player->get_pos();
     glm::ivec2 new_pos = {static_cast<int>(ppos.x) / 16,
                           static_cast<int>(ppos.z) / 16};

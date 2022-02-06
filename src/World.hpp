@@ -133,6 +133,8 @@ class World {
     FastNoiseLite fsl;
     float *hmap;
     uint32_t seed;
+    float tick_counter;
+    int rtick;
 };
 
 } // namespace CrossCraft

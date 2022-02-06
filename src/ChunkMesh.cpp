@@ -41,7 +41,7 @@ constexpr uint32_t LIGHT_SIDE_DARK = 0xFFAAAAAA;
 constexpr uint32_t LIGHT_BOT_DARK = 0xFF777777;
 
 ChunkMesh::ChunkMesh(int x, int y, int z)
-    : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z) {}
+    : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z), rtcounter(0) {}
 
 ChunkMesh::~ChunkMesh() {
     // Delete data
@@ -126,6 +126,33 @@ void ChunkMesh::finalize_mesh() {
 #if PSP
     sceKernelDcacheWritebackInvalidateAll();
 #endif
+}
+
+void ChunkMesh::rtick(World *wrld) {
+    srand(rtcounter++ + cX * cZ << cY);
+    int x = rand() % 16 + cX * 16;
+    int y = rand() % 16 + cY * 16;
+    int z = rand() % 16 + cZ * 16;
+
+    auto idx = (x * 256 * 64) + (z * 64) + y;
+
+    y += 1;
+    if (y >= 64)
+        return;
+
+    auto idx2 = (x * 256 * 64) + (z * 64) + y;
+    auto blk2 = wrld->worldData[idx2];
+    auto blk = wrld->worldData[idx];
+
+    if (blk == 2 && blk2 != 0) {
+        wrld->worldData[idx] = 3;
+        needsRegen = true;
+    }
+
+    if (blk == 3 && blk2 == 0) {
+        wrld->worldData[idx] = 2;
+        needsRegen = true;
+    }
 }
 
 void ChunkMesh::generate(const World *wrld) {

@@ -46,6 +46,20 @@ class ChunkStack {
     void generate(World *wrld);
 
     /**
+     * @brief Update Chunk
+     *
+     * @param wrld The world to reference
+     */
+    void chunk_update(World *wrld);
+
+    /**
+     * @brief Random Tick Update
+     *
+     * @param wrld The world to reference
+     */
+    void rtick_update(World *wrld);
+
+    /**
      * @brief Draw the chunk stack
      *
      */
