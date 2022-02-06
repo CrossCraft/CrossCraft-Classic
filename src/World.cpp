@@ -11,7 +11,6 @@
 
 namespace CrossCraft {
 World::World(std::shared_ptr<Player> p) {
-    rtick = 0;
     tick_counter = 0;
     player = p;
     pchunk_pos = {-1, -1};
@@ -85,18 +84,19 @@ void World::update(double dt) {
 
     tick_counter += dt;
 
-    if (tick_counter > 0.05) {
+    if (tick_counter > 0.25) {
         tick_counter = 0;
 
         for (auto &[key, value] : chunks) {
-            rtick++;
-            if (rtick % 3 == 0) {
-                // Random tick
-                value->rtick_update(this);
-            }
+            // Random tick
+            value->rtick_update(this);
 
             // Chunk Updates
             value->chunk_update(this);
+        }
+
+        for (auto &[key, value] : chunks) {
+            value->post_update(this);
         }
     }
 
@@ -401,6 +401,28 @@ auto validate_ivec3(glm::ivec3 ivec) -> bool {
            ivec.z >= 0 && ivec.z < 256;
 }
 
+auto World::add_update(glm::ivec3 ivec) -> void {
+    if (!validate_ivec3(ivec))
+        return;
+
+    uint16_t x = ivec.x / 16;
+    uint16_t y = ivec.z / 16;
+    uint32_t id = x << 16 | (y & 0x00FF);
+
+    if (chunks.find(id) != chunks.end()) {
+        chunks[id]->posUpdate.push_back(ivec);
+    }
+}
+
+auto World::update_nearby_blocks(glm::ivec3 ivec) -> void {
+    add_update({ivec.x, ivec.y + 1, ivec.z});
+    add_update({ivec.x, ivec.y - 1, ivec.z});
+    add_update({ivec.x - 1, ivec.y, ivec.z});
+    add_update({ivec.x + 1, ivec.y, ivec.z});
+    add_update({ivec.x, ivec.y, ivec.z + 1});
+    add_update({ivec.x, ivec.y, ivec.z - 1});
+}
+
 auto World::dig(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
     auto pos = w->player->get_pos();
@@ -443,9 +465,11 @@ auto World::dig(std::any d) -> void {
         // Update Lighting
         w->update_lighting(ivec.x, ivec.z);
 
-        w->chunks[id]->generate(w);
+        if (w->chunks.find(id) != w->chunks.end())
+            w->chunks[id]->generate(w);
 
         w->update_surroundings(ivec.x, ivec.z);
+        w->update_nearby_blocks(ivec);
 
         break;
     }
@@ -515,7 +539,8 @@ auto World::place(std::any d) -> void {
         // Update Lighting
         w->update_lighting(ivec.x, ivec.z);
 
-        w->chunks[id]->generate(w);
+        if (w->chunks.find(id) != w->chunks.end())
+            w->chunks[id]->generate(w);
 
         w->update_surroundings(ivec.x, ivec.z);
 

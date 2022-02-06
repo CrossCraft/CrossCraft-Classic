@@ -85,6 +85,37 @@ class World {
     static auto dig(std::any d) -> void;
     static auto place(std::any d) -> void;
 
+    /**
+     * @brief Updates surrounding chunks
+     *
+     * @param x X of block modified
+     * @param z Z of block modified
+     */
+    auto update_surroundings(int x, int z) -> void;
+
+    /**
+     * @brief Updates lighting
+     *
+     * @param x X of block mod
+     * @param z Z of block mod
+     */
+    auto update_lighting(int x, int z) -> void;
+
+    /**
+     * @brief Updates nearby block states
+     *
+     * @param ivec Block source from update
+     */
+    auto update_nearby_blocks(glm::ivec3 ivec) -> void;
+
+    /**
+     * @brief Calculate and add update to chunk
+     *
+     */
+    auto add_update(glm::ivec3 ivec) -> void;
+
+    std::map<int, ChunkStack *> chunks;
+
   private:
     /**
      * @brief Get noise from a position and settings
@@ -109,24 +140,6 @@ class World {
      */
     auto generate_tree(int x, int z, int hash) -> void;
 
-    /**
-     * @brief Updates surrounding chunks
-     *
-     * @param x X of block modified
-     * @param z Z of block modified
-     */
-    auto update_surroundings(int x, int z) -> void;
-
-    /**
-     * @brief Updates lighting
-     *
-     * @param x X of block mod
-     * @param z Z of block mod
-     */
-    auto update_lighting(int x, int z) -> void;
-
-    std::map<int, ChunkStack *> chunks;
-
     glm::ivec2 pchunk_pos;
 
     unsigned int terrain_atlas;
@@ -134,7 +147,6 @@ class World {
     float *hmap;
     uint32_t seed;
     float tick_counter;
-    int rtick;
 };
 
 } // namespace CrossCraft

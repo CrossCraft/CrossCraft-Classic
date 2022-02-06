@@ -16,6 +16,35 @@ ChunkStack::~ChunkStack() {
     }
 }
 
+auto is_valid(glm::ivec3 ivec) -> bool {
+    return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
+           ivec.z >= 0 && ivec.z < 256;
+}
+
+auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
+    if (is_valid(chk)) {
+        auto idx = (chk.x * 256 * 64) + (chk.z * 64) + chk.y;
+
+        auto blk = wrld->worldData[idx];
+        if (blk == 0) {
+
+            uint16_t x = chk.x / 16;
+            uint16_t y = chk.z / 16;
+            uint32_t id = x << 16 | (y & 0x00FF);
+
+            wrld->worldData[idx] = 8;
+            wrld->update_lighting(chk.x, chk.z);
+
+            if (wrld->chunks.find(id) != wrld->chunks.end())
+                wrld->chunks[id]->generate(wrld);
+
+            wrld->update_surroundings(chk.x, chk.z);
+
+            updated.push_back(chk);
+        }
+    }
+}
+
 /**
  * @brief Update Chunk
  *
@@ -24,6 +53,41 @@ ChunkStack::~ChunkStack() {
 void ChunkStack::chunk_update(World *wrld) {
     // Update this chunk
 
+    std::vector<glm::ivec3> newV;
+
+    for (auto &v : posUpdate) {
+        newV.push_back(v);
+    }
+
+    posUpdate.clear();
+
+    for (auto &pos : newV) {
+        auto idx = (pos.x * 256 * 64) + (pos.z * 64) + pos.y;
+        auto blk = wrld->worldData[idx];
+
+        // Unless this is water, we don't care
+        if (blk == 8) {
+            // Check surroundings if air.
+            // If air, fill then trigger cascade updates
+            update_check(wrld, blk, {pos.x, pos.y - 1, pos.z});
+            update_check(wrld, blk, {pos.x - 1, pos.y, pos.z});
+            update_check(wrld, blk, {pos.x + 1, pos.y, pos.z});
+            update_check(wrld, blk, {pos.x, pos.y, pos.z + 1});
+            update_check(wrld, blk, {pos.x, pos.y, pos.z - 1});
+
+            update_check(wrld, blk, {pos.x, pos.y - 2, pos.z});
+            update_check(wrld, blk, {pos.x - 2, pos.y, pos.z});
+            update_check(wrld, blk, {pos.x + 2, pos.y, pos.z});
+            update_check(wrld, blk, {pos.x, pos.y, pos.z + 2});
+            update_check(wrld, blk, {pos.x, pos.y, pos.z - 2});
+
+            update_check(wrld, blk, {pos.x + 1, pos.y, pos.z + 1});
+            update_check(wrld, blk, {pos.x + 1, pos.y, pos.z - 1});
+            update_check(wrld, blk, {pos.x - 1, pos.y, pos.z - 1});
+            update_check(wrld, blk, {pos.x - 1, pos.y, pos.z + 1});
+        }
+    }
+
     // Check regens for all
     for (int i = 0; i < 4; i++) {
         if (stack[i]->needsRegen) {
@@ -31,6 +95,14 @@ void ChunkStack::chunk_update(World *wrld) {
             stack[i]->needsRegen = false;
         }
     }
+}
+
+void ChunkStack::post_update(World *wrld) {
+    for (auto &v : updated) {
+        wrld->update_nearby_blocks(v);
+    }
+
+    updated.clear();
 }
 
 /**

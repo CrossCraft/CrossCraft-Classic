@@ -13,6 +13,7 @@
 #include "World.hpp"
 #include <array>
 #include <glm.hpp>
+#include <vector>
 namespace CrossCraft {
 
 class World;
@@ -59,6 +60,8 @@ class ChunkStack {
      */
     void rtick_update(World *wrld);
 
+    void post_update(World *wrld);
+
     /**
      * @brief Draw the chunk stack
      *
@@ -78,7 +81,12 @@ class ChunkStack {
      */
     inline auto get_chunk_pos() -> glm::ivec2 { return {cX, cZ}; }
 
+    std::vector<glm::ivec3> posUpdate;
+
   private:
+    auto update_check(World *wrld, int blkr, glm::ivec3 chk) -> void;
+    std::vector<glm::ivec3> updated;
+
     std::array<ChunkMesh *, 4> stack;
     int cX, cZ;
 };
