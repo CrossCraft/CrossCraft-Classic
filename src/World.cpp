@@ -378,6 +378,11 @@ auto World::update_lighting(int x, int z) -> void {
     }
 }
 
+auto validate_ivec3(glm::ivec3 ivec) -> bool {
+    return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
+           ivec.z >= 0 && ivec.z < 256;
+}
+
 auto World::dig(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
     auto pos = w->player->get_pos();
@@ -402,34 +407,102 @@ auto World::dig(std::any d) -> void {
                                static_cast<s32>(cast_pos.y),
                                static_cast<s32>(cast_pos.z));
 
-        if (ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
-            ivec.z >= 0 && ivec.z < 256) {
-            u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
-            auto blk = w->worldData[idx];
+        if (!validate_ivec3(ivec))
+            continue;
 
-            if (blk != 0 && blk != 7) {
-                uint16_t x = ivec.x / 16;
-                uint16_t y = ivec.z / 16;
-                uint32_t id = x << 16 | (y & 0x00FF);
+        u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+        auto blk = w->worldData[idx];
 
-                w->worldData[idx] = 0;
+        if (blk == 0 || blk == 7)
+            continue;
 
-                // Update Lighting
-                w->update_lighting(ivec.x, ivec.z);
+        uint16_t x = ivec.x / 16;
+        uint16_t y = ivec.z / 16;
+        uint32_t id = x << 16 | (y & 0x00FF);
 
-                w->chunks[id]->generate(w);
+        w->worldData[idx] = 0;
 
-                w->update_surroundings(ivec.x, ivec.z);
+        // Update Lighting
+        w->update_lighting(ivec.x, ivec.z);
 
-                break;
-            }
-        }
+        w->chunks[id]->generate(w);
+
+        w->update_surroundings(ivec.x, ivec.z);
+
+        break;
     }
 }
 
 auto World::place(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
-    SC_CORE_INFO("PLACE!");
+    auto pos = w->player->get_pos();
+
+    auto pos_ivec = glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
+                               static_cast<s32>(pos.z));
+
+    if (!validate_ivec3(pos_ivec))
+        return;
+
+    auto pidx = (pos_ivec.x * 256 * 64) + (pos_ivec.z * 64) + pos_ivec.y;
+    if (w->worldData[pidx] != 0)
+        return;
+
+    auto default_vec = glm::vec3(0, 0, 1);
+
+    default_vec = glm::rotateX(default_vec, DEGTORAD(w->player->get_rot().x));
+    default_vec =
+        glm::rotateY(default_vec, DEGTORAD(-w->player->get_rot().y + 180));
+
+    const float REACH_DISTANCE = 4.0f;
+    default_vec *= REACH_DISTANCE;
+
+    const u32 NUM_STEPS = 50;
+
+    for (u32 i = 0; i < NUM_STEPS; i++) {
+        float percentage =
+            static_cast<float>(i) / static_cast<float>(NUM_STEPS);
+
+        auto cast_pos = pos + (default_vec * percentage);
+
+        auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
+                               static_cast<s32>(cast_pos.y),
+                               static_cast<s32>(cast_pos.z));
+
+        if (!validate_ivec3(ivec))
+            continue;
+        u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+        auto blk = w->worldData[idx];
+
+        if (blk == 0)
+            continue;
+
+        cast_pos = pos + (default_vec * static_cast<float>(i - 1) /
+                          static_cast<float>(NUM_STEPS));
+
+        ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
+                          static_cast<s32>(cast_pos.y),
+                          static_cast<s32>(cast_pos.z));
+
+        if (!validate_ivec3(ivec))
+            continue;
+
+        idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+
+        uint16_t x = ivec.x / 16;
+        uint16_t y = ivec.z / 16;
+        uint32_t id = x << 16 | (y & 0x00FF);
+
+        w->worldData[idx] = w->player->blkSel;
+
+        // Update Lighting
+        w->update_lighting(ivec.x, ivec.z);
+
+        w->chunks[id]->generate(w);
+
+        w->update_surroundings(ivec.x, ivec.z);
+
+        break;
+    }
 }
 
 } // namespace CrossCraft

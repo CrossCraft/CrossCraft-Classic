@@ -70,6 +70,8 @@ class Player {
     static auto move_up(std::any p) -> void;
     static auto move_down(std::any p) -> void;
 
+    uint8_t blkSel;
+
   private:
     glm::vec3 pos;
     glm::vec2 rot;

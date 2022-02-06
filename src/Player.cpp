@@ -6,8 +6,9 @@ namespace CrossCraft {
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player()
-    : pos(0.f, 40.8f, 0.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
-      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.2f, 255.0f) {}
+    : pos(128.f, 40.8f, 128.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
+      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.2f, 255.0f),
+      blkSel(1) {}
 
 const auto playerSpeed = 4.3f;
 auto Player::move_forward(std::any d) -> void {
