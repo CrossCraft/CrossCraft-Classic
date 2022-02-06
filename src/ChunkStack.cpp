@@ -25,9 +25,12 @@ void ChunkStack::chunk_update(World *wrld) {
     // Update this chunk
 
     // Check regens for all
-    for (int i = 0; i < 4; i++)
-        if (stack[i]->needsRegen)
+    for (int i = 0; i < 4; i++) {
+        if (stack[i]->needsRegen) {
             stack[i]->generate(wrld);
+            stack[i]->needsRegen = false;
+        }
+    }
 }
 
 /**

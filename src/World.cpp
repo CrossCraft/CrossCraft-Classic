@@ -45,7 +45,7 @@ World::~World() {
 }
 
 #if PSP
-const auto RENDER_DISTANCE_DIAMETER = 5.f;
+const auto RENDER_DISTANCE_DIAMETER = 4.0f;
 #else
 const auto RENDER_DISTANCE_DIAMETER = 16.f;
 #endif

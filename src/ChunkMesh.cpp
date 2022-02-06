@@ -41,7 +41,8 @@ constexpr uint32_t LIGHT_SIDE_DARK = 0xFFAAAAAA;
 constexpr uint32_t LIGHT_BOT_DARK = 0xFF777777;
 
 ChunkMesh::ChunkMesh(int x, int y, int z)
-    : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z), rtcounter(0) {}
+    : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z), rtcounter(0),
+      needsRegen(0) {}
 
 ChunkMesh::~ChunkMesh() {
     // Delete data

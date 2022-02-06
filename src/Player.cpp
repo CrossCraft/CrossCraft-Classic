@@ -57,6 +57,11 @@ void Player::update(float dt) {
 #else
     cX = get_axis("PSP", "X");
     cY = get_axis("PSP", "Y");
+
+    if (cX <= 0.25f && cX >= -0.25f)
+        cX = 0.0f;
+    if (cY <= 0.25f && cY >= -0.25f)
+        cY = 0.0f;
 #endif
 
     rot.y += cX * rotSpeed * dt;
