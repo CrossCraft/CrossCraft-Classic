@@ -290,6 +290,14 @@ void World::generate() {
         }
     }
 
+    for (int x = 0; x < 256; x++) {
+        for (int z = 0; z < 256; z++) {
+            auto idx = (x * 256 * 64) + (z * 64) + 0;
+
+            worldData[idx] = 7;
+        }
+    }
+
     // Destroy height map
     free(hmap);
 }
@@ -312,6 +320,64 @@ void World::draw() {
 }
 
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
+
+auto World::update_surroundings(int x, int z) -> void {
+    auto localX = x % 16;
+    auto localZ = z % 16;
+
+    uint16_t cX = x / 16;
+    uint16_t cY = z / 16;
+
+    bool xMod = true;
+    auto nX = cX;
+    if (localX == 0) {
+        nX -= 1;
+    } else if (localX == 15) {
+        nX += 1;
+    } else {
+        xMod = false;
+    }
+
+    if (xMod && nX >= 0 && nX < 16) {
+        uint32_t idxx = nX << 16 | (cY & 0x00FF);
+        chunks[idxx]->generate(this);
+    }
+
+    bool zMod = true;
+    auto nY = cY;
+    if (localZ == 0) {
+        nY -= 1;
+    } else if (localZ == 15) {
+        nY += 1;
+    } else {
+        zMod = false;
+    }
+
+    if (zMod && nY >= 0 && nY < 16) {
+        uint32_t idzz = 0 | cX << 16 | (nY & 0x00FF);
+        chunks[idzz]->generate(this);
+    }
+}
+
+auto World::update_lighting(int x, int z) -> void {
+    // Clear
+    for (int i = 0; i < 4; i++) {
+        auto idx2 = (x * 256 * 4) + (z * 4) + i;
+        lightData[idx2] = 0;
+    }
+
+    // Retrace
+    for (int y = 63; y >= 0; y--) {
+        auto idx = (x * 256 * 64) + (z * 64) + y;
+        if (worldData[idx] == 0)
+            continue;
+
+        auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
+        lightData[idx2] |= 1 << (y % 16);
+        break;
+    }
+}
+
 auto World::dig(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
     auto pos = w->player->get_pos();
@@ -341,7 +407,7 @@ auto World::dig(std::any d) -> void {
             u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
             auto blk = w->worldData[idx];
 
-            if (blk != 0) {
+            if (blk != 0 && blk != 7) {
                 uint16_t x = ivec.x / 16;
                 uint16_t y = ivec.z / 16;
                 uint32_t id = x << 16 | (y & 0x00FF);
@@ -349,59 +415,11 @@ auto World::dig(std::any d) -> void {
                 w->worldData[idx] = 0;
 
                 // Update Lighting
-                {
-                    // Clear
-                    for (int i = 0; i < 4; i++) {
-                        auto idx2 = (ivec.x * 256 * 4) + (ivec.z * 4) + i;
-                        w->lightData[idx2] = 0;
-                    }
-
-                    // Retrace
-                    for (int y = 63; y >= 0; y--) {
-                        auto idx = (ivec.x * 256 * 64) + (ivec.z * 64) + y;
-                        if (w->worldData[idx] == 0)
-                            continue;
-
-                        auto idx2 = (ivec.x * 256 * 4) + (ivec.z * 4) + y / 16;
-                        w->lightData[idx2] |= 1 << (y % 16);
-                        break;
-                    }
-                }
+                w->update_lighting(ivec.x, ivec.z);
 
                 w->chunks[id]->generate(w);
 
-                auto localX = ivec.x % 16;
-                auto localZ = ivec.z % 16;
-
-                bool xMod = true;
-                auto nX = x;
-                if (localX == 0) {
-                    nX -= 1;
-                } else if (localX == 15) {
-                    nX += 1;
-                } else {
-                    xMod = false;
-                }
-
-                if (xMod) {
-                    uint32_t idxx = nX << 16 | (y & 0x00FF);
-                    w->chunks[idxx]->generate(w);
-                }
-
-                bool zMod = true;
-                auto nY = y;
-                if (localZ == 0) {
-                    nY -= 1;
-                } else if (localZ == 15) {
-                    nY += 1;
-                } else {
-                    zMod = false;
-                }
-
-                if (zMod) {
-                    uint32_t idzz = 0 | x << 16 | (nY & 0x00FF);
-                    w->chunks[idzz]->generate(w);
-                }
+                w->update_surroundings(ivec.x, ivec.z);
 
                 break;
             }

@@ -109,6 +109,22 @@ class World {
      */
     auto generate_tree(int x, int z, int hash) -> void;
 
+    /**
+     * @brief Updates surrounding chunks
+     *
+     * @param x X of block modified
+     * @param z Z of block modified
+     */
+    auto update_surroundings(int x, int z) -> void;
+
+    /**
+     * @brief Updates lighting
+     *
+     * @param x X of block mod
+     * @param z Z of block mod
+     */
+    auto update_lighting(int x, int z) -> void;
+
     std::map<int, ChunkStack *> chunks;
 
     glm::ivec2 pchunk_pos;

@@ -250,6 +250,8 @@ std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
             return getTexture(vec, 0);
     } else if (idx == 8)
         return getTexture(vec, 14);
+    else if (idx == 7)
+        return getTexture(vec, 17);
     else if (idx == 17) {
         if (lv == LIGHT_TOP || lv == LIGHT_BOT)
             return getTexture(vec, 21);
