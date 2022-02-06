@@ -321,7 +321,13 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
         if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8 ||
             wrld->worldData[idx] == 18) {
             if (blk == 8 && wrld->worldData[idx] != 8) {
-                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
+                std::array<float, 12> data2 = data;
+                data2[1] *= 0.9f;
+                data2[4] *= 0.9f;
+                data2[7] *= 0.9f;
+                data2[10] *= 0.9f;
+
+                add_face_to_mesh(data2, getTexCoord(blk, lightVal), pos, lv,
                                  true);
             } else if (blk == 18) {
                 add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,

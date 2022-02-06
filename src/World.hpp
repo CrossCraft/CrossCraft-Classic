@@ -10,6 +10,7 @@
  */
 #pragma once
 #include "ChunkStack.hpp"
+#include "Clouds.hpp"
 #include "Player.hpp"
 #include <FastNoiseLite.h>
 #include <Utilities/Types.hpp>
@@ -81,6 +82,7 @@ class World {
     block_t *worldData;
     uint16_t *lightData;
     RefPtr<Player> player;
+    ScopePtr<Clouds> clouds;
 
     static auto dig(std::any d) -> void;
     static auto place(std::any d) -> void;

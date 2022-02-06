@@ -23,6 +23,8 @@ World::World(std::shared_ptr<Player> p) {
     seed = time(NULL);
     fsl.SetSeed(seed);
 
+    clouds = create_scopeptr<Clouds>();
+
     // Zero the array
     worldData =
         reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
@@ -81,6 +83,7 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
 
 void World::update(double dt) {
     player->update(static_cast<float>(dt));
+    clouds->update(dt);
 
     tick_counter += dt;
 
@@ -334,6 +337,7 @@ void World::draw() {
         val->draw_transparent();
     }
 
+    clouds->draw();
     player->draw();
 }
 
