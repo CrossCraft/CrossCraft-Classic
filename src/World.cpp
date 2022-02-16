@@ -209,12 +209,12 @@ auto World::generate_tree(int x, int z, int hash) -> void {
     x *= 8;
     z *= 8;
 
-    x += (hash % 8);
-    z += (hash * z) % 8;
+    x += rand() % 5 - 2;
+    z += rand() % 5 - 2;
 
     int h = hmap[x * 256 + z] * 64.f;
 
-    if (h < 32)
+    if (h < 33)
         return;
 
     int tree_height = rand() % 3 + 4;
@@ -270,6 +270,8 @@ void World::generate() {
                 else {
                     if (h < 32)
                         worldData[idx] = 3;
+                    else if (h == 32)
+                        worldData[idx] = 12;
                     else
                         worldData[idx] = 2;
                 }
@@ -290,7 +292,22 @@ void World::generate() {
             srand((x | 1) << z * ~seed);
             uint8_t res = rand() % 10;
 
-            if (res < 6)
+            if (res < 2) {
+                int xf = x * 8 + rand() % 5 - 2;
+                int zf = z * 8 + rand() % 5 - 2;
+                if (xf < 0 || xf >= 256 || zf < 0 || zf >= 256)
+                    continue;
+
+                int h = hmap[xf * 256 + zf] * 64.f;
+                if ((h + 1) <= 33)
+                    continue;
+
+                auto idx = (xf * 256 * 64) + (zf * 64) + h;
+
+                worldData[idx] = 37 + res % 2;
+
+                continue;
+            } else if (res < 6)
                 continue;
 
             generate_tree(x, z, res);
@@ -301,7 +318,8 @@ void World::generate() {
         for (int z = 0; z < 256; z++) {
             for (int y = 63; y >= 0; y--) {
                 auto idx = (x * 256 * 64) + (z * 64) + y;
-                if (worldData[idx] == 0)
+                auto blk = worldData[idx];
+                if (blk == 0 || blk == 37 || blk == 38)
                     continue;
 
                 auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;

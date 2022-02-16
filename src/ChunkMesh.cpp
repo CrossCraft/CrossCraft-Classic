@@ -129,109 +129,6 @@ void ChunkMesh::finalize_mesh() {
 #endif
 }
 
-void ChunkMesh::rtick(World *wrld) {
-    srand(rtcounter++ + cX * cZ << cY);
-    int x = rand() % 16 + cX * 16;
-    int y = rand() % 16 + cY * 16;
-    int z = rand() % 16 + cZ * 16;
-
-    auto idx = (x * 256 * 64) + (z * 64) + y;
-
-    y += 1;
-    if (y >= 64)
-        return;
-
-    auto idx2 = (x * 256 * 64) + (z * 64) + y;
-    auto blk2 = wrld->worldData[idx2];
-    auto blk = wrld->worldData[idx];
-
-    if (blk == 2 && blk2 != 0) {
-        wrld->worldData[idx] = 3;
-        needsRegen = true;
-    }
-
-    if (blk == 3 && blk2 == 0) {
-        wrld->worldData[idx] = 2;
-        needsRegen = true;
-    }
-}
-
-void ChunkMesh::generate(const World *wrld) {
-
-    // Reset + Allocate
-    reset_allocate();
-
-    // Loop over the mesh
-    for (int x = 0; x < 16; x++) {
-        for (int z = 0; z < 16; z++) {
-            for (int y = 0; y < 16; y++) {
-
-                int idx = ((x + cX * 16) * 256 * 64) + ((z + cZ * 16) * 64) +
-                          (y + cY * 16);
-
-                // Get block
-                block_t blk = wrld->worldData[idx];
-
-                // Skip air
-                if (blk == 0)
-                    continue;
-
-                // Update surrounding positions
-                SurroundPos surround;
-                surround.update(x, y, z);
-
-                // Add 6 faces
-
-                try_add_face(wrld, bottomFace, blk, {x, y, z}, surround.down,
-                             LIGHT_BOT);
-                try_add_face(wrld, topFace, blk, {x, y, z}, surround.up,
-                             LIGHT_TOP);
-
-                try_add_face(wrld, leftFace, blk, {x, y, z}, surround.left,
-                             LIGHT_SIDE);
-                try_add_face(wrld, rightFace, blk, {x, y, z}, surround.right,
-                             LIGHT_SIDE);
-
-                try_add_face(wrld, frontFace, blk, {x, y, z}, surround.front,
-                             LIGHT_SIDE);
-                try_add_face(wrld, backFace, blk, {x, y, z}, surround.back,
-                             LIGHT_SIDE);
-            }
-        }
-    }
-
-    // Finalize the mesh
-    finalize_mesh();
-}
-
-void ChunkMesh::draw() {
-    // Set matrix
-    Rendering::RenderContext::get().matrix_translate(
-        {cX * 16, cY * 16, cZ * 16});
-
-    // Draw
-    if (mesh.get_index_count() > 0) {
-        mesh.bind();
-        mesh.draw();
-    }
-
-    Rendering::RenderContext::get().matrix_clear();
-}
-
-void ChunkMesh::draw_transparent() {
-    // Set matrix
-    Rendering::RenderContext::get().matrix_translate(
-        {cX * 16, cY * 16, cZ * 16});
-
-    // Draw
-    if (transMesh.get_index_count() > 0) {
-        transMesh.bind();
-        transMesh.draw();
-    }
-
-    Rendering::RenderContext::get().matrix_clear();
-}
-
 #include <memory>
 
 /**
@@ -280,6 +177,8 @@ std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
         return getTexture(vec, 14);
     else if (idx == 7)
         return getTexture(vec, 17);
+    else if (idx == 12)
+        return getTexture(vec, 18);
     else if (idx == 17) {
         if (lv == LIGHT_TOP || lv == LIGHT_BOT)
             return getTexture(vec, 21);
@@ -287,8 +186,133 @@ std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
             return getTexture(vec, 20);
     } else if (idx == 18)
         return getTexture(vec, 22);
+    else if (idx == 37)
+        return getTexture(vec, 13);
+    else if (idx == 38)
+        return getTexture(vec, 12);
 
     return getTexture(vec, idx);
+}
+
+void ChunkMesh::rtick(World *wrld) {
+    srand(rtcounter++ + cX * cZ << cY);
+    int x = rand() % 16 + cX * 16;
+    int y = rand() % 16 + cY * 16;
+    int z = rand() % 16 + cZ * 16;
+
+    auto idx = (x * 256 * 64) + (z * 64) + y;
+
+    y += 1;
+    if (y >= 64)
+        return;
+
+    auto idx2 = (x * 256 * 64) + (z * 64) + y;
+    auto blk2 = wrld->worldData[idx2];
+    auto blk = wrld->worldData[idx];
+
+    if (blk == 2 && blk2 != 0) {
+        wrld->worldData[idx] = 3;
+        needsRegen = true;
+    }
+
+    if (blk == 3 && blk2 == 0) {
+        wrld->worldData[idx] = 2;
+        needsRegen = true;
+    }
+}
+
+void ChunkMesh::generate(const World *wrld) {
+
+    // Reset + Allocate
+    reset_allocate();
+
+    // Loop over the mesh
+    for (int x = 0; x < 16; x++) {
+        for (int z = 0; z < 16; z++) {
+            for (int y = 0; y < 16; y++) {
+
+                int idx = ((x + cX * 16) * 256 * 64) + ((z + cZ * 16) * 64) +
+                          (y + cY * 16);
+
+                // Get block
+                block_t blk = wrld->worldData[idx];
+
+                // Skip air
+                if (blk == 0)
+                    continue;
+
+                if (blk == 37 || blk == 38) {
+                    add_xface_to_mesh(getTexCoord(blk, LIGHT_TOP), {x, y, z},
+                                      LIGHT_TOP);
+                    continue;
+                }
+
+                // Update surrounding positions
+                SurroundPos surround;
+                surround.update(x, y, z);
+
+                // Add 6 faces
+
+                try_add_face(wrld, bottomFace, blk, {x, y, z}, surround.down,
+                             LIGHT_BOT);
+                try_add_face(wrld, topFace, blk, {x, y, z}, surround.up,
+                             LIGHT_TOP);
+
+                try_add_face(wrld, leftFace, blk, {x, y, z}, surround.left,
+                             LIGHT_SIDE);
+                try_add_face(wrld, rightFace, blk, {x, y, z}, surround.right,
+                             LIGHT_SIDE);
+
+                try_add_face(wrld, frontFace, blk, {x, y, z}, surround.front,
+                             LIGHT_SIDE);
+                try_add_face(wrld, backFace, blk, {x, y, z}, surround.back,
+                             LIGHT_SIDE);
+            }
+        }
+    }
+
+    // Finalize the mesh
+    finalize_mesh();
+}
+
+void ChunkMesh::draw() {
+    // Set matrix
+    Rendering::RenderContext::get().matrix_translate(
+        {cX * 16, cY * 16, cZ * 16});
+
+    // Draw
+    if (mesh.get_index_count() > 0) {
+        mesh.bind();
+        mesh.draw();
+    }
+
+    Rendering::RenderContext::get().matrix_clear();
+}
+
+void ChunkMesh::draw_transparent() {
+    // Set matrix
+    Rendering::RenderContext::get().matrix_translate(
+        {cX * 16, cY * 16, cZ * 16});
+
+#if BUILD_PC
+    glDisable(GL_CULL_FACE);
+#else
+    sceGuDisable(GU_CULL_FACE);
+#endif
+
+    // Draw
+    if (transMesh.get_index_count() > 0) {
+        transMesh.bind();
+        transMesh.draw();
+    }
+
+#if BUILD_PC
+    glEnable(GL_CULL_FACE);
+#else
+    sceGuEnable(GU_CULL_FACE);
+#endif
+
+    Rendering::RenderContext::get().matrix_clear();
 }
 
 void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
@@ -319,7 +343,8 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
 
         // Add face to mesh
         if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8 ||
-            wrld->worldData[idx] == 18) {
+            wrld->worldData[idx] == 18 || wrld->worldData[idx] == 37 ||
+            wrld->worldData[idx] == 38) {
             if (blk == 8 && wrld->worldData[idx] != 8) {
                 std::array<float, 12> data2 = data;
                 data2[1] *= 0.9f;
@@ -339,6 +364,63 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
             }
         }
     }
+}
+
+void ChunkMesh::add_xface_to_mesh(std::array<float, 8> uv, glm::vec3 pos,
+                                  uint32_t lightVal) {
+
+    // Set data objects
+    auto *m = &t_verts;
+    auto *mi = &t_index;
+    auto *idc = &tidx_counter;
+
+    // Create color
+    Rendering::Color c;
+    c.color = lightVal;
+
+    // Push Back Verts
+    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
+
+        m->push_back(Rendering::Vertex{
+            uv[tx++],
+            uv[tx++],
+            c,
+            xFace1[idx++] + pos.x,
+            xFace1[idx++] + pos.y,
+            xFace1[idx++] + pos.z,
+        });
+    }
+
+    // Push Back Indices
+    mi->push_back((*idc));
+    mi->push_back((*idc) + 1);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 3);
+    mi->push_back((*idc) + 0);
+    (*idc) += 4;
+
+    // Push Back Verts
+    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
+
+        m->push_back(Rendering::Vertex{
+            uv[tx++],
+            uv[tx++],
+            c,
+            xFace2[idx++] + pos.x,
+            xFace2[idx++] + pos.y,
+            xFace2[idx++] + pos.z,
+        });
+    }
+
+    // Push Back Indices
+    mi->push_back((*idc));
+    mi->push_back((*idc) + 1);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 3);
+    mi->push_back((*idc) + 0);
+    (*idc) += 4;
 }
 
 void ChunkMesh::add_face_to_mesh(std::array<float, 12> data,

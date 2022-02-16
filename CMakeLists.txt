@@ -3,6 +3,10 @@ project(CrossCraft-Classic)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_C_FLAGS_INIT "-fsanitize=undefined")
+set(CMAKE_CXX_FLAGS_INIT "-fsanitize=undefined")
+
+
 if(WIN32)
     add_compile_definitions(BUILD_PLAT=0)
 elseif(PSP)
