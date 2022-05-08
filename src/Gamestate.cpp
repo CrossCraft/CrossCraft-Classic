@@ -17,39 +17,57 @@ void GameState::on_start() {
     key_controller = new Input::KeyboardController();
     mouse_controller = new Input::MouseController();
 
-    psp_controller->add_command({ (int)Input::PSPButtons::Triangle, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_forward, world->player.get()});
-    psp_controller->add_command({ (int)Input::PSPButtons::Square, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_left, world->player.get()});
-    psp_controller->add_command({ (int)Input::PSPButtons::Circle, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_right, world->player.get()});
-    psp_controller->add_command({ (int)Input::PSPButtons::Cross, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_backward, world->player.get()});
-    psp_controller->add_command({ (int)Input::PSPButtons::Select, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_down, world->player.get()});
-    psp_controller->add_command({ (int)Input::PSPButtons::Up, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_up, world->player.get()});
-    psp_controller->add_command({ (int)Input::PSPButtons::LTrigger, KeyFlag::Press},
-                                {World::dig, world.get()});
-    psp_controller->add_command({ (int)Input::PSPButtons::RTrigger, KeyFlag::Press},
-                                {World::place, world.get()});
+    Rendering::RenderContext::get().set_mode_3D();
 
-    key_controller->add_command({ (int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_forward, world->player.get()});
-    key_controller->add_command({ (int)Input::Keys::A, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_left, world->player.get()});
-    key_controller->add_command({ (int)Input::Keys::D, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_right, world->player.get()});
-    key_controller->add_command({ (int)Input::Keys::S, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_backward, world->player.get()});
-    key_controller->add_command({ (int)Input::Keys::Space, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_up, world->player.get()});
-    key_controller->add_command({ (int)Input::Keys::LShift, KeyFlag::Press | KeyFlag::Held },
-                                {Player::move_down, world->player.get()});
-    mouse_controller->add_command({ (int)Input::MouseButtons::Left, KeyFlag::Press },
-                                  {World::dig, world.get()});
-    mouse_controller->add_command({ (int)Input::MouseButtons::Right, KeyFlag::Press },
-                                  {World::place, world.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Triangle, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_forward, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Square, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_left, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Circle, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_right, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Cross, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_backward, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Select, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_down, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Up, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_up, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::LTrigger, KeyFlag::Press},
+        {World::dig, world.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::RTrigger, KeyFlag::Press},
+        {World::place, world.get()});
+
+    key_controller->add_command(
+        {(int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_forward, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::A, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_left, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::D, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_right, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::S, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_backward, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::Space, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_up, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::LShift, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_down, world->player.get()});
+    mouse_controller->add_command(
+        {(int)Input::MouseButtons::Left, KeyFlag::Press},
+        {World::dig, world.get()});
+    mouse_controller->add_command(
+        {(int)Input::MouseButtons::Right, KeyFlag::Press},
+        {World::place, world.get()});
 
     Input::add_controller(psp_controller);
     Input::add_controller(key_controller);
@@ -70,8 +88,10 @@ void GameState::on_update(Core::Application *app, double dt) {
     if (!ref) {
         ref = app;
 
-        psp_controller->add_command({ (int)Input::PSPButtons::Start, KeyFlag::Press }, {quit, ref});
-        key_controller->add_command({ (int)Input::Keys::Escape, KeyFlag::Press }, {quit, ref});
+        psp_controller->add_command(
+            {(int)Input::PSPButtons::Start, KeyFlag::Press}, {quit, ref});
+        key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
+                                    {quit, ref});
     }
 
     // Update the world

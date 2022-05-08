@@ -152,6 +152,31 @@ inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
     return {x, h, w, h, w, y, x, y};
 }
 
+/*
+0   Air             X
+1   Stone           X
+2   Dirt            X
+3   Grass           X
+4   Cobblestone     X
+5   Wood            X
+6   Gold            X
+7   Bedrock         X
+8   Water           X
+9   Lava            X
+10  Flower1         X
+11  Flower2         X
+12  Sand            X
+13  Gravel          X
+14  Mushroom1       X
+15  Mushroom2       X
+16  Sapling         X
+17  Logs            X
+18  Leaves          X
+19  Sponge          X
+20  Glass           X
+21 - 36 Wool variants
+*/
+
 /**
  * @brief Get the Tex Coord from a block ID and lightvalue
  *
@@ -162,36 +187,57 @@ inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
 std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
     auto vec = glm::vec2(16, 16);
 
-    if (idx == 1)
+    if (idx == 1) // Stone
         return getTexture(vec, 1);
-    else if (idx == 3)
-        return getTexture(vec, 2);
-    else if (idx == 2) {
+    else if (idx == 2) { // Dirt
         if (lv == LIGHT_SIDE)
             return getTexture(vec, 3);
         else if (lv == LIGHT_BOT)
             return getTexture(vec, 2);
         else
             return getTexture(vec, 0);
-    } else if (idx == 8)
-        return getTexture(vec, 14);
-    else if (idx == 7)
+    } else if (idx == 3) // Grass
+        return getTexture(vec, 2);
+    else if (idx == 4) // Cobblestone
+        return getTexture(vec, 16);
+    else if (idx == 5) // Wood
+        return getTexture(vec, 4);
+    else if (idx == 6) // Gold
+        return getTexture(vec, 24);
+    else if (idx == 7) // Bedrock
         return getTexture(vec, 17);
-    else if (idx == 12)
+    else if (idx == 8) // Water
+        return getTexture(vec, 14);
+    else if (idx == 9) // Lava
+        return getTexture(vec, 30);
+    else if (idx == 10) // Flower1
+        return getTexture(vec, 13);
+    else if (idx == 11) // Flower2
+        return getTexture(vec, 12);
+    else if (idx == 12) // Sand
         return getTexture(vec, 18);
-    else if (idx == 17) {
+    else if (idx == 13) // Gravel
+        return getTexture(vec, 19);
+    else if (idx == 14) // Mushroom1
+        return getTexture(vec, 29);
+    else if (idx == 15) // Mushroom2
+        return getTexture(vec, 28);
+    else if (idx == 16) // Mushroom2
+        return getTexture(vec, 15);
+    else if (idx == 17) { // Log
         if (lv == LIGHT_TOP || lv == LIGHT_BOT)
             return getTexture(vec, 21);
         else
             return getTexture(vec, 20);
-    } else if (idx == 18)
+    } else if (idx == 18) // Leaves
         return getTexture(vec, 22);
-    else if (idx == 37)
-        return getTexture(vec, 13);
-    else if (idx == 38)
-        return getTexture(vec, 12);
-
-    return getTexture(vec, idx);
+    else if (idx == 19) // Sponge
+        return getTexture(vec, 48);
+    else if (idx == 20) // Glass
+        return getTexture(vec, 49);
+    else {
+        return getTexture(vec, idx - 21 + 64);
+    }
 }
 
 void ChunkMesh::rtick(World *wrld) {
@@ -241,7 +287,8 @@ void ChunkMesh::generate(const World *wrld) {
                 if (blk == 0)
                     continue;
 
-                if (blk == 37 || blk == 38) {
+                if (blk == 10 || blk == 11 || blk == 14 || blk == 15 ||
+                    blk == 16) {
                     add_xface_to_mesh(getTexCoord(blk, LIGHT_TOP), {x, y, z},
                                       LIGHT_TOP);
                     continue;
@@ -343,8 +390,10 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
 
         // Add face to mesh
         if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8 ||
-            wrld->worldData[idx] == 18 || wrld->worldData[idx] == 37 ||
-            wrld->worldData[idx] == 38) {
+            wrld->worldData[idx] == 18 || wrld->worldData[idx] == 10 ||
+            wrld->worldData[idx] == 11 || wrld->worldData[idx] == 14 ||
+            wrld->worldData[idx] == 15 || wrld->worldData[idx] == 16 ||
+            wrld->worldData[idx] == 20) {
             if (blk == 8 && wrld->worldData[idx] != 8) {
                 std::array<float, 12> data2 = data;
                 data2[1] *= 0.9f;

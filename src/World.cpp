@@ -304,7 +304,7 @@ void World::generate() {
 
                 auto idx = (xf * 256 * 64) + (zf * 64) + h;
 
-                worldData[idx] = 37 + res % 2;
+                worldData[idx] = 10 + res % 2;
 
                 continue;
             } else if (res < 6)
@@ -316,24 +316,36 @@ void World::generate() {
 
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
-            for (int y = 63; y >= 0; y--) {
-                auto idx = (x * 256 * 64) + (z * 64) + y;
-                auto blk = worldData[idx];
-                if (blk == 0 || blk == 37 || blk == 38)
-                    continue;
+            auto idx = (x * 256 * 64) + (z * 64) + 0;
 
-                auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
-                lightData[idx2] |= 1 << (y % 16);
-                break;
+            worldData[idx] = 7;
+        }
+    }
+
+    int i = 0;
+    for (int x = 0; x < 16; x++) {
+        int y = 40;
+        for (int z = 0; z < 16; z++) {
+            auto idx = (x * 256 * 64) + (z * 64) + y;
+            if (i < 37) {
+                worldData[idx] = i++;
             }
         }
     }
 
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
-            auto idx = (x * 256 * 64) + (z * 64) + 0;
+            for (int y = 63; y >= 0; y--) {
+                auto idx = (x * 256 * 64) + (z * 64) + y;
+                auto blk = worldData[idx];
+                if (blk == 0 || blk == 10 || blk == 11 || blk == 14 ||
+                    blk == 15 || blk == 16)
+                    continue;
 
-            worldData[idx] = 7;
+                auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
+                lightData[idx2] |= 1 << (y % 16);
+                break;
+            }
         }
     }
 
@@ -409,7 +421,9 @@ auto World::update_lighting(int x, int z) -> void {
     // Retrace
     for (int y = 63; y >= 0; y--) {
         auto idx = (x * 256 * 64) + (z * 64) + y;
-        if (worldData[idx] == 0)
+        auto blk = worldData[idx];
+        if (blk == 0 || blk == 10 || blk == 11 || blk == 14 || blk == 15 ||
+            blk == 16)
             continue;
 
         auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
