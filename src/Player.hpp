@@ -9,6 +9,7 @@
  *
  */
 #pragma once
+#include "World.hpp"
 #include <Rendering/Camera.hpp>
 #include <any>
 #include <glm.hpp>
@@ -16,6 +17,8 @@
 using namespace Stardust_Celeste;
 
 namespace CrossCraft {
+
+class World;
 
 /**
  * @brief Player controller object
@@ -40,7 +43,7 @@ class Player {
      *
      * @param dt Delta Time
      */
-    auto update(float dt) -> void;
+    auto update(float dt, World *wrld) -> void;
 
     /**
      * @brief Draw the player UI
@@ -73,10 +76,14 @@ class Player {
     uint8_t blkSel;
 
   private:
+    auto rotate(float dt) -> void;
+
     glm::vec3 pos;
     glm::vec2 rot;
     glm::vec3 vel;
 
     Rendering::Camera cam;
+
+    bool is_falling;
 };
 } // namespace CrossCraft

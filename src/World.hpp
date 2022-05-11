@@ -22,6 +22,8 @@
 
 namespace CrossCraft {
 
+class Player;
+
 typedef uint8_t block_t;
 class ChunkStack;
 
@@ -78,6 +80,16 @@ class World {
      *
      */
     auto generate() -> void;
+
+    /**
+     * @brief Get a World Index
+     *
+     * @param x Position
+     * @param y Position
+     * @param z Position
+     * @return uint32_t block_t* worldData
+     */
+    auto getIdx(int x, int y, int z) -> uint32_t;
 
     block_t *worldData;
     uint16_t *lightData;

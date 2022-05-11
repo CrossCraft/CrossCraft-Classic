@@ -82,7 +82,7 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
 }
 
 void World::update(double dt) {
-    player->update(static_cast<float>(dt));
+    player->update(static_cast<float>(dt), this);
     clouds->update(dt);
 
     tick_counter += dt;
@@ -199,7 +199,7 @@ auto World::get_noise(float x, float y, NoiseSettings *settings) -> float {
     return divided;
 }
 
-auto getIdx(int x, int y, int z) -> uint32_t {
+auto World::getIdx(int x, int y, int z) -> uint32_t {
     if (x < 0 || x >= 256 || y >= 64 || y < 0 || z < 0 || z >= 256)
         return 0;
     return (x * 256 * 64) + (z * 64) + y;
