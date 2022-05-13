@@ -28,6 +28,8 @@ class GameState : public Core::ApplicationState {
     void on_start();
     void on_cleanup();
 
+    void bind_controls();
+
     void on_update(Core::Application *app, double dt);
     void on_draw(Core::Application *app, double dt);
 

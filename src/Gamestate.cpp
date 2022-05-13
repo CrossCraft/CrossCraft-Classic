@@ -8,17 +8,7 @@ namespace CrossCraft {
 
 using namespace Stardust_Celeste::Utilities;
 
-void GameState::on_start() {
-    // Make a world and generate it
-    world = create_scopeptr<World>(create_refptr<Player>());
-    world->generate();
-
-    psp_controller = new Input::PSPController();
-    key_controller = new Input::KeyboardController();
-    mouse_controller = new Input::MouseController();
-
-    Rendering::RenderContext::get().set_mode_3D();
-
+void GameState::bind_controls() {
     psp_controller->add_command(
         {(int)Input::PSPButtons::Triangle, KeyFlag::Press | KeyFlag::Held},
         {Player::move_forward, world->player.get()});
@@ -76,6 +66,24 @@ void GameState::on_start() {
     Input::set_differential_mode("Mouse", true);
     Input::set_differential_mode("PSP", true);
 }
+
+void GameState::on_start() {
+    // Make a world and generate it
+    world = create_scopeptr<World>(create_refptr<Player>());
+    world->generate();
+
+    // Make new controllers
+    psp_controller = new Input::PSPController();
+    key_controller = new Input::KeyboardController();
+    mouse_controller = new Input::MouseController();
+
+    // Bind our controllers
+    bind_controls();
+
+    // Request 3D Mode
+    Rendering::RenderContext::get().set_mode_3D();
+}
+
 void GameState::on_cleanup() {}
 
 void GameState::quit(std::any d) {
@@ -85,6 +93,7 @@ void GameState::quit(std::any d) {
 
 void GameState::on_update(Core::Application *app, double dt) {
 
+    // Setup quit command
     if (!ref) {
         ref = app;
 

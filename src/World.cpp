@@ -266,14 +266,14 @@ void World::generate() {
                 if (y < (h - 4))
                     worldData[idx] = 1;
                 else if (y >= (h - 4) && y < (h - 1))
-                    worldData[idx] = 3;
+                    worldData[idx] = 2;
                 else {
                     if (h < 32)
-                        worldData[idx] = 3;
+                        worldData[idx] = 2;
                     else if (h == 32)
                         worldData[idx] = 12;
                     else
-                        worldData[idx] = 2;
+                        worldData[idx] = 3;
                 }
             }
 
@@ -290,7 +290,7 @@ void World::generate() {
         for (int z = 0; z < 32; z++) {
 
             srand((x | 1) << z * ~seed);
-            uint8_t res = rand() % 10;
+            uint8_t res = rand() % 37;
 
             if (res < 2) {
                 int xf = x * 8 + rand() % 5 - 2;
@@ -304,7 +304,7 @@ void World::generate() {
 
                 auto idx = (xf * 256 * 64) + (zf * 64) + h;
 
-                worldData[idx] = 10 + res % 2;
+                worldData[idx] = 37 + res % 2;
 
                 continue;
             } else if (res < 6)
@@ -327,7 +327,7 @@ void World::generate() {
         int y = 40;
         for (int z = 0; z < 16; z++) {
             auto idx = (x * 256 * 64) + (z * 64) + y;
-            if (i < 37) {
+            if (i < 50) {
                 worldData[idx] = i++;
             }
         }
@@ -338,8 +338,8 @@ void World::generate() {
             for (int y = 63; y >= 0; y--) {
                 auto idx = (x * 256 * 64) + (z * 64) + y;
                 auto blk = worldData[idx];
-                if (blk == 0 || blk == 10 || blk == 11 || blk == 14 ||
-                    blk == 15 || blk == 16)
+                if (blk == 0 || blk == 37 || blk == 38 || blk == 39 ||
+                    blk == 40 || blk == 6)
                     continue;
 
                 auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
@@ -422,8 +422,8 @@ auto World::update_lighting(int x, int z) -> void {
     for (int y = 63; y >= 0; y--) {
         auto idx = (x * 256 * 64) + (z * 64) + y;
         auto blk = worldData[idx];
-        if (blk == 0 || blk == 10 || blk == 11 || blk == 14 || blk == 15 ||
-            blk == 16)
+        if (blk == 0 || blk == 37 || blk == 38 || blk == 39 || blk == 40 ||
+            blk == 6)
             continue;
 
         auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
