@@ -11,6 +11,7 @@
 #pragma once
 #include "ChunkStack.hpp"
 #include "Clouds.hpp"
+#include "Particles.hpp"
 #include "Player.hpp"
 #include <FastNoiseLite.h>
 #include <Utilities/Types.hpp>
@@ -156,6 +157,7 @@ class World {
 
     glm::ivec2 pchunk_pos;
 
+    ScopePtr<ParticleSystem> psystem;
     unsigned int terrain_atlas;
     FastNoiseLite fsl;
     float *hmap;

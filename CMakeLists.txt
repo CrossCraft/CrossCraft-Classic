@@ -17,7 +17,7 @@ endif()
 
 add_subdirectory(ext/Stardust-Celeste Stardust)
 
-add_executable(CrossCraft-Classic src/Main.cpp src/Gamestate.cpp src/Player.cpp src/World.cpp src/ChunkStack.cpp src/ChunkMesh.cpp src/Clouds.hpp src/Clouds.cpp)
+add_executable(CrossCraft-Classic src/Main.cpp src/Gamestate.cpp src/Particles.cpp src/Player.cpp src/World.cpp src/ChunkStack.cpp src/ChunkMesh.cpp src/Clouds.hpp src/Clouds.cpp)
 target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp)
 target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste)
 

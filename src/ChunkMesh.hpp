@@ -24,6 +24,15 @@ class World;
 class ChunkMesh {
   public:
     /**
+     * @brief Get the Tex Coords
+     *
+     * @param idx
+     * @param lv
+     * @return std::array<float, 8>
+     */
+    static std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv);
+
+    /**
      * @brief Construct a new Chunk Mesh object at a location
      *
      * @param x Chunk X position

@@ -24,6 +24,7 @@ World::World(std::shared_ptr<Player> p) {
     fsl.SetSeed(seed);
 
     clouds = create_scopeptr<Clouds>();
+    psystem = create_scopeptr<ParticleSystem>(terrain_atlas);
 
     // Zero the array
     worldData =
@@ -84,6 +85,7 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
 void World::update(double dt) {
     player->update(static_cast<float>(dt), this);
     clouds->update(dt);
+    psystem->update(dt);
 
     tick_counter += dt;
 
@@ -368,6 +370,7 @@ void World::draw() {
     }
 
     clouds->draw();
+    psystem->draw();
     player->draw();
 }
 
@@ -491,6 +494,8 @@ auto World::dig(std::any d) -> void {
 
         if (blk == 0 || blk == 7)
             continue;
+
+        w->psystem->initialize(blk, cast_pos);
 
         uint16_t x = ivec.x / 16;
         uint16_t y = ivec.z / 16;

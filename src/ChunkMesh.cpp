@@ -197,7 +197,7 @@ inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
  * @param lv Light Value
  * @return std::array<float, 8>
  */
-std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
+std::array<float, 8> ChunkMesh::getTexCoord(uint8_t idx, uint32_t lv) {
     auto vec = glm::vec2(16, 16);
 
     if (idx == 1) // Stone
