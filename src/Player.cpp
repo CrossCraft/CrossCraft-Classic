@@ -50,7 +50,7 @@ auto Player::move_down(std::any d) -> void {
 auto Player::rotate(float dt) -> void {
     using namespace Utilities::Input;
     // Rotate player
-    const auto rotSpeed = 600.0f;
+    const auto rotSpeed = 500.0f;
     float cX, cY;
 
 #ifndef PSP
