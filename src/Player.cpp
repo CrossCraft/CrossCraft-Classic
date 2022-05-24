@@ -7,8 +7,8 @@ template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player()
     : pos(8.f, 40.8f, 8.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
-      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.2f, 255.0f),
-      blkSel(1), is_falling(true) {}
+      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.01f, 255.0f),
+      blkSel(1), is_falling(true), model({8, 40.8, 8}, {0.4, 1.8, 0.4}) {}
 
 const auto playerSpeed = 4.3f;
 
@@ -40,6 +40,7 @@ auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->is_falling) {
         p->vel.y = 8.4f;
+        p->is_falling = false;
     }
 }
 
@@ -90,19 +91,57 @@ auto Player::rotate(float dt) -> void {
 
 const float GRAVITY_ACCELERATION = 28.0f;
 
+auto test(glm::vec3 pos, World *wrld) -> bool {
+    auto blk = wrld->worldData[wrld->getIdx(pos.x, pos.y, pos.z)];
+    return blk != 0 && blk != 8;
+}
+
+void Player::test_collide(glm::vec3 testpos, World *wrld) {
+
+    bool collide_down = false;
+    collide_down =
+        collide_down || test({testpos.x, testpos.y - 1.8f, testpos.z}, wrld);
+
+    if (collide_down) {
+        vel.y = 0;
+        is_falling = false;
+    }
+
+    for (int x = -1; x <= 1; x++)
+        for (int y = 0; y <= 2; y++)
+            for (int z = -1; z <= 1; z++) {
+                float xoff = x;
+                float zoff = z;
+
+                auto new_vec = glm::vec3(testpos.x + xoff, testpos.y - 1.8f + y,
+                                         testpos.z + zoff);
+
+                if (test(new_vec, wrld)) {
+                    AABB test_box = AABB(new_vec, {1, 1, 1});
+
+                    if (AABB::intersect(test_box, model)) {
+                        vel.x = 0;
+                        vel.z = 0;
+                    }
+                }
+            }
+
+    if (test({testpos.x, testpos.y, testpos.z}, wrld)) {
+        vel.y = 0;
+        is_falling = true;
+    }
+}
+
 void Player::update(float dt, World *wrld) {
     rotate(dt);
 
     // Update position
     vel.y -= GRAVITY_ACCELERATION * dt;
     is_falling = true;
-    glm::vec3 testpos = pos + vel * dt;
-    auto idx = wrld->getIdx(testpos.x, testpos.y - 1.8f, testpos.z);
 
-    if (wrld->worldData[idx] != 0) {
-        vel.y = 0;
-        is_falling = false;
-    }
+    glm::vec3 testpos = pos + vel * dt;
+    model.pos = testpos + glm::vec3(0.2f, 0, 0.2f);
+    test_collide(testpos, wrld);
 
     pos += vel * dt;
 

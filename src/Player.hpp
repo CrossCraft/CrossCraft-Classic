@@ -9,6 +9,7 @@
  *
  */
 #pragma once
+#include "AABB.hpp"
 #include "World.hpp"
 #include <Rendering/Camera.hpp>
 #include <any>
@@ -77,12 +78,15 @@ class Player {
 
   private:
     auto rotate(float dt) -> void;
+    auto test_collide(glm::vec3 pos, World *wrld) -> void;
 
     glm::vec3 pos;
     glm::vec2 rot;
     glm::vec3 vel;
 
     Rendering::Camera cam;
+
+    AABB model;
 
     bool is_falling;
 };
