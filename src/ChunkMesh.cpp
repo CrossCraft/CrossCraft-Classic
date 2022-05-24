@@ -182,12 +182,12 @@ inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
 41  Gold            X
 42  Iron            X
 43  Double Slab     X
-44  Slab
+44  Slab            X
 45  Brick           X
 46  TNT             X
-47  Bookshelf
-48  Mossy Rocks
-49  Obsidian
+47  Bookshelf       X
+48  Mossy Rocks     X
+49  Obsidian        X
 */
 
 /**

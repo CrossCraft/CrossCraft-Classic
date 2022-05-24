@@ -93,7 +93,8 @@ const float GRAVITY_ACCELERATION = 28.0f;
 
 auto test(glm::vec3 pos, World *wrld) -> bool {
     auto blk = wrld->worldData[wrld->getIdx(pos.x, pos.y, pos.z)];
-    return blk != 0 && blk != 8;
+    return blk != 0 && blk != 8 && blk != 6 && blk != 37 && blk != 38 &&
+           blk != 39 && blk != 40;
 }
 
 void Player::test_collide(glm::vec3 testpos, World *wrld) {
