@@ -11,6 +11,7 @@
 #pragma once
 #include "AABB.hpp"
 #include "World.hpp"
+#include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
 #include <any>
 #include <glm.hpp>
@@ -50,7 +51,7 @@ class Player {
      * @brief Draw the player UI
      *
      */
-    auto draw() -> void{};
+    auto draw() -> void;
 
     /**
      * @brief Get the position
@@ -74,7 +75,12 @@ class Player {
     static auto move_up(std::any p) -> void;
     static auto move_down(std::any p) -> void;
 
-    uint8_t blkSel;
+    static auto change_selector(std::any p) -> void;
+    static auto inc_selector(std::any p) -> void;
+    static auto dec_selector(std::any p) -> void;
+
+    uint32_t selectorIDX;
+    uint8_t itemSelections[9];
 
   private:
     auto rotate(float dt) -> void;
@@ -85,9 +91,18 @@ class Player {
     glm::vec3 vel;
 
     Rendering::Camera cam;
+    ScopePtr<Graphics::G2D::Sprite> item_box;
+    ScopePtr<Graphics::G2D::Sprite> selector;
+    uint32_t gui_texture;
 
     AABB model;
 
     bool is_falling;
 };
+
+struct SelData {
+    Player *player;
+    int selIDX;
+};
+
 } // namespace CrossCraft

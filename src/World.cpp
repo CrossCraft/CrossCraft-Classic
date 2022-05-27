@@ -17,7 +17,7 @@ World::World(std::shared_ptr<Player> p) {
 
     terrain_atlas = Rendering::TextureManager::get().load_texture(
         "./assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-        true);
+        true, false);
     fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     fsl.SetFrequency(0.001f * 5.f);
     seed = time(NULL);
@@ -83,6 +83,9 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
 }
 
 void World::update(double dt) {
+
+    // Request 3D Mode
+    Rendering::RenderContext::get().set_mode_3D();
     player->update(static_cast<float>(dt), this);
     clouds->update(dt);
     psystem->update(dt);
@@ -356,6 +359,7 @@ void World::generate() {
 }
 
 void World::draw() {
+
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
@@ -371,6 +375,10 @@ void World::draw() {
 
     clouds->draw();
     psystem->draw();
+
+    // Request 2D Mode
+    Rendering::RenderContext::get().set_mode_2D();
+
     player->draw();
 }
 
@@ -575,7 +583,7 @@ auto World::place(std::any d) -> void {
         uint16_t y = ivec.z / 16;
         uint32_t id = x << 16 | (y & 0x00FF);
 
-        w->worldData[idx] = w->player->blkSel;
+        w->worldData[idx] = w->player->itemSelections[w->player->selectorIDX];
 
         // Update Lighting
         w->update_lighting(ivec.x, ivec.z);

@@ -8,7 +8,26 @@ template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 Player::Player()
     : pos(8.f, 40.8f, 8.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
       cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.01f, 255.0f),
-      blkSel(1), is_falling(true), model({8, 40.8, 8}, {0.4, 1.8, 0.4}) {}
+      is_falling(true),
+      model({8, 40.8, 8}, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
+                                                           17, 18, 20, 48} {
+    gui_texture = Rendering::TextureManager::get().load_texture(
+        "./assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, true);
+
+    item_box = create_scopeptr<Graphics::G2D::Sprite>(
+        gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
+        Rendering::Rectangle{{0, (256.0f - 22.0f) / 256.0f},
+                             {182.0f / 256.0f, 22.0f / 256.0f}});
+    selector = create_scopeptr<Graphics::G2D::Sprite>(
+        gui_texture, Rendering::Rectangle{{148, 0}, {24, 24}},
+        Rendering::Rectangle{{0, (256.0f - 22.0f - 24.0f) / 256.0f},
+                             {24.0f / 256.0f, 24.0f / 256.0f}});
+
+    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 30, -30);
+
+    selectorIDX = 0;
+}
 
 const auto playerSpeed = 4.3f;
 
@@ -42,6 +61,27 @@ auto Player::move_up(std::any d) -> void {
         p->vel.y = 8.4f;
         p->is_falling = false;
     }
+}
+
+auto Player::change_selector(std::any d) -> void {
+    auto s = std::any_cast<SelData>(d);
+    s.player->selectorIDX = s.selIDX;
+}
+
+auto Player::inc_selector(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    p->selectorIDX += 1;
+
+    if (p->selectorIDX > 8)
+        p->selectorIDX = 0;
+}
+
+auto Player::dec_selector(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    p->selectorIDX -= 1;
+
+    if (p->selectorIDX < 0)
+        p->selectorIDX = 8;
 }
 
 auto Player::move_down(std::any d) -> void {
@@ -161,4 +201,9 @@ void Player::update(float dt, World *wrld) {
     vel = glm::vec3(0.f, vel.y, 0.f);
 }
 
+auto Player::draw() -> void {
+    selector->set_position({148 + 20 * selectorIDX, 0});
+    selector->draw();
+    item_box->draw();
+}
 } // namespace CrossCraft
