@@ -14,6 +14,9 @@ Player::Player()
     gui_texture = Rendering::TextureManager::get().load_texture(
         "./assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
+    water_texture = Rendering::TextureManager::get().load_texture(
+        "./assets/water.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, true);
 
     item_box = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
@@ -23,10 +26,18 @@ Player::Player()
         gui_texture, Rendering::Rectangle{{148, 0}, {24, 24}},
         Rendering::Rectangle{{0, (256.0f - 22.0f - 24.0f) / 256.0f},
                              {24.0f / 256.0f, 24.0f / 256.0f}});
+    crosshair = create_scopeptr<Graphics::G2D::Sprite>(
+        gui_texture, Rendering::Rectangle{{240 - 8, 136 - 8}, {16, 16}},
+        Rendering::Rectangle{
+            {(256.0f - 16.0f) / 256.0f, (256.0f - 16.0f) / 256.0f},
+            {16.0f / 256.0f, 16.0f / 256.0f}});
+    water = create_scopeptr<Graphics::G2D::Sprite>(
+        water_texture, Rendering::Rectangle{{0, 0}, {480, 272}});
 
     Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 30, -30);
 
     selectorIDX = 0;
+    is_underwater = false;
 }
 
 const auto playerSpeed = 4.3f;
@@ -59,6 +70,11 @@ auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->is_falling) {
         p->vel.y = 8.4f;
+        p->is_falling = false;
+    }
+
+    if (p->is_underwater) {
+        p->vel.y = 3.2f;
         p->is_falling = false;
     }
 }
@@ -177,12 +193,35 @@ void Player::update(float dt, World *wrld) {
     rotate(dt);
 
     // Update position
-    vel.y -= GRAVITY_ACCELERATION * dt;
+    if (!is_underwater)
+        vel.y -= GRAVITY_ACCELERATION * dt;
+    else
+        vel.y -= GRAVITY_ACCELERATION * 0.3f * dt;
     is_falling = true;
 
     glm::vec3 testpos = pos + vel * dt;
     model.pos = testpos + glm::vec3(0.2f, 0, 0.2f);
+
+    auto blk =
+        wrld->worldData[wrld->getIdx(testpos.x, testpos.y + 0.2f, testpos.z)];
+    if (blk == 8)
+        is_head_water = true;
+    else
+        is_head_water = false;
+
+    blk = wrld->worldData[wrld->getIdx(testpos.x, testpos.y - 1.5f, testpos.z)];
+    if (blk == 8)
+        is_underwater = true;
+    else
+        is_underwater = false;
+
     test_collide(testpos, wrld);
+
+    if (is_underwater) {
+        vel.x *= 0.5f;
+        vel.z *= 0.5f;
+        vel.y *= 0.9f;
+    }
 
     pos += vel * dt;
 
@@ -204,6 +243,20 @@ void Player::update(float dt, World *wrld) {
 auto Player::draw() -> void {
     selector->set_position({148 + 20 * selectorIDX, 0});
     selector->draw();
+
+    item_box->set_position({149, 1});
     item_box->draw();
+
+    crosshair->set_position({240 - 8, 136 - 8});
+    crosshair->draw();
+
+    if (is_head_water) {
+        water->set_position({0, 0});
+        water->draw();
+    }
+
+    Rendering::RenderContext::get().set_mode_3D();
+    Rendering::RenderContext::get().matrix_perspective(60.0f, 16.0f / 9.0f,
+                                                       0.1f, 255.0f);
 }
 } // namespace CrossCraft

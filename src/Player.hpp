@@ -93,11 +93,13 @@ class Player {
     Rendering::Camera cam;
     ScopePtr<Graphics::G2D::Sprite> item_box;
     ScopePtr<Graphics::G2D::Sprite> selector;
-    uint32_t gui_texture;
+    ScopePtr<Graphics::G2D::Sprite> crosshair;
+    ScopePtr<Graphics::G2D::Sprite> water;
+    uint32_t gui_texture, water_texture;
 
     AABB model;
 
-    bool is_falling;
+    bool is_falling, is_underwater, is_head_water;
 };
 
 struct SelData {
