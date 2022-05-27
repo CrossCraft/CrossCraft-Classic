@@ -18,6 +18,22 @@ const std::array<float, 12> rightFace{
     1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1,
 };
 
+const std::array<float, 12> frontFaceHalf{
+    0, 0, 1, 1, 0, 1, 1, 0.5f, 1, 0, 0.5f, 1,
+};
+
+const std::array<float, 12> backFaceHalf{
+    1, 0, 0, 0, 0, 0, 0, 0.5f, 0, 1, 0.5f, 0,
+};
+
+const std::array<float, 12> leftFaceHalf{
+    0, 0, 0, 0, 0, 1, 0, 0.5f, 1, 0, 0.5f, 0,
+};
+
+const std::array<float, 12> rightFaceHalf{
+    1, 0, 1, 1, 0, 0, 1, 0.5f, 0, 1, 0.5f, 1,
+};
+
 const std::array<float, 12> topFace{
     0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0,
 };
@@ -258,6 +274,11 @@ std::array<float, 8> ChunkMesh::getTexCoord(uint8_t idx, uint32_t lv) {
         return getTexture(vec, 23);
     else if (idx == 43) // DSLAB
         return getTexture(vec, 5);
+    else if (idx == 44) // HSLAB
+        if (lv == LIGHT_SIDE)
+            return getTexture(vec, 25);
+        else
+            return getTexture(vec, 6);
     else if (idx == 45) // Brick
         return getTexture(vec, 7);
     else if (idx == 46) // TNT
@@ -341,6 +362,26 @@ void ChunkMesh::generate(const World *wrld) {
                 surround.update(x, y, z);
 
                 // Add 6 faces
+
+                if (blk == 44) {
+
+                    try_add_face(wrld, bottomFace, blk, {x, y, z},
+                                 surround.down, LIGHT_BOT);
+                    add_face_to_mesh(topFace, getTexCoord(blk, LIGHT_TOP),
+                                     {x, y - 0.5f, z}, LIGHT_TOP, false);
+
+                    try_add_face(wrld, leftFaceHalf, blk, {x, y, z},
+                                 surround.left, LIGHT_SIDE);
+                    try_add_face(wrld, rightFaceHalf, blk, {x, y, z},
+                                 surround.right, LIGHT_SIDE);
+
+                    try_add_face(wrld, frontFaceHalf, blk, {x, y, z},
+                                 surround.front, LIGHT_SIDE);
+                    try_add_face(wrld, backFaceHalf, blk, {x, y, z},
+                                 surround.back, LIGHT_SIDE);
+
+                    continue;
+                }
 
                 try_add_face(wrld, bottomFace, blk, {x, y, z}, surround.down,
                              LIGHT_BOT);
@@ -435,7 +476,7 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
             wrld->worldData[idx] == 18 || wrld->worldData[idx] == 37 ||
             wrld->worldData[idx] == 38 || wrld->worldData[idx] == 39 ||
             wrld->worldData[idx] == 40 || wrld->worldData[idx] == 6 ||
-            wrld->worldData[idx] == 20) {
+            wrld->worldData[idx] == 20 || wrld->worldData[idx] == 44) {
             if (blk == 8 && wrld->worldData[idx] != 8) {
                 std::array<float, 12> data2 = data;
                 data2[1] *= 0.9f;

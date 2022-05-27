@@ -10,7 +10,7 @@ Player::Player()
       cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.01f, 255.0f),
       is_falling(true),
       model({8, 40.8, 8}, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
-                                                           17, 18, 20, 48} {
+                                                           17, 18, 20, 44} {
     gui_texture = Rendering::TextureManager::get().load_texture(
         "./assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
