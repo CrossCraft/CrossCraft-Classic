@@ -424,23 +424,11 @@ void ChunkMesh::draw_transparent() {
     Rendering::RenderContext::get().matrix_translate(
         {cX * 16, cY * 16, cZ * 16});
 
-#if BUILD_PC
-    glDisable(GL_CULL_FACE);
-#else
-    sceGuDisable(GU_CULL_FACE);
-#endif
-
     // Draw
     if (transMesh.get_index_count() > 0) {
         transMesh.bind();
         transMesh.draw();
     }
-
-#if BUILD_PC
-    glEnable(GL_CULL_FACE);
-#else
-    sceGuEnable(GU_CULL_FACE);
-#endif
 
     Rendering::RenderContext::get().matrix_clear();
 }
