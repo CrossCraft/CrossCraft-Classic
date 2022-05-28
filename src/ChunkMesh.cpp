@@ -47,6 +47,13 @@ const std::array<float, 12> xFace1{
 const std::array<float, 12> xFace2{
     0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
 };
+const std::array<float, 12> xFace3{
+    0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1,
+};
+
+const std::array<float, 12> xFace4{
+    0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0,
+};
 
 constexpr uint32_t LIGHT_TOP = 0xFFFFFFFF;
 constexpr uint32_t LIGHT_SIDE = 0xFFCCCCCC;
@@ -530,6 +537,55 @@ void ChunkMesh::add_xface_to_mesh(std::array<float, 8> uv, glm::vec3 pos,
             xFace2[idx++] + pos.x,
             xFace2[idx++] + pos.y,
             xFace2[idx++] + pos.z,
+        });
+    }
+
+    // Push Back Indices
+    mi->push_back((*idc));
+    mi->push_back((*idc) + 1);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 3);
+    mi->push_back((*idc) + 0);
+    (*idc) += 4;
+
+    // UV ORDER
+    //{x, h, w, h, w, y, x, y};
+    std::array<float, 8> uv2{uv[2], uv[3], uv[4], uv[5],
+                             uv[6], uv[7], uv[0], uv[1]};
+
+    // Push Back Verts
+    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
+
+        m->push_back(Rendering::Vertex{
+            uv2[tx++],
+            uv2[tx++],
+            c,
+            xFace3[idx++] + pos.x,
+            xFace3[idx++] + pos.y,
+            xFace3[idx++] + pos.z,
+        });
+    }
+
+    // Push Back Indices
+    mi->push_back((*idc));
+    mi->push_back((*idc) + 1);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 3);
+    mi->push_back((*idc) + 0);
+    (*idc) += 4;
+
+    // Push Back Verts
+    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
+
+        m->push_back(Rendering::Vertex{
+            uv2[tx++],
+            uv2[tx++],
+            c,
+            xFace4[idx++] + pos.x,
+            xFace4[idx++] + pos.y,
+            xFace4[idx++] + pos.z,
         });
     }
 
