@@ -25,7 +25,7 @@ void GameState::bind_controls() {
         {(int)Input::PSPButtons::Select, KeyFlag::Press | KeyFlag::Held},
         {Player::move_down, world->player.get()});
     psp_controller->add_command(
-        {(int)Input::PSPButtons::Up, KeyFlag::Press | KeyFlag::Held},
+        {(int)Input::PSPButtons::Select, KeyFlag::Press | KeyFlag::Held},
         {Player::move_up, world->player.get()});
     psp_controller->add_command(
         {(int)Input::PSPButtons::LTrigger, KeyFlag::Press},

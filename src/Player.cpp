@@ -117,10 +117,13 @@ auto Player::rotate(float dt) -> void {
     cX = get_axis("PSP", "X");
     cY = get_axis("PSP", "Y");
 
-    if (cX <= 0.25f && cX >= -0.25f)
+    if (cX <= 0.4f && cX >= -0.4f)
         cX = 0.0f;
-    if (cY <= 0.25f && cY >= -0.25f)
+    if (cY <= 0.4f && cY >= -0.4f)
         cY = 0.0f;
+
+    cX * 0.5f;
+    cY * 0.5f;
 #endif
 
     rot.y += cX * rotSpeed * dt;
