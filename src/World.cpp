@@ -563,7 +563,11 @@ auto World::place(std::any d) -> void {
                                static_cast<s32>(cast_pos.y),
                                static_cast<s32>(cast_pos.z));
 
-        if (!validate_ivec3(ivec))
+        auto posivec =
+            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
+                       static_cast<s32>(pos.z));
+
+        if (!validate_ivec3(ivec) || ivec == posivec)
             continue;
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = w->worldData[idx];
@@ -578,7 +582,7 @@ auto World::place(std::any d) -> void {
                           static_cast<s32>(cast_pos.y),
                           static_cast<s32>(cast_pos.z));
 
-        if (!validate_ivec3(ivec))
+        if (!validate_ivec3(ivec) || ivec == posivec)
             continue;
 
         idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;

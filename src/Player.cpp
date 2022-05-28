@@ -38,6 +38,7 @@ Player::Player()
 
     selectorIDX = 0;
     is_underwater = false;
+    jump_icd = 0.2f;
 }
 
 const auto playerSpeed = 4.3f;
@@ -68,9 +69,11 @@ auto Player::move_right(std::any d) -> void {
 
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->is_falling) {
+
+    if (!p->is_falling && p->jump_icd < 0.0f) {
         p->vel.y = 8.4f;
         p->is_falling = false;
+        p->jump_icd = 0.2f;
     }
 
     if (p->is_underwater) {
@@ -156,17 +159,7 @@ auto test(glm::vec3 pos, World *wrld) -> bool {
            blk != 39 && blk != 40;
 }
 
-void Player::test_collide(glm::vec3 testpos, World *wrld) {
-
-    bool collide_down = false;
-    collide_down =
-        collide_down || test({testpos.x, testpos.y - 1.8f, testpos.z}, wrld);
-
-    if (collide_down) {
-        vel.y = 0;
-        is_falling = false;
-    }
-
+void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
     for (int x = -1; x <= 1; x++)
         for (int y = 0; y <= 2; y++)
             for (int z = -1; z <= 1; z++) {
@@ -186,6 +179,17 @@ void Player::test_collide(glm::vec3 testpos, World *wrld) {
                 }
             }
 
+    testpos = pos + vel * dt;
+
+    bool collide_down = false;
+    collide_down =
+        collide_down || test({testpos.x, testpos.y - 1.8f, testpos.z}, wrld);
+
+    if (collide_down && vel.y < 0) {
+        vel.y = 0;
+        is_falling = false;
+    }
+
     if (test({testpos.x, testpos.y, testpos.z}, wrld)) {
         vel.y = 0;
         is_falling = true;
@@ -194,6 +198,7 @@ void Player::test_collide(glm::vec3 testpos, World *wrld) {
 
 void Player::update(float dt, World *wrld) {
     rotate(dt);
+    jump_icd -= dt;
 
     // Update position
     if (!is_underwater)
@@ -218,7 +223,7 @@ void Player::update(float dt, World *wrld) {
     else
         is_underwater = false;
 
-    test_collide(testpos, wrld);
+    test_collide(testpos, wrld, dt);
 
     if (is_underwater) {
         vel.x *= 0.5f;

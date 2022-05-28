@@ -84,11 +84,13 @@ class Player {
 
   private:
     auto rotate(float dt) -> void;
-    auto test_collide(glm::vec3 pos, World *wrld) -> void;
+    auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;
 
     glm::vec3 pos;
     glm::vec2 rot;
     glm::vec3 vel;
+
+    float jump_icd;
 
     Rendering::Camera cam;
     ScopePtr<Graphics::G2D::Sprite> item_box;
