@@ -79,7 +79,7 @@ class Player {
     static auto inc_selector(std::any p) -> void;
     static auto dec_selector(std::any p) -> void;
 
-    uint32_t selectorIDX;
+    int32_t selectorIDX;
     uint8_t itemSelections[9];
 
   private:

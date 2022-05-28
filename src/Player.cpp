@@ -86,7 +86,7 @@ auto Player::change_selector(std::any d) -> void {
 
 auto Player::inc_selector(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    p->selectorIDX += 1;
+    p->selectorIDX++;
 
     if (p->selectorIDX > 8)
         p->selectorIDX = 0;
@@ -94,7 +94,7 @@ auto Player::inc_selector(std::any d) -> void {
 
 auto Player::dec_selector(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    p->selectorIDX -= 1;
+    p->selectorIDX--;
 
     if (p->selectorIDX < 0)
         p->selectorIDX = 8;
@@ -241,20 +241,21 @@ void Player::update(float dt, World *wrld) {
 }
 
 auto Player::draw() -> void {
-    selector->set_position({148 + 20 * selectorIDX, 0});
-    selector->draw();
-
-    item_box->set_position({149, 1});
-    item_box->draw();
+    if (is_head_water) {
+        water->set_position({0, 0});
+        water->set_layer(1);
+        water->draw();
+    }
 
     crosshair->set_position({240 - 8, 136 - 8});
     crosshair->draw();
 
-    if (is_head_water) {
-        water->set_position({0, 0});
-        water->draw();
-    }
+    item_box->set_position({149, 1});
+    item_box->draw();
 
+    selector->set_position({148 + 20 * selectorIDX, 0});
+    selector->set_layer(-1);
+    selector->draw();
     Rendering::RenderContext::get().set_mode_3D();
     Rendering::RenderContext::get().matrix_perspective(60.0f, 16.0f / 9.0f,
                                                        0.1f, 255.0f);

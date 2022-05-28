@@ -23,7 +23,7 @@ namespace CrossCraft {
 class GameState : public Core::ApplicationState {
   public:
     GameState() = default;
-    ~GameState() = default;
+    ~GameState();
 
     void on_start();
     void on_cleanup();

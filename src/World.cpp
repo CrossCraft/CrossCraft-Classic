@@ -38,6 +38,7 @@ World::World(std::shared_ptr<Player> p) {
 World::~World() {
     Rendering::TextureManager::get().delete_texture(terrain_atlas);
     free(worldData);
+    free(lightData);
 
     for (auto const &[key, val] : chunks) {
         if (val)
@@ -216,6 +217,9 @@ auto World::generate_tree(int x, int z, int hash) -> void {
 
     x += rand() % 5 - 2;
     z += rand() % 5 - 2;
+
+    if (!(x >= 0 && x < 256 && z >= 0 && z < 256))
+        return;
 
     int h = hmap[x * 256 + z] * 64.f;
 

@@ -99,6 +99,8 @@ void GameState::bind_controls() {
     Input::set_differential_mode("PSP", true);
 }
 
+GameState::~GameState() { on_cleanup(); }
+
 void GameState::on_start() {
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
@@ -116,7 +118,11 @@ void GameState::on_start() {
     Rendering::RenderContext::get().set_mode_3D();
 }
 
-void GameState::on_cleanup() {}
+void GameState::on_cleanup() {
+    delete psp_controller;
+    delete key_controller;
+    delete mouse_controller;
+}
 
 void GameState::quit(std::any d) {
     auto app = std::any_cast<Core::Application *>(d);

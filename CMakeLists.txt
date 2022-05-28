@@ -2,9 +2,8 @@ cmake_minimum_required(VERSION 3.17)
 project(CrossCraft-Classic)
 
 set(CMAKE_CXX_STANDARD 17)
-
-set(CMAKE_C_FLAGS_INIT "-fsanitize=undefined")
-set(CMAKE_CXX_FLAGS_INIT "-fsanitize=undefined")
+#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=leak")
+#set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=leak")
 
 
 if(WIN32)
