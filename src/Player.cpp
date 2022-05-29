@@ -1,7 +1,9 @@
 #include "Player.hpp"
+#include "BlockConst.hpp"
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
 #include <gtx/projection.hpp>
+
 namespace CrossCraft {
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
@@ -9,8 +11,9 @@ Player::Player()
     : pos(128.f, 64.0f, 128.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
       cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.01f, 255.0f),
       is_falling(true),
-      model({8, 40.8, 8}, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
-                                                           17, 18, 20, 44} {
+      model(pos, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
+                                                  17, 18, 20, 44},
+      idx_counter(0) {
     gui_texture = Rendering::TextureManager::get().load_texture(
         "./assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
@@ -34,14 +37,66 @@ Player::Player()
     water = create_scopeptr<Graphics::G2D::Sprite>(
         water_texture, Rendering::Rectangle{{0, 0}, {480, 272}});
 
-    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 30, -30);
-
     selectorIDX = 0;
     is_underwater = false;
     jump_icd = 0.2f;
+    terrain_atlas = 0;
 }
 
 const auto playerSpeed = 4.3f;
+
+auto Player::add_face_to_mesh(std::array<float, 12> data,
+                              std::array<float, 8> uv, uint32_t lightVal,
+                              glm::vec3 mypos) -> void { // Create color
+    Rendering::Color c;
+    c.color = lightVal;
+
+    // Push Back Verts
+    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
+        m_verts.push_back(Rendering::Vertex{
+            uv[tx++],
+            uv[tx++],
+            c,
+            data[idx++] + mypos.x,
+            data[idx++] + mypos.y,
+            data[idx++] + mypos.z,
+        });
+    }
+
+    // Push Back Indices
+    m_index.push_back(idx_counter);
+    m_index.push_back(idx_counter + 1);
+    m_index.push_back(idx_counter + 2);
+    m_index.push_back(idx_counter + 2);
+    m_index.push_back(idx_counter + 3);
+    m_index.push_back(idx_counter + 0);
+    idx_counter += 4;
+}
+
+auto Player::setup_model(uint8_t type) -> void {
+    idx_counter = 0;
+    m_verts.clear();
+    m_verts.shrink_to_fit();
+    m_index.clear();
+    m_index.shrink_to_fit();
+    blockMesh.delete_data();
+
+    glm::vec3 p = {0, 0, 0};
+
+    add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
+                     LIGHT_TOP, p);
+    add_face_to_mesh(leftFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+                     LIGHT_SIDE, p);
+    add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+                     LIGHT_BOT, {0, 0, 1});
+    add_face_to_mesh(frontFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+                     LIGHT_BOT, {0, 0, 1});
+    add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+                     LIGHT_BOT, p);
+
+    blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
+                       idx_counter);
+}
 
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
@@ -247,8 +302,40 @@ void Player::update(float dt, World *wrld) {
     cam.update();
     vel = glm::vec3(0.f, vel.y, 0.f);
 }
+// template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f
+// * 3.14159; }
+
+auto Player::drawBlk(uint8_t type, int x) -> void {
+    setup_model(type);
+
+    Rendering::RenderContext::get().matrix_view(glm::mat4(1));
+    Rendering::RenderContext::get().matrix_translate(
+        {153.5f + x * 20, 6 + 3, -20});
+    Rendering::RenderContext::get().matrix_rotate({45.0f, 45.0f, 0});
+    Rendering::RenderContext::get().matrix_scale({9.0f, 8.0f, 9.0f});
+
+// DISABLE CULL
+#if BUILD_PC
+    glDisable(GL_CULL_FACE);
+#else
+    sceGuDisable(GU_CULL_FACE);
+#endif
+
+    // Set up texture
+    Rendering::TextureManager::get().bind_texture(terrain_atlas);
+    blockMesh.draw();
+
+// ENABLE CULL
+#if BUILD_PC
+    glEnable(GL_CULL_FACE);
+#else
+    sceGuEnable(GU_CULL_FACE);
+#endif
+}
 
 auto Player::draw() -> void {
+    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 30, -30);
+
     if (is_head_water) {
         water->set_position({0, 0});
         water->set_layer(1);
@@ -264,8 +351,8 @@ auto Player::draw() -> void {
     selector->set_position({148 + 20 * selectorIDX, 0});
     selector->set_layer(-1);
     selector->draw();
-    Rendering::RenderContext::get().set_mode_3D();
-    Rendering::RenderContext::get().matrix_perspective(60.0f, 16.0f / 9.0f,
-                                                       0.1f, 255.0f);
+
+    for (int i = 0; i < 9; i++)
+        drawBlk(itemSelections[i], i);
 }
 } // namespace CrossCraft

@@ -18,6 +18,8 @@ World::World(std::shared_ptr<Player> p) {
     terrain_atlas = Rendering::TextureManager::get().load_texture(
         "./assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         true, false);
+    p->terrain_atlas = terrain_atlas;
+
     fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     fsl.SetFrequency(0.001f * 5.f);
     seed = time(NULL);

@@ -82,9 +82,18 @@ class Player {
     int32_t selectorIDX;
     uint8_t itemSelections[9];
 
+    uint32_t terrain_atlas;
+
   private:
     auto rotate(float dt) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;
+
+    auto setup_model(uint8_t type) -> void;
+
+    auto add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
+                          uint32_t lightVal, glm::vec3 pos) -> void;
+
+    auto drawBlk(uint8_t type, int x) -> void;
 
     glm::vec3 pos;
     glm::vec2 rot;
@@ -102,6 +111,13 @@ class Player {
     AABB model;
 
     bool is_falling, is_underwater, is_head_water;
+
+    // Block Drawing
+
+    uint16_t idx_counter;
+    std::vector<Rendering::Vertex> m_verts;
+    std::vector<uint16_t> m_index;
+    Rendering::Mesh blockMesh;
 };
 
 struct SelData {
