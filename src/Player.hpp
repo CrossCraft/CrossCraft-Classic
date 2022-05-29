@@ -79,6 +79,8 @@ class Player {
     static auto inc_selector(std::any p) -> void;
     static auto dec_selector(std::any p) -> void;
 
+    static auto toggle_inv(std::any p) -> void;
+
     int32_t selectorIDX;
     uint8_t itemSelections[9];
 
@@ -93,7 +95,7 @@ class Player {
     auto add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
                           uint32_t lightVal, glm::vec3 pos) -> void;
 
-    auto drawBlk(uint8_t type, int x) -> void;
+    auto drawBlk(uint8_t type, int x, int y) -> void;
 
     glm::vec3 pos;
     glm::vec2 rot;
@@ -101,12 +103,17 @@ class Player {
 
     float jump_icd;
 
+    uint8_t inventorySelection[45];
+
     Rendering::Camera cam;
     ScopePtr<Graphics::G2D::Sprite> item_box;
     ScopePtr<Graphics::G2D::Sprite> selector;
     ScopePtr<Graphics::G2D::Sprite> crosshair;
     ScopePtr<Graphics::G2D::Sprite> water;
-    uint32_t gui_texture, water_texture;
+    ScopePtr<Graphics::G2D::Sprite> overlay;
+    uint32_t gui_texture, water_texture, overlay_texture;
+
+    bool in_inventory;
 
     AABB model;
 

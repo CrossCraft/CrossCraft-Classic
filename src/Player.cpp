@@ -12,7 +12,8 @@ Player::Player()
       cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.01f, 255.0f),
       is_falling(true),
       model(pos, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
-                                                  17, 18, 20, 44},
+                                                  17, 18, 20, 44}, 
+    inventorySelection{ 1, 4, 45, 2, 5, 17, 18, 20, 44, 48, 6, 37, 38, 39, 40, 12, 13, 19, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 14, 15, 16, 42, 41, 47, 46, 49 },
       idx_counter(0) {
     gui_texture = Rendering::TextureManager::get().load_texture(
         "./assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
@@ -20,7 +21,9 @@ Player::Player()
     water_texture = Rendering::TextureManager::get().load_texture(
         "./assets/water.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
-
+    overlay_texture = Rendering::TextureManager::get().load_texture(
+        "./assets/overlay.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, true);
     item_box = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
         Rendering::Rectangle{{0, (256.0f - 22.0f) / 256.0f},
@@ -35,10 +38,13 @@ Player::Player()
             {(256.0f - 16.0f) / 256.0f, (256.0f - 16.0f) / 256.0f},
             {16.0f / 256.0f, 16.0f / 256.0f}});
     water = create_scopeptr<Graphics::G2D::Sprite>(
-        water_texture, Rendering::Rectangle{{0, 0}, {480, 272}});
+        water_texture, Rendering::Rectangle{ {0, 0}, {480, 272} });
+    overlay = create_scopeptr<Graphics::G2D::Sprite>(
+        overlay_texture, Rendering::Rectangle{ {120, 64}, {240, 168} });
 
     selectorIDX = 0;
     is_underwater = false;
+    in_inventory = false;
     jump_icd = 0.2f;
     terrain_atlas = 0;
 }
@@ -83,16 +89,38 @@ auto Player::setup_model(uint8_t type) -> void {
 
     glm::vec3 p = {0, 0, 0};
 
-    add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
-                     LIGHT_TOP, p);
-    add_face_to_mesh(leftFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                     LIGHT_SIDE, p);
-    add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                     LIGHT_BOT, {0, 0, 1});
-    add_face_to_mesh(frontFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                     LIGHT_BOT, {0, 0, 1});
-    add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                     LIGHT_BOT, p);
+    if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40) {
+
+        add_face_to_mesh(xFace1, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_SIDE, p);
+        add_face_to_mesh(xFace2, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_SIDE, p);
+    }
+    else if (type == 44) {
+        add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
+            LIGHT_TOP, { 0 , -0.5, 0 });
+        add_face_to_mesh(leftFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_BOT, p);
+        add_face_to_mesh(backFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_SIDE, { 0, 0, 1 });
+        add_face_to_mesh(frontFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_SIDE, { 0, 0, 1 });
+        add_face_to_mesh(backFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_SIDE, p);
+    }
+    else {
+
+        add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
+            LIGHT_TOP, p);
+        add_face_to_mesh(leftFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_BOT, p);
+        add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_SIDE, { 0, 0, 1 });
+        add_face_to_mesh(frontFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_SIDE, { 0, 0, 1 });
+        add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+            LIGHT_SIDE, p);
+    }
 
     blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
                        idx_counter);
@@ -156,6 +184,12 @@ auto Player::dec_selector(std::any d) -> void {
 
     if (p->selectorIDX < 0)
         p->selectorIDX = 8;
+}
+
+auto Player::toggle_inv(std::any d) -> void
+{
+    auto p = std::any_cast<Player*>(d);
+    p->in_inventory = !p->in_inventory;
 }
 
 auto Player::move_down(std::any d) -> void {
@@ -305,14 +339,18 @@ void Player::update(float dt, World *wrld) {
 // template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f
 // * 3.14159; }
 
-auto Player::drawBlk(uint8_t type, int x) -> void {
+auto Player::drawBlk(uint8_t type, int x, int y) -> void {
     setup_model(type);
 
     Rendering::RenderContext::get().matrix_view(glm::mat4(1));
     Rendering::RenderContext::get().matrix_translate(
-        {153.5f + x * 20, 6 + 3, -20});
-    Rendering::RenderContext::get().matrix_rotate({45.0f, 45.0f, 0});
-    Rendering::RenderContext::get().matrix_scale({9.0f, 8.0f, 9.0f});
+        {153.5f + x * 20, 8 + y * 24, -20});
+    if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40)
+        Rendering::RenderContext::get().matrix_rotate({ 0.0f, 45.0f, 0 });
+    else
+        Rendering::RenderContext::get().matrix_rotate({30.0f, 45.0f, 0});
+
+    Rendering::RenderContext::get().matrix_scale({9.0f, 9.0f, 9.0f});
 
 // DISABLE CULL
 #if BUILD_PC
@@ -339,13 +377,21 @@ auto Player::draw() -> void {
     Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 30, -30);
 
     if (is_head_water) {
-        water->set_position({0, 0});
+        water->set_position({ 0, 0 });
         water->set_layer(1);
         water->draw();
     }
 
     crosshair->set_position({240 - 8, 136 - 8});
     crosshair->draw();
+
+
+    if (in_inventory) {
+        overlay->set_position({ 120, 64 });
+        overlay->set_layer(0);
+        overlay->draw();
+    }
+
 
     item_box->set_position({149, 1});
     item_box->set_layer(-1);
@@ -356,6 +402,12 @@ auto Player::draw() -> void {
     selector->draw();
 
     for (int i = 0; i < 9; i++)
-        drawBlk(itemSelections[i], i);
+        drawBlk(itemSelections[i], i, 0);
+
+    if (in_inventory) {
+        for (int i = 0; i < 42; i++)
+            drawBlk(inventorySelection[i], i % 9, 7 - i / 9);
+    }
+
 }
 } // namespace CrossCraft
