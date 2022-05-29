@@ -47,9 +47,9 @@ jobs:
       - name: Build
         run: |
           git submodule update --init --recursive --remote
-          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 .
-          cmake --build . --config Release
-          move Release\CrossCraft-Classic.exe CrossCraft-Classic.exe
+          cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 .
+          cmake --build . --config Debug
+          move Debug\CrossCraft-Classic.exe CrossCraft-Classic.exe
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:

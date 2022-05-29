@@ -348,10 +348,11 @@ auto Player::draw() -> void {
     crosshair->draw();
 
     item_box->set_position({149, 1});
+    item_box->set_layer(-1);
     item_box->draw();
 
     selector->set_position({148 + 20 * selectorIDX, 0});
-    selector->set_layer(-1);
+    selector->set_layer(-2);
     selector->draw();
 
     for (int i = 0; i < 9; i++)
