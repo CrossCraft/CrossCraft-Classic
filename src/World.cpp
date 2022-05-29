@@ -331,17 +331,6 @@ void World::generate() {
         }
     }
 
-    int i = 0;
-    for (int x = 0; x < 16; x++) {
-        int y = 40;
-        for (int z = 0; z < 16; z++) {
-            auto idx = (x * 256 * 64) + (z * 64) + y;
-            if (i < 50) {
-                worldData[idx] = i++;
-            }
-        }
-    }
-
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
             for (int y = 63; y >= 0; y--) {
