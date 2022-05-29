@@ -331,6 +331,8 @@ auto Player::drawBlk(uint8_t type, int x) -> void {
 #else
     sceGuEnable(GU_CULL_FACE);
 #endif
+
+    Rendering::RenderContext::get().matrix_clear();
 }
 
 auto Player::draw() -> void {
