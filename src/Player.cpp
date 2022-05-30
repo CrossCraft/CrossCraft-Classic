@@ -1,9 +1,9 @@
 #include "Player.hpp"
 #include "BlockConst.hpp"
+#include <Platform/Platform.hpp>
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
 #include <gtx/projection.hpp>
-#include <Platform/Platform.hpp>
 
 #if PSP
 #include <pspctrl.h>
@@ -11,16 +11,14 @@
 
 #define BUILD_PC (BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX)
 
-
 #if BUILD_PC
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 namespace Stardust_Celeste::Rendering {
-    extern GLFWwindow* window;
+extern GLFWwindow *window;
 }
 #endif
-
 
 namespace CrossCraft {
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
@@ -30,8 +28,11 @@ Player::Player()
       cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.01f, 255.0f),
       is_falling(true),
       model(pos, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
-                                                  17, 18, 20, 44}, 
-    inventorySelection{ 1, 4, 45, 2, 5, 17, 18, 20, 44, 48, 6, 37, 38, 39, 40, 12, 13, 19, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 14, 15, 16, 42, 41, 47, 46, 49 },
+                                                  17, 18, 20, 44},
+      inventorySelection{1,  4,  45, 2,  5,  17, 18, 20, 44, 48, 6,
+                         37, 38, 39, 40, 12, 13, 19, 21, 22, 23, 24,
+                         25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+                         36, 14, 15, 16, 42, 41, 47, 46, 49},
       idx_counter(0) {
     gui_texture = Rendering::TextureManager::get().load_texture(
         "./assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
@@ -56,9 +57,9 @@ Player::Player()
             {(256.0f - 16.0f) / 256.0f, (256.0f - 16.0f) / 256.0f},
             {16.0f / 256.0f, 16.0f / 256.0f}});
     water = create_scopeptr<Graphics::G2D::Sprite>(
-        water_texture, Rendering::Rectangle{ {0, 0}, {480, 272} });
+        water_texture, Rendering::Rectangle{{0, 0}, {480, 272}});
     overlay = create_scopeptr<Graphics::G2D::Sprite>(
-        overlay_texture, Rendering::Rectangle{ {120, 64}, {240, 168} });
+        overlay_texture, Rendering::Rectangle{{120, 64}, {240, 168}});
 
     selectorIDX = 0;
     is_underwater = false;
@@ -110,34 +111,33 @@ auto Player::setup_model(uint8_t type) -> void {
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40) {
 
         add_face_to_mesh(xFace1, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_SIDE, p);
+                         LIGHT_SIDE, p);
         add_face_to_mesh(xFace2, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_SIDE, p);
-    }
-    else if (type == 44) {
+                         LIGHT_SIDE, p);
+    } else if (type == 44) {
         add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
-            LIGHT_TOP, { 0 , -0.5, 0 });
+                         LIGHT_TOP, {0, -0.5, 0});
         add_face_to_mesh(leftFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_BOT, p);
+                         LIGHT_BOT, p);
         add_face_to_mesh(backFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_SIDE, { 0, 0, 1 });
-        add_face_to_mesh(frontFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_SIDE, { 0, 0, 1 });
+                         LIGHT_SIDE, {0, 0, 1});
+        add_face_to_mesh(frontFaceHalf,
+                         ChunkMesh::getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE,
+                         {0, 0, 1});
         add_face_to_mesh(backFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_SIDE, p);
-    }
-    else {
+                         LIGHT_SIDE, p);
+    } else {
 
         add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
-            LIGHT_TOP, p);
+                         LIGHT_TOP, p);
         add_face_to_mesh(leftFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_BOT, p);
+                         LIGHT_BOT, p);
         add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_SIDE, { 0, 0, 1 });
+                         LIGHT_SIDE, {0, 0, 1});
         add_face_to_mesh(frontFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_SIDE, { 0, 0, 1 });
+                         LIGHT_SIDE, {0, 0, 1});
         add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-            LIGHT_SIDE, p);
+                         LIGHT_SIDE, p);
     }
 
     blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
@@ -153,7 +153,7 @@ auto Player::move_forward(std::any d) -> void {
 }
 
 auto Player::move_backward(std::any d) -> void {
-    auto p = std::any_cast<Player*>(d); 
+    auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory) {
         p->vel.x += sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
         p->vel.z += cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
@@ -213,20 +213,18 @@ auto Player::dec_selector(std::any d) -> void {
         p->selectorIDX = 8;
 }
 
-auto Player::toggle_inv(std::any d) -> void
-{
-    auto p = std::any_cast<Player*>(d);
+auto Player::toggle_inv(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
     p->in_inventory = !p->in_inventory;
 
 #if BUILD_PC
-    if(p->in_inventory)
-        glfwSetInputMode(Rendering::window, GLFW_CURSOR,
-        GLFW_CURSOR_NORMAL);
+    if (p->in_inventory)
+        glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     else
-        glfwSetInputMode(Rendering::window, GLFW_CURSOR,
-            GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 #else
-
+    p->vcursor_x = 240;
+    p->vcursor_y = 136;
 #endif
 }
 
@@ -276,6 +274,18 @@ auto Player::rotate(float dt) -> void {
         }
 
         set_cursor_center();
+    } else {
+        vcursor_x += cX * 20.0f;
+        vcursor_y += cY * 20.0f;
+
+        if (vcursor_x < 0)
+            vcursor_x = 0;
+        else if (vcursor_x > 480)
+            vcursor_x = 480;
+        if (vcursor_y < 0)
+            vcursor_y = 0;
+        else if (vcursor_y > 272)
+            vcursor_y = 272;
     }
 }
 
@@ -385,7 +395,7 @@ auto Player::drawBlk(uint8_t type, int x, int y) -> void {
     Rendering::RenderContext::get().matrix_translate(
         {153.5f + x * 20, 8 + y * 24, -20});
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40)
-        Rendering::RenderContext::get().matrix_rotate({ 0.0f, 45.0f, 0 });
+        Rendering::RenderContext::get().matrix_rotate({0.0f, 45.0f, 0});
     else
         Rendering::RenderContext::get().matrix_rotate({30.0f, 45.0f, 0});
 
@@ -416,22 +426,28 @@ auto Player::draw() -> void {
     Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 30, -30);
 
     if (is_head_water) {
-        water->set_position({ 0, 0 });
+        water->set_position({0, 0});
         water->set_layer(1);
         water->draw();
     }
 
-    crosshair->set_position({240 - 8, 136 - 8});
-    crosshair->set_layer(-1);
-    crosshair->draw();
-
+    if (!in_inventory) {
+        crosshair->set_position({240 - 8, 136 - 8});
+        crosshair->set_layer(-1);
+        crosshair->draw();
+    } else {
+#if PSP
+        crosshair->set_position({vcursor_x, vcursor_y});
+        crosshair->set_layer(1);
+        crosshair->draw();
+#endif
+    }
 
     if (in_inventory) {
-        overlay->set_position({ 120, 64 });
+        overlay->set_position({120, 64});
         overlay->set_layer(0);
         overlay->draw();
     }
-
 
     item_box->set_position({149, 1});
     item_box->set_layer(-1);
@@ -448,6 +464,5 @@ auto Player::draw() -> void {
         for (int i = 0; i < 42; i++)
             drawBlk(inventorySelection[i], i % 9, 7 - i / 9);
     }
-
 }
 } // namespace CrossCraft

@@ -88,6 +88,9 @@ class Player {
     bool in_inventory;
 
     uint8_t inventorySelection[45];
+
+    float vcursor_x, vcursor_y;
+
   private:
     auto rotate(float dt) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;
@@ -105,7 +108,6 @@ class Player {
 
     float jump_icd;
 
-
     Rendering::Camera cam;
     ScopePtr<Graphics::G2D::Sprite> item_box;
     ScopePtr<Graphics::G2D::Sprite> selector;
@@ -113,7 +115,6 @@ class Player {
     ScopePtr<Graphics::G2D::Sprite> water;
     ScopePtr<Graphics::G2D::Sprite> overlay;
     uint32_t gui_texture, water_texture, overlay_texture;
-
 
     AABB model;
 

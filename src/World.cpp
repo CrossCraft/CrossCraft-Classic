@@ -1,9 +1,9 @@
 #include "World.hpp"
+#include <Platform/Platform.hpp>
 #include <Rendering/Rendering.hpp>
+#include <Utilities/Input.hpp>
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
-#include <Platform/Platform.hpp>
-#include <Utilities/Input.hpp>
 
 #if PSP
 #include <pspctrl.h>
@@ -473,8 +473,6 @@ auto World::update_nearby_blocks(glm::ivec3 ivec) -> void {
     add_update({ivec.x, ivec.y, ivec.z - 1});
 }
 
-
-
 auto World::dig(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
     auto pos = w->player->get_pos();
@@ -482,9 +480,13 @@ auto World::dig(std::any d) -> void {
 
     if (w->player->in_inventory) {
         using namespace Stardust_Celeste::Utilities;
-#if BUILD_PC
         auto cX = (Input::get_axis("Mouse", "X") + 1.0f) / 2.0f;
         auto cY = (Input::get_axis("Mouse", "Y") + 1.0f) / 2.0f;
+
+#if PSP
+        cX = w->player->vcursor_x / 480.0f;
+        cY = w->player->vcursor_y / 272.0f;
+#endif
 
         if (cX > 0.3125f && cX < 0.675f)
             cX = (cX - 0.3125f) / .04f;
@@ -504,10 +506,8 @@ auto World::dig(std::any d) -> void {
         if (idx > 41)
             return;
 
-        w->player->itemSelections[w->player->selectorIDX] = w->player->inventorySelection[idx];
-#else
-
-#endif
+        w->player->itemSelections[w->player->selectorIDX] =
+            w->player->inventorySelection[idx];
 
         return;
     }
