@@ -98,7 +98,8 @@ class Player {
     auto setup_model(uint8_t type) -> void;
 
     auto add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
-                          uint32_t lightVal, glm::vec3 pos) -> void;
+                          uint32_t lightVal, glm::vec3 pos, uint8_t type)
+        -> void;
 
     auto drawBlk(uint8_t type, int x, int y) -> void;
 
@@ -122,10 +123,10 @@ class Player {
 
     // Block Drawing
 
-    uint16_t idx_counter;
-    std::vector<Rendering::Vertex> m_verts;
-    std::vector<uint16_t> m_index;
-    Rendering::Mesh blockMesh;
+    uint16_t idx_counter[50];
+    std::vector<Rendering::Vertex> m_verts[50];
+    std::vector<uint16_t> m_index[50];
+    Rendering::Mesh blockMesh[50];
 };
 
 struct SelData {

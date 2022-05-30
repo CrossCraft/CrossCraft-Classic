@@ -32,8 +32,7 @@ Player::Player()
       inventorySelection{1,  4,  45, 2,  5,  17, 18, 20, 44, 48, 6,
                          37, 38, 39, 40, 12, 13, 19, 21, 22, 23, 24,
                          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-                         36, 14, 15, 16, 42, 41, 47, 46, 49},
-      idx_counter(0) {
+                         36, 14, 15, 16, 42, 41, 47, 46, 49} {
     gui_texture = Rendering::TextureManager::get().load_texture(
         "./assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
@@ -66,19 +65,24 @@ Player::Player()
     in_inventory = false;
     jump_icd = 0.2f;
     terrain_atlas = 0;
+
+    for (int i = 0; i < 50; i++) {
+        setup_model(i);
+    }
 }
 
 const auto playerSpeed = 4.3f;
 
 auto Player::add_face_to_mesh(std::array<float, 12> data,
                               std::array<float, 8> uv, uint32_t lightVal,
-                              glm::vec3 mypos) -> void { // Create color
+                              glm::vec3 mypos, uint8_t type)
+    -> void { // Create color
     Rendering::Color c;
     c.color = lightVal;
 
     // Push Back Verts
     for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
-        m_verts.push_back(Rendering::Vertex{
+        m_verts[type].push_back(Rendering::Vertex{
             uv[tx++],
             uv[tx++],
             c,
@@ -89,59 +93,59 @@ auto Player::add_face_to_mesh(std::array<float, 12> data,
     }
 
     // Push Back Indices
-    m_index.push_back(idx_counter);
-    m_index.push_back(idx_counter + 1);
-    m_index.push_back(idx_counter + 2);
-    m_index.push_back(idx_counter + 2);
-    m_index.push_back(idx_counter + 3);
-    m_index.push_back(idx_counter + 0);
-    idx_counter += 4;
+    m_index[type].push_back(idx_counter[type]);
+    m_index[type].push_back(idx_counter[type] + 1);
+    m_index[type].push_back(idx_counter[type] + 2);
+    m_index[type].push_back(idx_counter[type] + 2);
+    m_index[type].push_back(idx_counter[type] + 3);
+    m_index[type].push_back(idx_counter[type] + 0);
+    idx_counter[type] += 4;
 }
 
 auto Player::setup_model(uint8_t type) -> void {
-    idx_counter = 0;
-    m_verts.clear();
-    m_verts.shrink_to_fit();
-    m_index.clear();
-    m_index.shrink_to_fit();
-    blockMesh.delete_data();
+    idx_counter[type] = 0;
+    m_verts[type].clear();
+    m_verts[type].shrink_to_fit();
+    m_index[type].clear();
+    m_index[type].shrink_to_fit();
+    blockMesh[type].delete_data();
 
     glm::vec3 p = {0, 0, 0};
 
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40) {
 
         add_face_to_mesh(xFace1, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, p);
+                         LIGHT_SIDE, p, type);
         add_face_to_mesh(xFace2, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, p);
+                         LIGHT_SIDE, p, type);
     } else if (type == 44) {
         add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
-                         LIGHT_TOP, {0, -0.5, 0});
+                         LIGHT_TOP, {0, -0.5, 0}, type);
         add_face_to_mesh(leftFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_BOT, p);
+                         LIGHT_BOT, p, type);
         add_face_to_mesh(backFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, {0, 0, 1});
+                         LIGHT_SIDE, {0, 0, 1}, type);
         add_face_to_mesh(frontFaceHalf,
                          ChunkMesh::getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE,
-                         {0, 0, 1});
+                         {0, 0, 1}, type);
         add_face_to_mesh(backFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, p);
+                         LIGHT_SIDE, p, type);
     } else {
 
         add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
-                         LIGHT_TOP, p);
+                         LIGHT_TOP, p, type);
         add_face_to_mesh(leftFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_BOT, p);
+                         LIGHT_BOT, p, type);
         add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, {0, 0, 1});
+                         LIGHT_SIDE, {0, 0, 1}, type);
         add_face_to_mesh(frontFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, {0, 0, 1});
+                         LIGHT_SIDE, {0, 0, 1}, type);
         add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, p);
+                         LIGHT_SIDE, p, type);
     }
 
-    blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
-                       idx_counter);
+    blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
+                             m_index[type].data(), idx_counter[type]);
 }
 
 auto Player::move_forward(std::any d) -> void {
@@ -275,8 +279,8 @@ auto Player::rotate(float dt) -> void {
 
         set_cursor_center();
     } else {
-        vcursor_x += cX * 20.0f;
-        vcursor_y += cY * 20.0f;
+        vcursor_x += cX * 10.0f;
+        vcursor_y += -cY * 10.0f;
 
         if (vcursor_x < 0)
             vcursor_x = 0;
@@ -389,8 +393,6 @@ void Player::update(float dt, World *wrld) {
 // * 3.14159; }
 
 auto Player::drawBlk(uint8_t type, int x, int y) -> void {
-    setup_model(type);
-
     Rendering::RenderContext::get().matrix_view(glm::mat4(1));
     Rendering::RenderContext::get().matrix_translate(
         {153.5f + x * 20, 8 + y * 24, -20});
@@ -410,7 +412,7 @@ auto Player::drawBlk(uint8_t type, int x, int y) -> void {
 
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
-    blockMesh.draw();
+    blockMesh[type].draw();
 
 // ENABLE CULL
 #if BUILD_PC
