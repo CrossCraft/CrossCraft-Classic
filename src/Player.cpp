@@ -58,7 +58,7 @@ Player::Player()
     water = create_scopeptr<Graphics::G2D::Sprite>(
         water_texture, Rendering::Rectangle{{0, 0}, {480, 272}});
     overlay = create_scopeptr<Graphics::G2D::Sprite>(
-        overlay_texture, Rendering::Rectangle{{120, 64}, {240, 168}});
+        overlay_texture, Rendering::Rectangle{{120 - 8, 64 - 44}, {256, 256}});
 
     selectorIDX = 0;
     is_underwater = false;
@@ -446,7 +446,7 @@ auto Player::draw() -> void {
     }
 
     if (in_inventory) {
-        overlay->set_position({120, 64});
+        overlay->set_position({120 - 8, 64 - 44});
         overlay->set_layer(0);
         overlay->draw();
     }

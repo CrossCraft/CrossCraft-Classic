@@ -485,7 +485,7 @@ auto World::dig(std::any d) -> void {
 
 #if PSP
         cX = w->player->vcursor_x / 480.0f;
-        cY = w->player->vcursor_y / 272.0f;
+        cY = 1.0f - (w->player->vcursor_y / 272.0f);
 #endif
 
         if (cX > 0.3125f && cX < 0.675f)
