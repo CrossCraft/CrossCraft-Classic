@@ -2,6 +2,14 @@
 #include <Rendering/Rendering.hpp>
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
+#include <Platform/Platform.hpp>
+#include <Utilities/Input.hpp>
+
+#if PSP
+#include <pspctrl.h>
+#endif
+
+#define BUILD_PC (BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX)
 
 #if PSP
 #include <pspkernel.h>
@@ -465,10 +473,44 @@ auto World::update_nearby_blocks(glm::ivec3 ivec) -> void {
     add_update({ivec.x, ivec.y, ivec.z - 1});
 }
 
+
+
 auto World::dig(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
     auto pos = w->player->get_pos();
     auto default_vec = glm::vec3(0, 0, 1);
+
+    if (w->player->in_inventory) {
+        using namespace Stardust_Celeste::Utilities;
+#if BUILD_PC
+        auto cX = (Input::get_axis("Mouse", "X") + 1.0f) / 2.0f;
+        auto cY = (Input::get_axis("Mouse", "Y") + 1.0f) / 2.0f;
+
+        if (cX > 0.3125f && cX < 0.675f)
+            cX = (cX - 0.3125f) / .04f;
+        else
+            return;
+
+        if (cY > 0.3125f && cY < 0.7188f)
+            cY = (cY - 0.3125f) / .08f;
+        else
+            return;
+
+        int iX = cX;
+        int iY = cY;
+
+        int idx = iY * 9 + iX;
+
+        if (idx > 41)
+            return;
+
+        w->player->itemSelections[w->player->selectorIDX] = w->player->inventorySelection[idx];
+#else
+
+#endif
+
+        return;
+    }
 
     default_vec = glm::rotateX(default_vec, DEGTORAD(w->player->get_rot().x));
     default_vec =
@@ -522,6 +564,9 @@ auto World::dig(std::any d) -> void {
 auto World::place(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
     auto pos = w->player->get_pos();
+
+    if (w->player->in_inventory)
+        return;
 
     auto pos_ivec = glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
                                static_cast<s32>(pos.z));

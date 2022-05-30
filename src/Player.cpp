@@ -3,6 +3,24 @@
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
 #include <gtx/projection.hpp>
+#include <Platform/Platform.hpp>
+
+#if PSP
+#include <pspctrl.h>
+#endif
+
+#define BUILD_PC (BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX)
+
+
+#if BUILD_PC
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
+namespace Stardust_Celeste::Rendering {
+    extern GLFWwindow* window;
+}
+#endif
+
 
 namespace CrossCraft {
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
@@ -128,40 +146,49 @@ auto Player::setup_model(uint8_t type) -> void {
 
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    p->vel.x += -sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
-    p->vel.z += -cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
+    if (!p->in_inventory) {
+        p->vel.x += -sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
+        p->vel.z += -cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
+    }
 }
 
 auto Player::move_backward(std::any d) -> void {
-    auto p = std::any_cast<Player *>(d);
-    p->vel.x += sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
-    p->vel.z += cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
+    auto p = std::any_cast<Player*>(d); 
+    if (!p->in_inventory) {
+        p->vel.x += sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
+        p->vel.z += cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
+    }
 }
 
 auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-    p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+    if (!p->in_inventory) {
+        p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+        p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+    }
 }
 
 auto Player::move_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-    p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+    if (!p->in_inventory) {
+        p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+        p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+    }
 }
 
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
+    if (!p->in_inventory) {
+        if (!p->is_falling && p->jump_icd < 0.0f) {
+            p->vel.y = 8.4f;
+            p->is_falling = false;
+            p->jump_icd = 0.2f;
+        }
 
-    if (!p->is_falling && p->jump_icd < 0.0f) {
-        p->vel.y = 8.4f;
-        p->is_falling = false;
-        p->jump_icd = 0.2f;
-    }
-
-    if (p->is_underwater) {
-        p->vel.y = 3.2f;
-        p->is_falling = false;
+        if (p->is_underwater) {
+            p->vel.y = 3.2f;
+            p->is_falling = false;
+        }
     }
 }
 
@@ -190,6 +217,17 @@ auto Player::toggle_inv(std::any d) -> void
 {
     auto p = std::any_cast<Player*>(d);
     p->in_inventory = !p->in_inventory;
+
+#if BUILD_PC
+    if(p->in_inventory)
+        glfwSetInputMode(Rendering::window, GLFW_CURSOR,
+        GLFW_CURSOR_NORMAL);
+    else
+        glfwSetInputMode(Rendering::window, GLFW_CURSOR,
+            GLFW_CURSOR_DISABLED);
+#else
+
+#endif
 }
 
 auto Player::move_down(std::any d) -> void {
@@ -217,27 +255,28 @@ auto Player::rotate(float dt) -> void {
     cX * 0.5f;
     cY * 0.5f;
 #endif
+    if (!in_inventory) {
+        rot.y += cX * rotSpeed * dt;
+        rot.x += cY * rotSpeed * dt;
 
-    rot.y += cX * rotSpeed * dt;
-    rot.x += cY * rotSpeed * dt;
+        if (rot.y > 360.0f) {
+            rot.y -= 360.0f;
+        }
 
-    if (rot.y > 360.0f) {
-        rot.y -= 360.0f;
+        if (rot.y < 0.0f) {
+            rot.y += 360.0f;
+        }
+
+        if (rot.x < -89.9f) {
+            rot.x = -89.9f;
+        }
+
+        if (rot.x > 89.9f) {
+            rot.x = 89.9f;
+        }
+
+        set_cursor_center();
     }
-
-    if (rot.y < 0.0f) {
-        rot.y += 360.0f;
-    }
-
-    if (rot.x < -89.9f) {
-        rot.x = -89.9f;
-    }
-
-    if (rot.x > 89.9f) {
-        rot.x = 89.9f;
-    }
-
-    set_cursor_center();
 }
 
 const float GRAVITY_ACCELERATION = 28.0f;
@@ -383,6 +422,7 @@ auto Player::draw() -> void {
     }
 
     crosshair->set_position({240 - 8, 136 - 8});
+    crosshair->set_layer(-1);
     crosshair->draw();
 
 
