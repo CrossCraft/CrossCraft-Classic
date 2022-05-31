@@ -245,6 +245,9 @@ auto Player::rotate(float dt) -> void {
 #ifndef PSP
     cX = get_axis("Mouse", "X");
     cY = get_axis("Mouse", "Y");
+
+    cX * 4.0f;
+    cY * 4.0f;
 #else
     cX = get_axis("PSP", "X");
     cY = get_axis("PSP", "Y");
@@ -254,8 +257,8 @@ auto Player::rotate(float dt) -> void {
     if (cY <= 0.4f && cY >= -0.4f)
         cY = 0.0f;
 
-    cX * 0.5f;
-    cY * 0.5f;
+    cX * 0.2f;
+    cY * 0.2f;
 #endif
     if (!in_inventory) {
         rot.y += cX * rotSpeed * dt;
