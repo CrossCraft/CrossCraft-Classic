@@ -366,10 +366,21 @@ void World::draw() {
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
+
+#if !BUILD_PC
+    sceGuDisable(GU_BLEND);
+    sceGuDisable(GU_ALPHA_TEST);
+#endif
+
     // Draw opaque
     for (auto const &[key, val] : chunks) {
         val->draw();
     }
+
+#if !BUILD_PC
+    sceGuEnable(GU_BLEND);
+    sceGuEnable(GU_ALPHA_TEST);
+#endif
 
     // Draw transparent
     for (auto const &[key, val] : chunks) {
