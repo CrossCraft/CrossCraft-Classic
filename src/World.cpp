@@ -548,7 +548,7 @@ auto World::dig(std::any d) -> void {
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = w->worldData[idx];
 
-        if (blk == 0 || blk == 7)
+        if (blk == 0 || blk == 7 || blk == 8)
             continue;
 
         w->psystem->initialize(blk, cast_pos);
@@ -625,8 +625,9 @@ auto World::place(std::any d) -> void {
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = w->worldData[idx];
 
-        if (blk == 0)
+        if (blk == 0 || blk == 8)
             continue;
+
 
         cast_pos = pos + (default_vec * static_cast<float>(i - 1) /
                           static_cast<float>(NUM_STEPS));
