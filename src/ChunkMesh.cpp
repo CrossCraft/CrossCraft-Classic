@@ -410,7 +410,7 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
         if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8 ||
             wrld->worldData[idx] == 18 || wrld->worldData[idx] == 37 ||
             wrld->worldData[idx] == 38 || wrld->worldData[idx] == 39 ||
-            wrld->worldData[idx] == 40 || wrld->worldData[idx] == 6 ||
+            wrld->worldData[idx] == 40 || wrld->worldData[idx] == 6 || 
             wrld->worldData[idx] == 20 || wrld->worldData[idx] == 44) {
             if (blk == 8 && wrld->worldData[idx] != 8) {
                 std::array<float, 12> data2 = data;
@@ -424,8 +424,13 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
             } else if (blk == 18) {
                 add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
                                  true);
-            } else {
-                if (blk != 8)
+            }
+            else if (blk == 20 && wrld->worldData[idx] != 20) {
+                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
+                    true);
+            }
+            else {
+                if (blk != 8 && blk != 20)
                     add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
                                      false);
             }

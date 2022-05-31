@@ -347,7 +347,7 @@ void World::generate() {
                 auto idx = (x * 256 * 64) + (z * 64) + y;
                 auto blk = worldData[idx];
                 if (blk == 0 || blk == 37 || blk == 38 || blk == 39 ||
-                    blk == 40 || blk == 6)
+                    blk == 40 || blk == 20 || blk == 6)
                     continue;
 
                 auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
@@ -436,7 +436,7 @@ auto World::update_lighting(int x, int z) -> void {
     for (int y = 63; y >= 0; y--) {
         auto idx = (x * 256 * 64) + (z * 64) + y;
         auto blk = worldData[idx];
-        if (blk == 0 || blk == 37 || blk == 38 || blk == 39 || blk == 40 ||
+        if (blk == 0 || blk == 37 || blk == 20 || blk == 38 || blk == 39 || blk == 40 ||
             blk == 6)
             continue;
 
