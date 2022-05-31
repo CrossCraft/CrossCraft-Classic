@@ -408,7 +408,10 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
 
         // Add face to mesh
         if (wrld->worldData[idx] == 0 || wrld->worldData[idx] == 8 ||
-            wrld->worldData[idx] == 18 || wrld->worldData[idx] == 37 ||
+#ifndef PSP
+            wrld->worldData[idx] == 18 ||
+#endif      
+            wrld->worldData[idx] == 37 ||
             wrld->worldData[idx] == 38 || wrld->worldData[idx] == 39 ||
             wrld->worldData[idx] == 40 || wrld->worldData[idx] == 6 || 
             wrld->worldData[idx] == 20 || wrld->worldData[idx] == 44) {
