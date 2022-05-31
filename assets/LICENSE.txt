@@ -1,12 +1,19 @@
 CrossCraft Classic uses assets both derived and used 
-from the Unity and Pixel Perfection Community Edition
-resource packs.
+from the Unity, the Pixel Perfection Community Edition,
+and the "defaultish" resource packs.
+
+Defaultish was used to provide the ascii font file
+default.png.
 
 Pixel Perfection Community Edition was used to provide
 the block destroy states from terrain.png, as well as
-the entirety of particles.png and particles.png. Any
-other texture file is from Unity unless stated other-
-wise. 
+the entirety of particles.png and particles.png.
+
+Textures not explicitly referenced above have derived
+from Unity.
+
+Defaultish by foreverxml is licensed under the GNU
+General Public License version 3.
 
 Unity by CyanideX is licensed under a Creative Commons 
 Attribution-NonCommercial-ShareAlike 4.0 International 
@@ -15,6 +22,9 @@ License.
 Pixel Perfection Community Edition is licensed under a
 Creative Commons Attribution Share Alike 4.0 Internat-
 ional licence.
+
+Defaultish Download:
+https://github.com/foreverxml/defaultish-resource-pack
 
 Unity Download: 
 https://www.curseforge.com/minecraft/texture-packs/unity
