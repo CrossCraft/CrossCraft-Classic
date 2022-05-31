@@ -266,7 +266,7 @@ void ChunkMesh::rtick(World *wrld) {
     auto blk2 = wrld->worldData[idx2];
     auto blk = wrld->worldData[idx];
 
-    if (blk == 3 && blk2 != 0) {
+    if (blk == 3 && !(blk2 == 0 || blk2 == 6 || blk2 == 37 || blk2 == 38 || blk2 == 39 || blk2 == 40)) {
         wrld->worldData[idx] = 2;
         needsRegen = true;
     }
