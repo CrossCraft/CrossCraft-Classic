@@ -635,7 +635,11 @@ auto World::place(std::any d) -> void {
                           static_cast<s32>(cast_pos.y),
                           static_cast<s32>(cast_pos.z));
 
-        if (!validate_ivec3(ivec) || ivec == posivec || ivec == posivec2 || ivec == posivec3)
+        if (!validate_ivec3(ivec))
+            return;
+
+        auto bk = w->player->itemSelections[w->player->selectorIDX];
+        if ((ivec == posivec || ivec == posivec2 || ivec == posivec3) && (bk != 6 && bk != 37 && bk != 38 && bk != 39 && bk != 40))
             return;
 
         idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
