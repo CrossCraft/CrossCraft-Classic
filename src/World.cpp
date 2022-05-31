@@ -612,7 +612,13 @@ auto World::place(std::any d) -> void {
 
         auto posivec =
             glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
-                       static_cast<s32>(pos.z));
+                static_cast<s32>(pos.z));
+        auto posivec2 =
+            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y - 1),
+                static_cast<s32>(pos.z));
+        auto posivec3 =
+            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y - 1.8f),
+                static_cast<s32>(pos.z));
 
         if (!validate_ivec3(ivec) || ivec == posivec)
             continue;
@@ -629,8 +635,8 @@ auto World::place(std::any d) -> void {
                           static_cast<s32>(cast_pos.y),
                           static_cast<s32>(cast_pos.z));
 
-        if (!validate_ivec3(ivec) || ivec == posivec)
-            continue;
+        if (!validate_ivec3(ivec) || ivec == posivec || ivec == posivec2 || ivec == posivec3)
+            return;
 
         idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
 
