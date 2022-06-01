@@ -53,6 +53,8 @@ class Player {
      */
     auto draw() -> void;
 
+    auto spawn(World* wrld) -> void;
+
     /**
      * @brief Get the position
      *

@@ -25,7 +25,7 @@ template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player()
     : pos(128.f, 64.0f, 128.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
-      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.01f, 255.0f),
+      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.3f, 255.0f),
       is_falling(true),
       model(pos, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
                                                   17, 18, 20, 44},
@@ -72,6 +72,31 @@ Player::Player()
 }
 
 const auto playerSpeed = 4.3f;
+
+auto Player::spawn(World* wrld) -> void {
+    bool spawned = false;
+
+    while (!spawned) {
+        int x = rand() % 64 - 32 + 128;
+        int z = rand() % 64 - 32 + 128;
+
+        for (int y = 50; y > 32; y--) {
+            auto blk = wrld->worldData[wrld->getIdx(x, y, z)];
+
+            if (blk != 0 && blk != 8) {
+                pos = { x, y + 1, z };
+                pos.y += 1.8f;
+
+                cam.pos = pos;
+                model.pos = pos;
+
+                SC_APP_INFO("SPAWNED AT {} {} {} {}", x, y, z, blk);
+                return;
+            }
+
+        }
+    }
+}
 
 auto Player::add_face_to_mesh(std::array<float, 12> data,
                               std::array<float, 8> uv, uint32_t lightVal,
