@@ -365,6 +365,8 @@ void World::generate() {
 
     // Destroy height map
     free(hmap);
+
+    player->spawn(this);
 }
 
 void World::draw() {
