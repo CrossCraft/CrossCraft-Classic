@@ -28,6 +28,8 @@ if(PSP)
 create_pbp_file(
     TARGET CrossCraft-Classic
     TITLE CrossCraft-Classic
+    ICON_PATH ../src/assets/psp/ICON0.png
+    BACKGROUND_PATH ../src/assets/psp/PIC1.png
     BUILD_PRX 1
 )
 
