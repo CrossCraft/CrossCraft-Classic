@@ -43,6 +43,9 @@ World::World(std::shared_ptr<Player> p) {
         reinterpret_cast<uint16_t *>(calloc(256 * 4 * 256, sizeof(uint16_t)));
 
     chunks.clear();
+
+    place_icd = 0.0f;
+    break_icd = 0.0f;
 }
 
 World::~World() {
@@ -102,6 +105,9 @@ void World::update(double dt) {
     psystem->update(dt);
 
     tick_counter += dt;
+
+    break_icd -= dt;
+    place_icd -= dt;
 
     if (tick_counter > 0.25) {
         tick_counter = 0;
@@ -486,6 +492,12 @@ auto World::update_nearby_blocks(glm::ivec3 ivec) -> void {
 
 auto World::dig(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
+
+    if (w->break_icd < 0) 
+        w->break_icd = 0.2f;
+    else
+        return;
+
     auto pos = w->player->get_pos();
     auto default_vec = glm::vec3(0, 0, 1);
 
@@ -574,6 +586,13 @@ auto World::dig(std::any d) -> void {
 
 auto World::place(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
+
+    if (w->place_icd < 0)
+        w->place_icd = 0.2f;
+    else
+        return;
+
+
     auto pos = w->player->get_pos();
 
     if (w->player->in_inventory)
@@ -658,7 +677,8 @@ auto World::place(std::any d) -> void {
             w->chunks[id]->generate(w);
 
         w->update_surroundings(ivec.x, ivec.z);
-
+        
+        return;
         break;
     }
 }

@@ -28,10 +28,10 @@ void GameState::bind_controls() {
         { (int)Input::PSPButtons::Select, KeyFlag::Press },
         { Player::toggle_inv, world->player.get() });
     psp_controller->add_command(
-        {(int)Input::PSPButtons::LTrigger, KeyFlag::Press},
+        {(int)Input::PSPButtons::LTrigger, KeyFlag::Press | KeyFlag::Held },
         {World::dig, world.get()});
     psp_controller->add_command(
-        {(int)Input::PSPButtons::RTrigger, KeyFlag::Press},
+        {(int)Input::PSPButtons::RTrigger, KeyFlag::Press | KeyFlag::Held },
         {World::place, world.get()});
     psp_controller->add_command({(int)Input::PSPButtons::Left, KeyFlag::Press},
                                 {Player::dec_selector, world->player.get()});
@@ -60,10 +60,10 @@ void GameState::bind_controls() {
         { (int)Input::Keys::B, KeyFlag::Press },
         { Player::toggle_inv, world->player.get() });
     mouse_controller->add_command(
-        {(int)Input::MouseButtons::Left, KeyFlag::Press},
+        {(int)Input::MouseButtons::Left, KeyFlag::Press | KeyFlag::Held},
         {World::dig, world.get()});
     mouse_controller->add_command(
-        {(int)Input::MouseButtons::Right, KeyFlag::Press},
+        {(int)Input::MouseButtons::Right, KeyFlag::Press | KeyFlag::Held },
         {World::place, world.get()});
 
     key_controller->add_command(

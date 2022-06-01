@@ -163,6 +163,8 @@ class World {
     float *hmap;
     uint32_t seed;
     float tick_counter;
+
+    float place_icd, break_icd;
 };
 
 } // namespace CrossCraft
