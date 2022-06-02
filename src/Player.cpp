@@ -387,12 +387,15 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
     testpos = pos + vel * dt;
 
     bool collide_down = false;
-    collide_down =
-        collide_down || test({testpos.x, testpos.y - 1.8f, testpos.z}, wrld);
+    collide_down = collide_down || test({}, wrld);
 
-    if (collide_down && vel.y < 0) {
-        vel.y = 0;
-        is_falling = false;
+    if (test({testpos.x, testpos.y - 1.8f, testpos.z}, wrld)) {
+        AABB test_box =
+            AABB(glm::ivec3(testpos.x, testpos.y + 1, testpos.z), {1, 1, 1});
+        if (AABB::intersect(test_box, model)) {
+            vel.y = 0;
+            is_falling = false;
+        }
     }
 
     if (test({testpos.x, testpos.y, testpos.z}, wrld)) {
@@ -438,8 +441,8 @@ void Player::update(float dt, World *wrld) {
 
     pos += vel * dt;
 
-    // When the player stops falling, we make sure the player snaps to the top
-    // of a surface
+    // When the player stops falling, we make sure the player snaps to the
+    // top of a surface
     if (!is_falling) {
         pos.y += 0.2f;
         pos.y = std::round(pos.y);
