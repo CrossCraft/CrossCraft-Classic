@@ -251,13 +251,13 @@ namespace CrossCraft {
         }
         case 48: // Mossy Cobble
             return getTexture(vec, 36);
-        
+
         case 49: // Obsidian
             return getTexture(vec, 37);
-        
+
         default:
             return getTexture(vec, idx - 21 + 64);
-        
+
         }
 
 
@@ -287,6 +287,23 @@ namespace CrossCraft {
         if (blk == 2 && blk2 == 0) {
             wrld->worldData[idx] = 3;
             needsRegen = true;
+        }
+
+        if (blk == 6 || blk == 37 || blk == 38) {
+            int idxl = (x * 256 * 4) + (z * 4) + y / 16;
+            if (!((wrld->lightData[idxl] >> (int)y) & 1)) {
+                wrld->worldData[idx] = 0;
+                needsRegen = true;
+            }
+        }
+
+
+        if (blk == 39 || blk == 40) {
+            int idxl = (x * 256 * 4) + (z * 4) + y / 16;
+            if (((wrld->lightData[idxl] >> (int)y) & 1)) {
+                wrld->worldData[idx] = 0;
+                needsRegen = true;
+            }
         }
     }
 

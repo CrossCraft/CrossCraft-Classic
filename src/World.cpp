@@ -109,7 +109,7 @@ void World::update(double dt) {
     break_icd -= dt;
     place_icd -= dt;
 
-    if (tick_counter > 0.25) {
+    if (tick_counter > 0.15) {
         tick_counter = 0;
 
         for (auto &[key, value] : chunks) {
