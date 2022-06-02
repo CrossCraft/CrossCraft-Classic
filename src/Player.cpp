@@ -25,9 +25,9 @@ template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player()
     : pos(128.f, 64.0f, 128.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
-      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.3f, 255.0f),
+      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.1f, 255.0f),
       is_falling(true),
-      model(pos, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
+      model(pos, {0.6, 1.8, 0.6}), itemSelections{1,  4,  45, 2, 5,
                                                   17, 18, 20, 44},
       inventorySelection{1,  4,  45, 2,  5,  17, 18, 20, 44, 48, 6,
                          37, 38, 39, 40, 12, 13, 19, 21, 22, 23, 24,
@@ -330,6 +330,8 @@ auto test(glm::vec3 pos, World *wrld) -> bool {
 }
 
 void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
+    model.ext = glm::vec3(0.6f, 1.8f, 0.6f);
+
     for (int x = -1; x <= 1; x++)
         for (int y = 0; y <= 2; y++)
             for (int z = -1; z <= 1; z++) {
@@ -337,14 +339,46 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                 float zoff = z;
 
                 auto new_vec = glm::vec3(testpos.x + xoff, testpos.y - 1.8f + y,
-                                         testpos.z + zoff);
+                    testpos.z + zoff);
 
                 if (test(new_vec, wrld)) {
-                    AABB test_box = AABB(new_vec, {1, 1, 1});
+                    AABB test_box = AABB(glm::ivec3(new_vec.x, new_vec.y + 1, new_vec.z), { 1, 1, 1 });
 
                     if (AABB::intersect(test_box, model)) {
-                        vel.x = 0;
-                        vel.z = 0;
+                        float player_bottom = model.getMax().x;
+                        float tiles_bottom = test_box.getMax().x;
+                        float player_right = model.getMax().z;
+                        float tiles_right = test_box.getMax().z;
+
+                        float b_collision = tiles_bottom - model.getMin().x;
+                        float t_collision = player_bottom - test_box.getMin().x;
+                        float l_collision = player_right - test_box.getMin().z;
+                        float r_collision = tiles_right - model.getMin().z;
+
+                        if (t_collision < b_collision && t_collision < l_collision && t_collision < r_collision)
+                        {
+                            //Top collision
+                            vel.x = 0;
+                        }
+                        else if (b_collision < t_collision && b_collision < l_collision && b_collision < r_collision)
+                        {
+                            //bottom collision
+                            vel.x = 0;
+                        }
+                        else if (l_collision < r_collision && l_collision < t_collision && l_collision < b_collision)
+                        {
+                            //Left collision
+                            vel.z = 0;
+                        }
+                        else if (r_collision < l_collision && r_collision < t_collision && r_collision < b_collision)
+                        {
+                            //Right collision
+                            vel.z = 0;
+                        }
+                        else {
+                            vel.x = 0;
+                            vel.z = 0;
+                        }
                     }
                 }
             }
@@ -378,7 +412,7 @@ void Player::update(float dt, World *wrld) {
     is_falling = true;
 
     glm::vec3 testpos = pos + vel * dt;
-    model.pos = testpos + glm::vec3(0.2f, 0, 0.2f);
+    model.pos = testpos - glm::vec3(0.3f, 0, 0.3f);
 
     auto blk =
         wrld->worldData[wrld->getIdx(testpos.x, testpos.y + 0.2f, testpos.z)];
