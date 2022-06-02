@@ -125,19 +125,25 @@ void GameState::on_start() {
 
     // Read config
     // TODO: Make a different function for this
-    std::fstream file("config.cfg");
+    std::ifstream file("config.cfg");
 
-    std::string line;
-    std::getline(file, line, ':');
+    if (file.is_open()) {
+        std::string line;
+        std::getline(file, line, ':');
 
-    if (line == "sense") {
-        std::getline(file, line);
-        std::stringstream str(line);
+        if (line == "sense") {
+            std::getline(file, line);
+            std::stringstream str(line);
 
-        str >> config.sense;
+            str >> config.sense;
+        }
+
+        world->cfg = config;
+    } else {
+        std::ofstream file2("config.cfg");
+        file2 << "sense:1.50" << std::endl;
+        file2.close();
     }
-
-    world->cfg = config;
 }
 
 void GameState::on_cleanup() {
