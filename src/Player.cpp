@@ -73,7 +73,7 @@ Player::Player()
 
 const auto playerSpeed = 4.3f;
 
-auto Player::spawn(World* wrld) -> void {
+auto Player::spawn(World *wrld) -> void {
     bool spawned = false;
 
     while (!spawned) {
@@ -84,7 +84,7 @@ auto Player::spawn(World* wrld) -> void {
             auto blk = wrld->worldData[wrld->getIdx(x, y, z)];
 
             if (blk != 0 && blk != 8) {
-                pos = { x + 0.5f, y + 1, z + 0.5f };
+                pos = {x + 0.5f, y + 1, z + 0.5f};
                 pos.y += 1.8f;
 
                 cam.pos = pos;
@@ -93,7 +93,6 @@ auto Player::spawn(World* wrld) -> void {
                 SC_APP_INFO("SPAWNED AT {} {} {} {}", x, y, z, blk);
                 return;
             }
-
         }
     }
 }
@@ -261,7 +260,7 @@ auto Player::move_down(std::any d) -> void {
     // TODO: Sneak
 }
 
-auto Player::rotate(float dt) -> void {
+auto Player::rotate(float dt, float sense) -> void {
     using namespace Utilities::Input;
     // Rotate player
     const auto rotSpeed = 500.0f;
@@ -286,8 +285,8 @@ auto Player::rotate(float dt) -> void {
     cY * 0.1f;
 #endif
     if (!in_inventory) {
-        rot.y += cX * rotSpeed * dt;
-        rot.x += cY * rotSpeed * dt;
+        rot.y += cX * rotSpeed * dt * sense;
+        rot.x += cY * rotSpeed * dt * sense;
 
         if (rot.y > 360.0f) {
             rot.y -= 360.0f;
@@ -339,10 +338,12 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                 float zoff = z;
 
                 auto new_vec = glm::vec3(testpos.x + xoff, testpos.y - 1.8f + y,
-                    testpos.z + zoff);
+                                         testpos.z + zoff);
 
                 if (test(new_vec, wrld)) {
-                    AABB test_box = AABB(glm::ivec3(new_vec.x, new_vec.y + 1, new_vec.z), { 1, 1, 1 });
+                    AABB test_box =
+                        AABB(glm::ivec3(new_vec.x, new_vec.y + 1, new_vec.z),
+                             {1, 1, 1});
 
                     if (AABB::intersect(test_box, model)) {
                         float player_bottom = model.getMax().x;
@@ -355,27 +356,27 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                         float l_collision = player_right - test_box.getMin().z;
                         float r_collision = tiles_right - model.getMin().z;
 
-                        if (t_collision < b_collision && t_collision < l_collision && t_collision < r_collision)
-                        {
-                            //Top collision
+                        if (t_collision < b_collision &&
+                            t_collision < l_collision &&
+                            t_collision < r_collision) {
+                            // Top collision
                             vel.x = 0;
-                        }
-                        else if (b_collision < t_collision && b_collision < l_collision && b_collision < r_collision)
-                        {
-                            //bottom collision
+                        } else if (b_collision < t_collision &&
+                                   b_collision < l_collision &&
+                                   b_collision < r_collision) {
+                            // bottom collision
                             vel.x = 0;
-                        }
-                        else if (l_collision < r_collision && l_collision < t_collision && l_collision < b_collision)
-                        {
-                            //Left collision
+                        } else if (l_collision < r_collision &&
+                                   l_collision < t_collision &&
+                                   l_collision < b_collision) {
+                            // Left collision
                             vel.z = 0;
-                        }
-                        else if (r_collision < l_collision && r_collision < t_collision && r_collision < b_collision)
-                        {
-                            //Right collision
+                        } else if (r_collision < l_collision &&
+                                   r_collision < t_collision &&
+                                   r_collision < b_collision) {
+                            // Right collision
                             vel.z = 0;
-                        }
-                        else {
+                        } else {
                             vel.x = 0;
                             vel.z = 0;
                         }
@@ -401,7 +402,7 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
 }
 
 void Player::update(float dt, World *wrld) {
-    rotate(dt);
+    rotate(dt, wrld->cfg.sense);
     jump_icd -= dt;
 
     // Update position

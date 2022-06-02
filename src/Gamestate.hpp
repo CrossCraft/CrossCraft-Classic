@@ -8,6 +8,7 @@
  * @copyright Copyright (c) 2022
  *
  */
+#include "Config.hpp"
 #include "World.hpp"
 #include <Core/Application.hpp>
 #include <Utilities/Input.hpp>
@@ -41,6 +42,7 @@ class GameState : public Core::ApplicationState {
     Utilities::Controller *psp_controller;
     Utilities::Controller *key_controller;
     Utilities::Controller *mouse_controller;
+    Config config;
 };
 
 } // namespace CrossCraft

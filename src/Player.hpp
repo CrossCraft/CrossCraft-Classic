@@ -53,7 +53,7 @@ class Player {
      */
     auto draw() -> void;
 
-    auto spawn(World* wrld) -> void;
+    auto spawn(World *wrld) -> void;
 
     /**
      * @brief Get the position
@@ -94,7 +94,7 @@ class Player {
     float vcursor_x, vcursor_y;
 
   private:
-    auto rotate(float dt) -> void;
+    auto rotate(float dt, float sense) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;
 
     auto setup_model(uint8_t type) -> void;
