@@ -84,7 +84,7 @@ auto Player::spawn(World* wrld) -> void {
             auto blk = wrld->worldData[wrld->getIdx(x, y, z)];
 
             if (blk != 0 && blk != 8) {
-                pos = { x, y + 1, z };
+                pos = { x + 0.5f, y + 1, z + 0.5f };
                 pos.y += 1.8f;
 
                 cam.pos = pos;
@@ -282,8 +282,8 @@ auto Player::rotate(float dt) -> void {
     if (cY <= 0.4f && cY >= -0.4f)
         cY = 0.0f;
 
-    cX * 0.2f;
-    cY * 0.2f;
+    cX * 0.1f;
+    cY * 0.1f;
 #endif
     if (!in_inventory) {
         rot.y += cX * rotSpeed * dt;
