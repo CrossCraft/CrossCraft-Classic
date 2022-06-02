@@ -374,7 +374,6 @@ void World::draw() {
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
-
 #if !BUILD_PC
     sceGuDisable(GU_BLEND);
     sceGuDisable(GU_ALPHA_TEST);
@@ -455,8 +454,8 @@ auto World::update_lighting(int x, int z) -> void {
     for (int y = 63; y >= 0; y--) {
         auto idx = (x * 256 * 64) + (z * 64) + y;
         auto blk = worldData[idx];
-        if (blk == 0 || blk == 37 || blk == 20 || blk == 38 || blk == 39 || blk == 40 ||
-            blk == 6)
+        if (blk == 0 || blk == 37 || blk == 20 || blk == 38 || blk == 39 ||
+            blk == 40 || blk == 6)
             continue;
 
         auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
@@ -495,7 +494,7 @@ auto World::update_nearby_blocks(glm::ivec3 ivec) -> void {
 auto World::dig(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
 
-    if (w->break_icd < 0) 
+    if (w->break_icd < 0)
         w->break_icd = 0.2f;
     else
         return;
@@ -594,7 +593,6 @@ auto World::place(std::any d) -> void {
     else
         return;
 
-
     auto pos = w->player->get_pos();
 
     if (w->player->in_inventory)
@@ -607,7 +605,7 @@ auto World::place(std::any d) -> void {
         return;
 
     auto pidx = (pos_ivec.x * 256 * 64) + (pos_ivec.z * 64) + pos_ivec.y;
-    if (w->worldData[pidx] != 0)
+    if (w->worldData[pidx] != 0 && w->worldData[pidx] != 8)
         return;
 
     auto default_vec = glm::vec3(0, 0, 1);
@@ -633,22 +631,22 @@ auto World::place(std::any d) -> void {
 
         auto posivec =
             glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
-                static_cast<s32>(pos.z));
+                       static_cast<s32>(pos.z));
         auto posivec2 =
             glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y - 1),
-                static_cast<s32>(pos.z));
+                       static_cast<s32>(pos.z));
         auto posivec3 =
             glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y - 1.8f),
-                static_cast<s32>(pos.z));
+                       static_cast<s32>(pos.z));
 
         if (!validate_ivec3(ivec) || ivec == posivec)
             continue;
+
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = w->worldData[idx];
 
         if (blk == 0 || blk == 8)
             continue;
-
 
         cast_pos = pos + (default_vec * static_cast<float>(i - 1) /
                           static_cast<float>(NUM_STEPS));
@@ -661,7 +659,8 @@ auto World::place(std::any d) -> void {
             return;
 
         auto bk = w->player->itemSelections[w->player->selectorIDX];
-        if ((ivec == posivec || ivec == posivec2 || ivec == posivec3) && (bk != 6 && bk != 37 && bk != 38 && bk != 39 && bk != 40))
+        if ((ivec == posivec || ivec == posivec2 || ivec == posivec3) &&
+            (bk != 6 && bk != 37 && bk != 38 && bk != 39 && bk != 40))
             return;
 
         idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
@@ -679,7 +678,7 @@ auto World::place(std::any d) -> void {
             w->chunks[id]->generate(w);
 
         w->update_surroundings(ivec.x, ivec.z);
-        
+
         return;
         break;
     }
