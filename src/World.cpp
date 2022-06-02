@@ -480,6 +480,7 @@ auto World::add_update(glm::ivec3 ivec) -> void {
 }
 
 auto World::update_nearby_blocks(glm::ivec3 ivec) -> void {
+    add_update({ivec.x, ivec.y, ivec.z });
     add_update({ivec.x, ivec.y + 1, ivec.z});
     add_update({ivec.x, ivec.y - 1, ivec.z});
     add_update({ivec.x - 1, ivec.y, ivec.z});
@@ -692,6 +693,7 @@ auto World::place(std::any d) -> void {
             w->chunks[id]->generate(w);
 
         w->update_surroundings(ivec.x, ivec.z);
+        w->update_nearby_blocks(ivec);
 
         return;
         break;

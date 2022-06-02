@@ -65,26 +65,12 @@ void ChunkStack::chunk_update(World *wrld) {
         auto idx = (pos.x * 256 * 64) + (pos.z * 64) + pos.y;
         auto blk = wrld->worldData[idx];
 
-        // Unless this is water, we don't care
         if (blk == 8) {
-            // Check surroundings if air.
-            // If air, fill then trigger cascade updates
-            update_check(wrld, blk, {pos.x, pos.y - 1, pos.z});
-            update_check(wrld, blk, {pos.x - 1, pos.y, pos.z});
-            update_check(wrld, blk, {pos.x + 1, pos.y, pos.z});
-            update_check(wrld, blk, {pos.x, pos.y, pos.z + 1});
-            update_check(wrld, blk, {pos.x, pos.y, pos.z - 1});
-
-            update_check(wrld, blk, {pos.x, pos.y - 2, pos.z});
-            update_check(wrld, blk, {pos.x - 2, pos.y, pos.z});
-            update_check(wrld, blk, {pos.x + 2, pos.y, pos.z});
-            update_check(wrld, blk, {pos.x, pos.y, pos.z + 2});
-            update_check(wrld, blk, {pos.x, pos.y, pos.z - 2});
-
-            update_check(wrld, blk, {pos.x + 1, pos.y, pos.z + 1});
-            update_check(wrld, blk, {pos.x + 1, pos.y, pos.z - 1});
-            update_check(wrld, blk, {pos.x - 1, pos.y, pos.z - 1});
-            update_check(wrld, blk, {pos.x - 1, pos.y, pos.z + 1});
+            update_check(wrld, blk, { pos.x, pos.y - 1, pos.z });
+            update_check(wrld, blk, { pos.x - 1, pos.y, pos.z });
+            update_check(wrld, blk, { pos.x + 1, pos.y, pos.z });
+            update_check(wrld, blk, { pos.x, pos.y, pos.z + 1 });
+            update_check(wrld, blk, { pos.x, pos.y, pos.z - 1 });
         }
     }
 
