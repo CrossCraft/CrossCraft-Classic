@@ -397,9 +397,6 @@ void World::draw() {
     clouds->draw();
     psystem->draw();
 
-    // Request 2D Mode
-    Rendering::RenderContext::get().set_mode_2D();
-
     player->draw();
 }
 

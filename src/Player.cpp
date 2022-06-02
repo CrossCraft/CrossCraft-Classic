@@ -24,7 +24,7 @@ namespace CrossCraft {
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player()
-    : pos(128.f, 64.0f, 128.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
+    : pos(0.f, 64.0f, 0.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
       cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.05f, 255.0f),
       is_falling(true),
       model(pos, {0.6, 1.8, 0.6}), itemSelections{1,  4,  45, 2, 5,
@@ -490,8 +490,43 @@ auto Player::drawBlk(uint8_t type, int x, int y) -> void {
     Rendering::RenderContext::get().matrix_clear();
 }
 
+auto Player::drawBlkHand(uint8_t type) -> void {
+    auto ctx = &Rendering::RenderContext::get();
+
+    ctx->matrix_view(glm::mat4(1.0f));
+    ctx->matrix_translate({0.18f, -0.6125f, -0.725f});
+    if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40 ||
+        type == 44) {
+        ctx->matrix_translate({0.0f, 0.175f, 0.0f});
+    }
+    ctx->matrix_rotate({0, 55.0f, 0});
+    ctx->matrix_scale({0.35f, 0.35f, 0.35f});
+
+// DISABLE CULL
+#if BUILD_PC
+    glDisable(GL_CULL_FACE);
+#else
+    sceGuDisable(GU_CULL_FACE);
+#endif
+
+    // Set up texture
+    Rendering::TextureManager::get().bind_texture(terrain_atlas);
+    blockMesh[type].draw();
+
+// ENABLE CULL
+#if BUILD_PC
+    glEnable(GL_CULL_FACE);
+#else
+    sceGuEnable(GU_CULL_FACE);
+#endif
+
+    ctx->matrix_clear();
+}
+
 auto Player::draw() -> void {
-    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 30, -30);
+    drawBlkHand(itemSelections[selectorIDX]);
+    Rendering::RenderContext::get().set_mode_2D();
+    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 100, -100);
 
     if (is_head_water) {
         water->set_position({0, 0});

@@ -104,6 +104,7 @@ class Player {
         -> void;
 
     auto drawBlk(uint8_t type, int x, int y) -> void;
+    auto drawBlkHand(uint8_t type) -> void;
 
     glm::vec3 pos;
     glm::vec2 rot;
