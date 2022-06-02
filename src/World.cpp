@@ -662,11 +662,28 @@ auto World::place(std::any d) -> void {
 
         idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
 
+
+        auto idx2 = (ivec.x * 256 * 64) + (ivec.z * 64) + (ivec.y - 1);
+
+        
         uint16_t x = ivec.x / 16;
         uint16_t y = ivec.z / 16;
         uint32_t id = x << 16 | (y & 0x00FF);
+        
+        blk = w->player->itemSelections[w->player->selectorIDX];
 
-        w->worldData[idx] = w->player->itemSelections[w->player->selectorIDX];
+        auto blk2 = w->worldData[idx2];
+
+        if ((blk == 37 || blk == 38) && blk2 != 3)
+            return;
+
+        if (blk == 6 && (blk2 != 3 && blk2 != 2))
+            return;
+
+        if ((blk == 39 || blk == 40) && (blk2 != 1 && blk2 != 4 && blk2 != 13))
+            return;
+
+        w->worldData[idx] = blk;
 
         // Update Lighting
         w->update_lighting(ivec.x, ivec.z);
