@@ -525,10 +525,10 @@ auto Player::drawBlkHand(uint8_t type) -> void {
 // DISABLE CULL
 #if BUILD_PC
     glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT);
 #else
     sceGuDisable(GU_CULL_FACE);
-    sceGuDisable(GU_DEPTH_TEST);
+    sceGuClear(GU_DEPTH_BUFFER_BIT);
 #endif
 
     // Set up texture
@@ -538,10 +538,8 @@ auto Player::drawBlkHand(uint8_t type) -> void {
 // ENABLE CULL
 #if BUILD_PC
     glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
 #else
     sceGuEnable(GU_CULL_FACE);
-    sceGuEnable(GU_DEPTH_TEST);
 #endif
 
     ctx->matrix_clear();
