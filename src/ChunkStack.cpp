@@ -56,8 +56,8 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
                 wrld->update_surroundings(chk.x, chk.z);
 
                 updated.push_back(chk);
-            }
-            else if (blkr == 6 || blkr == 37 || blkr == 38 || blkr == 39 || blkr == 40) {
+            } else if (blkr == 6 || blkr == 37 || blkr == 38 || blkr == 39 ||
+                       blkr == 40) {
                 uint16_t x = chk.x / 16;
                 uint16_t y = chk.z / 16;
                 uint32_t id = x << 16 | (y & 0x00FF);
@@ -98,14 +98,14 @@ void ChunkStack::chunk_update(World *wrld) {
         auto blk = wrld->worldData[idx];
 
         if (blk == 8) {
-            update_check(wrld, blk, { pos.x, pos.y - 1, pos.z });
-            update_check(wrld, blk, { pos.x - 1, pos.y, pos.z });
-            update_check(wrld, blk, { pos.x + 1, pos.y, pos.z });
-            update_check(wrld, blk, { pos.x, pos.y, pos.z + 1 });
-            update_check(wrld, blk, { pos.x, pos.y, pos.z - 1 });
-        }
-        else if (blk == 6 || blk == 37 || blk == 38 || blk == 39 || blk == 40) {
-            update_check(wrld, blk, { pos.x, pos.y - 1, pos.z });
+            update_check(wrld, blk, {pos.x, pos.y - 1, pos.z});
+            update_check(wrld, blk, {pos.x - 1, pos.y, pos.z});
+            update_check(wrld, blk, {pos.x + 1, pos.y, pos.z});
+            update_check(wrld, blk, {pos.x, pos.y, pos.z + 1});
+            update_check(wrld, blk, {pos.x, pos.y, pos.z - 1});
+        } else if (blk == 6 || blk == 37 || blk == 38 || blk == 39 ||
+                   blk == 40) {
+            update_check(wrld, blk, {pos.x, pos.y - 1, pos.z});
         }
     }
 
@@ -156,6 +156,13 @@ void ChunkStack::draw_transparent() {
     // Draw transparent meshes
     for (int i = 0; i < 4; i++) {
         stack[i]->draw_transparent();
+    }
+}
+
+void ChunkStack::draw_flora() {
+    // Draw transparent meshes
+    for (int i = 0; i < 4; i++) {
+        stack[i]->draw_flora();
     }
 }
 

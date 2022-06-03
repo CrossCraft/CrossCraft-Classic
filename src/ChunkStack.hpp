@@ -74,6 +74,8 @@ class ChunkStack {
      */
     void draw_transparent();
 
+    void draw_flora();
+
     /**
      * @brief Get the chunk position
      *

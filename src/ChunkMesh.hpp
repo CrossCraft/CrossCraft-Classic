@@ -72,6 +72,8 @@ class ChunkMesh {
      */
     void draw_transparent();
 
+    void draw_flora();
+
     bool needsRegen;
 
   private:
@@ -100,10 +102,10 @@ class ChunkMesh {
      *
      */
     void add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
-                          glm::vec3 pos, uint32_t lightVal, bool trans);
+                          glm::vec3 pos, uint32_t lightVal, int m);
 
     void add_xface_to_mesh(std::array<float, 8> uv, glm::vec3 pos,
-                           uint32_t lightVal, const World* wrld);
+                           uint32_t lightVal, const World *wrld);
 
     int cX, cY, cZ;
     int rtcounter;
@@ -116,8 +118,13 @@ class ChunkMesh {
     std::vector<Rendering::Vertex> t_verts;
     std::vector<uint16_t> t_index;
 
+    uint16_t fidx_counter;
+    std::vector<Rendering::Vertex> f_verts;
+    std::vector<uint16_t> f_index;
+
     Rendering::Mesh mesh;
     Rendering::Mesh transMesh;
+    Rendering::Mesh floraMesh;
 };
 
 } // namespace CrossCraft
