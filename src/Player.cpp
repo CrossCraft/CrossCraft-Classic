@@ -25,7 +25,7 @@ template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player()
     : pos(0.f, 64.0f, 0.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
-      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.05f, 255.0f),
+      cam(pos, glm::vec3(rot.x, rot.y, 0), DEGTORAD(70.0f), 16.0f / 9.0f, 0.05f, 255.0f),
       is_falling(true),
       model(pos, {0.6, 1.8, 0.6}), itemSelections{1,  4,  45, 2, 5,
                                                   17, 18, 20, 44},
@@ -505,13 +505,13 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     auto ctx = &Rendering::RenderContext::get();
 
     ctx->matrix_view(glm::mat4(1.0f));
-    ctx->matrix_translate({0.18f, -0.6125f, -0.725f});
+    ctx->matrix_translate({0.280f, -0.7225f, -0.725f});
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40 ||
         type == 44) {
         ctx->matrix_translate({0.0f, 0.175f, 0.0f});
     }
-    ctx->matrix_rotate({0, 55.0f, 0});
-    ctx->matrix_scale({0.35f, 0.35f, 0.35f});
+    ctx->matrix_rotate({0, 45.0f, 0});
+    ctx->matrix_scale({0.40f, 0.40f, 0.40f});
 
 // DISABLE CULL
 #if BUILD_PC
