@@ -111,22 +111,21 @@ namespace CrossCraft {
         break_icd -= dt;
         place_icd -= dt;
 
-        //    if (tick_counter > 0.15) {
-        tick_counter = 0;
+        if (tick_counter > 0.15) {
+            tick_counter = 0;
 
-        for (auto& [key, value] : chunks) {
-            // Random tick
-            for (int i = 0; i < 4; i++)
+            for (auto& [key, value] : chunks) {
+                // Random tick
                 value->rtick_update(this);
 
-            // Chunk Updates
-            value->chunk_update(this);
-        }
+                // Chunk Updates
+                value->chunk_update(this);
+            }
 
-        for (auto& [key, value] : chunks) {
-            value->post_update(this);
+            for (auto& [key, value] : chunks) {
+                value->post_update(this);
+            }
         }
-        //    }
 
         auto ppos = player->get_pos();
         glm::ivec2 new_pos = { static_cast<int>(ppos.x) / 16,
