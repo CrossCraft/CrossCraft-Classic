@@ -313,8 +313,8 @@ auto Player::rotate(float dt, float sense) -> void {
 
         set_cursor_center();
     } else {
-        vcursor_x += cX * 20.0f * 2.5f * dt;
-        vcursor_y += -cY * 20.0f * 2.5f * dt;
+        vcursor_x += cX * 20.0f * 2.5f * dt / 0.3f * sense;
+        vcursor_y += -cY * 20.0f * 2.5f * dt / 0.3f * sense;
 
         if (vcursor_x < 0)
             vcursor_x = 0;
