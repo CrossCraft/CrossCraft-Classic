@@ -210,15 +210,18 @@ auto Player::move_right(std::any d) -> void {
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory) {
-        if (!p->jumping && p->on_ground && p->jump_icd < 0.0f) {
+        if (!p->jumping && p->on_ground && p->jump_icd < 0.0f &&
+            !p->is_underwater) {
             p->vel.y = 8.4f;
             p->jumping = true;
             p->jump_icd = 0.2f;
         }
 
-        if (p->is_underwater) {
+        if (p->is_underwater && p->jump_icd < 0.0f) {
             p->vel.y = 3.2f;
+            p->jumping = true;
             p->is_falling = false;
+            p->jump_icd = 0.01f;
         }
     }
 }
@@ -451,7 +454,7 @@ void Player::update(float dt, World *wrld) {
 
     blk = wrld->worldData[wrld->getIdx(pos.x, pos.y - 2.0f, pos.z)];
 
-    on_ground = (blk != 0);
+    on_ground = (blk != 0 && blk != 8);
 
     if (on_ground)
         if (jumping)
