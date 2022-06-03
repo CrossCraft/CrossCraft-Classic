@@ -69,6 +69,9 @@ Player::Player()
     for (int i = 0; i < 50; i++) {
         setup_model(i);
     }
+
+    on_ground = false;
+    jumping = false;
 }
 
 const auto playerSpeed = 4.3f;
@@ -207,9 +210,9 @@ auto Player::move_right(std::any d) -> void {
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory) {
-        if (!p->is_falling && p->jump_icd < 0.0f) {
+        if (!p->jumping && p->on_ground && p->jump_icd < 0.0f) {
             p->vel.y = 8.4f;
-            p->is_falling = false;
+            p->jumping = true;
             p->jump_icd = 0.2f;
         }
 
@@ -446,13 +449,13 @@ void Player::update(float dt, World *wrld) {
 
     pos += vel * dt;
 
-    // When the player stops falling, we make sure the player snaps to the
-    // top of a surface
-    if (!is_falling) {
-        pos.y += 0.2f;
-        pos.y = std::round(pos.y);
-        pos.y -= 0.2f;
-    }
+    blk = wrld->worldData[wrld->getIdx(pos.x, pos.y - 2.0f, pos.z)];
+
+    on_ground = (blk != 0);
+
+    if (on_ground)
+        if (jumping)
+            jumping = false;
 
     // Update camera
     cam.pos = pos;
