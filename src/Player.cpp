@@ -361,23 +361,23 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                             t_collision < r_collision) {
                             // Top collision
                             vel.x = 0;
-                        } else if (b_collision < t_collision &&
-                                   b_collision < l_collision &&
-                                   b_collision < r_collision) {
+                        }
+                        if (b_collision < t_collision &&
+                            b_collision < l_collision &&
+                            b_collision < r_collision) {
                             // bottom collision
                             vel.x = 0;
-                        } else if (l_collision < r_collision &&
-                                   l_collision < t_collision &&
-                                   l_collision < b_collision) {
+                        }
+                        if (l_collision < r_collision &&
+                            l_collision < t_collision &&
+                            l_collision < b_collision) {
                             // Left collision
                             vel.z = 0;
-                        } else if (r_collision < l_collision &&
-                                   r_collision < t_collision &&
-                                   r_collision < b_collision) {
+                        }
+                        if (r_collision < l_collision &&
+                            r_collision < t_collision &&
+                            r_collision < b_collision) {
                             // Right collision
-                            vel.z = 0;
-                        } else {
-                            vel.x = 0;
                             vel.z = 0;
                         }
                     }
@@ -386,17 +386,22 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
 
     testpos = pos + vel * dt;
 
-    bool collide_down = false;
-    collide_down = collide_down || test({}, wrld);
-
-    if (test({testpos.x, testpos.y - 1.8f, testpos.z}, wrld)) {
-        AABB test_box =
-            AABB(glm::ivec3(testpos.x, testpos.y + 1, testpos.z), {1, 1, 1});
-        if (AABB::intersect(test_box, model)) {
-            vel.y = 0;
-            is_falling = false;
+    for (int x = -1; x <= 1; x++)
+        for (int z = -1; z <= 1; z++) {
+            if (test({testpos.x + (float)x, testpos.y - 1.8f,
+                      testpos.z + (float)z},
+                     wrld) &&
+                vel.y < 0 && is_falling) {
+                AABB test_box =
+                    AABB(glm::ivec3(testpos.x + (float)x, testpos.y + 1,
+                                    testpos.z + (float)z),
+                         {1, 1, 1});
+                if (AABB::intersect(test_box, model)) {
+                    vel.y = 0;
+                    is_falling = false;
+                }
+            }
         }
-    }
 
     if (test({testpos.x, testpos.y, testpos.z}, wrld)) {
         vel.y = 0;
