@@ -232,10 +232,22 @@ std::array<float, 8> ChunkMesh::getTexCoord(uint8_t idx, uint32_t lv) {
         return getTexture(vec, 29);
     case 40: // Mushroom2
         return getTexture(vec, 28);
-    case 41: // Gold
-        return getTexture(vec, 24);
-    case 42: // Iron
-        return getTexture(vec, 23);
+    case 41: { // Gold
+        if (lv == LIGHT_SIDE)
+            return getTexture(vec, 40);
+        else if (lv == LIGHT_BOT)
+            return getTexture(vec, 56);
+        else
+            return getTexture(vec, 24);
+    }
+    case 42: { // Iron
+        if (lv == LIGHT_SIDE)
+            return getTexture(vec, 39);
+        else if (lv == LIGHT_BOT)
+            return getTexture(vec, 55);
+        else
+            return getTexture(vec, 23);
+    }
     case 43: // DSLAB
         return getTexture(vec, 5);
     case 44: { // HSLAB
