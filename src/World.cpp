@@ -597,6 +597,8 @@ auto World::dig(std::any d) -> void {
                     w->add_update({i, ivec.y, j});
                     w->add_update({i, ivec.y + 1, j});
                     w->add_update({i, ivec.y - 1, j});
+                    w->add_update({i, ivec.y + 2, j});
+                    w->add_update({i, ivec.y - 2, j});
                 }
             }
         }
@@ -723,8 +725,11 @@ auto World::place(std::any d) -> void {
                         idx = (i * 256 * 64) + (k * 64) + j;
 
                         // If it's water or flowing water, replace with air.
-                        if (w->worldData[idx] == 8 || w->worldData[idx] == 9)
+                        if (w->worldData[idx] == 8 || w->worldData[idx] == 9) {
                             w->worldData[idx] = 0;
+
+                            w->update_surroundings(i, k);
+                        }
                     }
                 }
             }
