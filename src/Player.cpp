@@ -288,8 +288,8 @@ auto Player::rotate(float dt, float sense) -> void {
     if (cY <= 0.4f && cY >= -0.4f)
         cY = 0.0f;
 
-    cX * 0.1f;
-    cY * 0.1f;
+    cX *= 0.3f;
+    cY *= 0.3f;
 #endif
     if (!in_inventory) {
         rot.y += cX * rotSpeed * dt * sense;
