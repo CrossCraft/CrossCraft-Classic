@@ -37,6 +37,7 @@ jobs:
             assets/
             LICENSE
             README.md
+            config.cfg
 
   Windows:
     runs-on: windows-latest
@@ -59,6 +60,7 @@ jobs:
             assets\
             LICENSE
             README.md
+            config.cfg
 
   PSP:
     runs-on: ubuntu-latest
@@ -93,3 +95,4 @@ jobs:
             assets/
             LICENSE
             README.md
+            config.cfg

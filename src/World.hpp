@@ -11,6 +11,7 @@
 #pragma once
 #include "ChunkStack.hpp"
 #include "Clouds.hpp"
+#include "Config.hpp"
 #include "Particles.hpp"
 #include "Player.hpp"
 #include <FastNoiseLite.h>
@@ -96,6 +97,7 @@ class World {
     uint16_t *lightData;
     RefPtr<Player> player;
     ScopePtr<Clouds> clouds;
+    Config cfg;
 
     static auto dig(std::any d) -> void;
     static auto place(std::any d) -> void;
@@ -130,6 +132,8 @@ class World {
     auto add_update(glm::ivec3 ivec) -> void;
 
     std::map<int, ChunkStack *> chunks;
+
+    auto make_tree(int x, int z, int h) -> void;
 
   private:
     /**

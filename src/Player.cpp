@@ -24,10 +24,10 @@ namespace CrossCraft {
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player()
-    : pos(128.f, 64.0f, 128.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
-      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.3f, 255.0f),
+    : pos(0.f, 64.0f, 0.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
+      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.05f, 255.0f),
       is_falling(true),
-      model(pos, {0.4, 1.8, 0.4}), itemSelections{1,  4,  45, 2, 5,
+      model(pos, {0.6, 1.8, 0.6}), itemSelections{1,  4,  45, 2, 5,
                                                   17, 18, 20, 44},
       inventorySelection{1,  4,  45, 2,  5,  17, 18, 20, 44, 48, 6,
                          37, 38, 39, 40, 12, 13, 19, 21, 22, 23, 24,
@@ -73,7 +73,7 @@ Player::Player()
 
 const auto playerSpeed = 4.3f;
 
-auto Player::spawn(World* wrld) -> void {
+auto Player::spawn(World *wrld) -> void {
     bool spawned = false;
 
     while (!spawned) {
@@ -84,7 +84,7 @@ auto Player::spawn(World* wrld) -> void {
             auto blk = wrld->worldData[wrld->getIdx(x, y, z)];
 
             if (blk != 0 && blk != 8) {
-                pos = { x, y + 1, z };
+                pos = {x + 0.5f, y + 1, z + 0.5f};
                 pos.y += 1.8f;
 
                 cam.pos = pos;
@@ -93,7 +93,6 @@ auto Player::spawn(World* wrld) -> void {
                 SC_APP_INFO("SPAWNED AT {} {} {} {}", x, y, z, blk);
                 return;
             }
-
         }
     }
 }
@@ -261,7 +260,7 @@ auto Player::move_down(std::any d) -> void {
     // TODO: Sneak
 }
 
-auto Player::rotate(float dt) -> void {
+auto Player::rotate(float dt, float sense) -> void {
     using namespace Utilities::Input;
     // Rotate player
     const auto rotSpeed = 500.0f;
@@ -282,12 +281,12 @@ auto Player::rotate(float dt) -> void {
     if (cY <= 0.4f && cY >= -0.4f)
         cY = 0.0f;
 
-    cX * 0.2f;
-    cY * 0.2f;
+    cX * 0.1f;
+    cY * 0.1f;
 #endif
     if (!in_inventory) {
-        rot.y += cX * rotSpeed * dt;
-        rot.x += cY * rotSpeed * dt;
+        rot.y += cX * rotSpeed * dt * sense;
+        rot.x += cY * rotSpeed * dt * sense;
 
         if (rot.y > 360.0f) {
             rot.y -= 360.0f;
@@ -330,6 +329,8 @@ auto test(glm::vec3 pos, World *wrld) -> bool {
 }
 
 void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
+    model.ext = glm::vec3(0.6f, 1.8f, 0.6f);
+
     for (int x = -1; x <= 1; x++)
         for (int y = 0; y <= 2; y++)
             for (int z = -1; z <= 1; z++) {
@@ -340,11 +341,45 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                                          testpos.z + zoff);
 
                 if (test(new_vec, wrld)) {
-                    AABB test_box = AABB(new_vec, {1, 1, 1});
+                    AABB test_box =
+                        AABB(glm::ivec3(new_vec.x, new_vec.y + 1, new_vec.z),
+                             {1, 1, 1});
 
                     if (AABB::intersect(test_box, model)) {
-                        vel.x = 0;
-                        vel.z = 0;
+                        float player_bottom = model.getMax().x;
+                        float tiles_bottom = test_box.getMax().x;
+                        float player_right = model.getMax().z;
+                        float tiles_right = test_box.getMax().z;
+
+                        float b_collision = tiles_bottom - model.getMin().x;
+                        float t_collision = player_bottom - test_box.getMin().x;
+                        float l_collision = player_right - test_box.getMin().z;
+                        float r_collision = tiles_right - model.getMin().z;
+
+                        if (t_collision < b_collision &&
+                            t_collision < l_collision &&
+                            t_collision < r_collision) {
+                            // Top collision
+                            vel.x = 0;
+                        } else if (b_collision < t_collision &&
+                                   b_collision < l_collision &&
+                                   b_collision < r_collision) {
+                            // bottom collision
+                            vel.x = 0;
+                        } else if (l_collision < r_collision &&
+                                   l_collision < t_collision &&
+                                   l_collision < b_collision) {
+                            // Left collision
+                            vel.z = 0;
+                        } else if (r_collision < l_collision &&
+                                   r_collision < t_collision &&
+                                   r_collision < b_collision) {
+                            // Right collision
+                            vel.z = 0;
+                        } else {
+                            vel.x = 0;
+                            vel.z = 0;
+                        }
                     }
                 }
             }
@@ -352,12 +387,15 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
     testpos = pos + vel * dt;
 
     bool collide_down = false;
-    collide_down =
-        collide_down || test({testpos.x, testpos.y - 1.8f, testpos.z}, wrld);
+    collide_down = collide_down || test({}, wrld);
 
-    if (collide_down && vel.y < 0) {
-        vel.y = 0;
-        is_falling = false;
+    if (test({testpos.x, testpos.y - 1.8f, testpos.z}, wrld)) {
+        AABB test_box =
+            AABB(glm::ivec3(testpos.x, testpos.y + 1, testpos.z), {1, 1, 1});
+        if (AABB::intersect(test_box, model)) {
+            vel.y = 0;
+            is_falling = false;
+        }
     }
 
     if (test({testpos.x, testpos.y, testpos.z}, wrld)) {
@@ -367,7 +405,7 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
 }
 
 void Player::update(float dt, World *wrld) {
-    rotate(dt);
+    rotate(dt, wrld->cfg.sense);
     jump_icd -= dt;
 
     // Update position
@@ -378,7 +416,7 @@ void Player::update(float dt, World *wrld) {
     is_falling = true;
 
     glm::vec3 testpos = pos + vel * dt;
-    model.pos = testpos + glm::vec3(0.2f, 0, 0.2f);
+    model.pos = testpos - glm::vec3(0.3f, 0, 0.3f);
 
     auto blk =
         wrld->worldData[wrld->getIdx(testpos.x, testpos.y + 0.2f, testpos.z)];
@@ -403,8 +441,8 @@ void Player::update(float dt, World *wrld) {
 
     pos += vel * dt;
 
-    // When the player stops falling, we make sure the player snaps to the top
-    // of a surface
+    // When the player stops falling, we make sure the player snaps to the
+    // top of a surface
     if (!is_falling) {
         pos.y += 0.2f;
         pos.y = std::round(pos.y);
@@ -452,8 +490,47 @@ auto Player::drawBlk(uint8_t type, int x, int y) -> void {
     Rendering::RenderContext::get().matrix_clear();
 }
 
+auto Player::drawBlkHand(uint8_t type) -> void {
+    auto ctx = &Rendering::RenderContext::get();
+
+    ctx->matrix_view(glm::mat4(1.0f));
+    ctx->matrix_translate({0.18f, -0.6125f, -0.725f});
+    if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40 ||
+        type == 44) {
+        ctx->matrix_translate({0.0f, 0.175f, 0.0f});
+    }
+    ctx->matrix_rotate({0, 55.0f, 0});
+    ctx->matrix_scale({0.35f, 0.35f, 0.35f});
+
+// DISABLE CULL
+#if BUILD_PC
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+#else
+    sceGuDisable(GU_CULL_FACE);
+    sceGuDisable(GU_DEPTH_TEST);
+#endif
+
+    // Set up texture
+    Rendering::TextureManager::get().bind_texture(terrain_atlas);
+    blockMesh[type].draw();
+
+// ENABLE CULL
+#if BUILD_PC
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+#else
+    sceGuEnable(GU_CULL_FACE);
+    sceGuEnable(GU_DEPTH_TEST);
+#endif
+
+    ctx->matrix_clear();
+}
+
 auto Player::draw() -> void {
-    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 30, -30);
+    drawBlkHand(itemSelections[selectorIDX]);
+    Rendering::RenderContext::get().set_mode_2D();
+    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 100, -100);
 
     if (is_head_water) {
         water->set_position({0, 0});
