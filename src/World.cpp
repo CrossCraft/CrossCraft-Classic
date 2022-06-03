@@ -588,7 +588,21 @@ namespace CrossCraft {
             uint16_t y = ivec.z / 16;
             uint32_t id = x << 16 | (y & 0x00FF);
 
+            bool was_sponge = false;
+            if (w->worldData[idx] == 19) {
+                was_sponge = true;
+            }
+
             w->worldData[idx] = 0;
+
+            // Update surrounding blocks on a larger radius for water filling
+            if (was_sponge == true) {
+                for (auto i = ivec.x - 3; i <= ivec.x + 3; i++) {
+                    for (auto j = ivec.z - 3; j <= ivec.z + 3; j++) {
+                        w->update_surroundings(i, j);
+                    }
+                }
+            }
 
             // Update Lighting
             w->update_lighting(ivec.x, ivec.z);
@@ -705,6 +719,21 @@ namespace CrossCraft {
                 return;
 
             w->worldData[idx] = blk;
+
+            // Drain water in a surrounding 5x5x5 area if a sponge was placed.
+            if (bk == 19) {
+                for (auto i = ivec.x - 2; i <= ivec.x + 2; i++) {
+                    for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
+                        for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
+                            idx = (i * 256 * 64) + (k * 64) + j;
+
+                            // If it's water or flowing water, replace with air.
+                            if (w->worldData[idx] == 8 || w->worldData[idx] == 9)
+                                w->worldData[idx] = 0;
+                        }
+                    }
+                }
+            }
 
             // Update Lighting
             w->update_lighting(ivec.x, ivec.z);
