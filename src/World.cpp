@@ -396,6 +396,11 @@ void World::draw() {
     sceGuEnable(GU_ALPHA_TEST);
 #endif
 
+    // Draw flora
+    for (auto const &[key, val] : chunks) {
+        val->draw_flora();
+    }
+
     // Draw transparent
     for (auto const &[key, val] : chunks) {
         val->draw_transparent();

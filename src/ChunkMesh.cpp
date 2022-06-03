@@ -61,6 +61,12 @@ void ChunkMesh::reset_allocate() {
     t_index.clear();
     t_index.shrink_to_fit();
 
+    fidx_counter = 0;
+    f_verts.clear();
+    f_verts.shrink_to_fit();
+    f_index.clear();
+    f_index.shrink_to_fit();
+
     // Allocate memory
     m_verts.reserve(4 * numFace);
     m_index.reserve(6 * numFace);
@@ -70,6 +76,7 @@ void ChunkMesh::reset_allocate() {
 
     mesh.delete_data();
     transMesh.delete_data();
+    floraMesh.delete_data();
 }
 
 void ChunkMesh::finalize_mesh() {
@@ -81,11 +88,16 @@ void ChunkMesh::finalize_mesh() {
     t_verts.shrink_to_fit();
     t_index.shrink_to_fit();
 
+    f_verts.shrink_to_fit();
+    f_index.shrink_to_fit();
+
     // Add data
     mesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
                   m_index.size());
     transMesh.add_data(t_verts.data(), t_verts.size(), t_index.data(),
                        t_index.size());
+    floraMesh.add_data(f_verts.data(), f_verts.size(), f_index.data(),
+                       f_index.size());
 
 #if PSP
     sceKernelDcacheWritebackInvalidateAll();
@@ -426,6 +438,20 @@ void ChunkMesh::draw_transparent() {
     Rendering::RenderContext::get().matrix_clear();
 }
 
+void ChunkMesh::draw_flora() {
+    // Set matrix
+    Rendering::RenderContext::get().matrix_translate(
+        {cX * 16, cY * 16, cZ * 16});
+
+    // Draw
+    if (floraMesh.get_index_count() > 0) {
+        floraMesh.bind();
+        floraMesh.draw();
+    }
+
+    Rendering::RenderContext::get().matrix_clear();
+}
+
 void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
                              uint8_t blk, glm::vec3 pos, glm::vec3 posCheck,
                              uint32_t lightVal) {
@@ -476,8 +502,7 @@ void ChunkMesh::try_add_face(const World *wrld, std::array<float, 12> data,
                 add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
                                  false);
             } else if (blk == 20 && wrld->worldData[idx] != 20) {
-                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
-                                 true);
+                add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv, 2);
             } else {
                 if (blk != 8 && blk != 20)
                     add_face_to_mesh(data, getTexCoord(blk, lightVal), pos, lv,
@@ -607,7 +632,7 @@ void ChunkMesh::add_xface_to_mesh(std::array<float, 8> uv, glm::vec3 pos,
 
 void ChunkMesh::add_face_to_mesh(std::array<float, 12> data,
                                  std::array<float, 8> uv, glm::vec3 pos,
-                                 uint32_t lightVal, bool trans) {
+                                 uint32_t lightVal, int trans) {
 
     // Set data objects
     auto *m = &m_verts;
@@ -615,10 +640,14 @@ void ChunkMesh::add_face_to_mesh(std::array<float, 12> data,
     auto *idc = &idx_counter;
 
     // If transparent - set data
-    if (trans) {
+    if (trans == 1) {
         m = &t_verts;
         mi = &t_index;
         idc = &tidx_counter;
+    } else if (trans == 2) {
+        m = &f_verts;
+        mi = &f_index;
+        idc = &fidx_counter;
     }
 
     // Create color
