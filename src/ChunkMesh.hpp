@@ -103,7 +103,7 @@ class ChunkMesh {
                           glm::vec3 pos, uint32_t lightVal, bool trans);
 
     void add_xface_to_mesh(std::array<float, 8> uv, glm::vec3 pos,
-                           uint32_t lightVal);
+                           uint32_t lightVal, const World* wrld);
 
     int cX, cY, cZ;
     int rtcounter;

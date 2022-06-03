@@ -133,6 +133,8 @@ class World {
 
     std::map<int, ChunkStack *> chunks;
 
+    auto make_tree(int x, int z, int h) -> void;
+
   private:
     /**
      * @brief Get noise from a position and settings

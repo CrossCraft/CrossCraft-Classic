@@ -264,10 +264,16 @@ namespace CrossCraft {
     }
 
     void ChunkMesh::rtick(World* wrld) {
-        srand(rtcounter++ + cX * cZ << cY);
-        int x = rand() % 16 + cX * 16;
-        int y = rand() % 16 + cY * 16;
-        int z = rand() % 16 + cZ * 16;
+        int x = rand() % 16;// + cX * 16;
+        int y = rand() % 16;// + cY * 16;
+        int z = rand() % 16;// + cZ * 16;
+
+        int idxl = ((x + cX * 16) * 256 * 4) + ((z + cZ * 16) * 4) + cY;
+        auto is_dark = (!((wrld->lightData[idxl] >> (int)y) & 1));
+
+        x += cX * 16;
+        y += cY * 16;
+        z += cZ * 16;
 
         auto idx = (x * 256 * 64) + (z * 64) + y;
 
@@ -279,6 +285,8 @@ namespace CrossCraft {
         auto blk2 = wrld->worldData[idx2];
         auto blk = wrld->worldData[idx];
 
+        
+
         if (blk == 3 && !(blk2 == 0 || blk2 == 6 || blk2 == 37 || blk2 == 38 || blk2 == 39 || blk2 == 40)) {
             wrld->worldData[idx] = 2;
             needsRegen = true;
@@ -289,18 +297,32 @@ namespace CrossCraft {
             needsRegen = true;
         }
 
-        if (blk == 6 || blk == 37 || blk == 38) {
-            int idxl = (x * 256 * 4) + (z * 4) + y / 16;
-            if (!((wrld->lightData[idxl] >> (int)y) & 1)) {
+
+        if (blk == 6) {
+            if (is_dark) {
+                wrld->worldData[idx] = 0;
+                needsRegen = true;
+            }
+            else {
+                wrld->make_tree(x, z, y - 1);
+                for (int tx = -2; tx < 3; tx++)
+                    for (int tz = -2; tz < 3; tz++)
+                        wrld->update_lighting(x + tx, z + tz);
+                needsRegen = true;
+            }
+        }
+
+        if (blk == 37 || blk == 38) {
+            if (is_dark) {
                 wrld->worldData[idx] = 0;
                 needsRegen = true;
             }
         }
 
-
         if (blk == 39 || blk == 40) {
-            int idxl = (x * 256 * 4) + (z * 4) + y / 16;
-            if (((wrld->lightData[idxl] >> (int)y) & 1)) {
+            int idxl = ((x) * 256 * 4) + ((z * 16) * 4) + cY;
+
+            if (!is_dark) {
                 wrld->worldData[idx] = 0;
                 needsRegen = true;
             }
@@ -330,7 +352,7 @@ namespace CrossCraft {
                     if (blk == 37 || blk == 38 || blk == 39 || blk == 40 ||
                         blk == 6) {
                         add_xface_to_mesh(getTexCoord(blk, LIGHT_TOP), { x, y, z },
-                            LIGHT_TOP);
+                            LIGHT_TOP, wrld);
                         continue;
                     }
 
@@ -473,7 +495,20 @@ namespace CrossCraft {
     }
 
     void ChunkMesh::add_xface_to_mesh(std::array<float, 8> uv, glm::vec3 pos,
-        uint32_t lightVal) {
+        uint32_t lightVal, const World* wrld) {
+
+
+        int idxl = ((pos.x + cX * 16) * 256 * 4) + ((pos.z + cZ * 16) * 4) + cY;
+
+        auto lv = lightVal;
+        if (!((wrld->lightData[idxl] >> (int)pos.y) & 1)) {
+            if (lv == LIGHT_TOP)
+                lv = LIGHT_TOP_DARK;
+            else if (lv == LIGHT_SIDE)
+                lv = LIGHT_SIDE_DARK;
+            else
+                lv = LIGHT_BOT_DARK;
+        }
 
         // Set data objects
         auto* m = &t_verts;
@@ -482,7 +517,7 @@ namespace CrossCraft {
 
         // Create color
         Rendering::Color c;
-        c.color = lightVal;
+        c.color = lv;
 
         // Push Back Verts
         for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
