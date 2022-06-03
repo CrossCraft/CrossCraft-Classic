@@ -25,7 +25,8 @@ template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 Player::Player()
     : pos(0.f, 64.0f, 0.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
-      cam(pos, glm::vec3(rot.x, rot.y, 0), DEGTORAD(70.0f), 16.0f / 9.0f, 0.05f, 255.0f),
+      cam(pos, glm::vec3(rot.x, rot.y, 0), DEGTORAD(70.0f), 16.0f / 9.0f, 0.05f,
+          255.0f),
       is_falling(true),
       model(pos, {0.6, 1.8, 0.6}), itemSelections{1,  4,  45, 2, 5,
                                                   17, 18, 20, 44},
@@ -451,6 +452,14 @@ void Player::update(float dt, World *wrld) {
     }
 
     pos += vel * dt;
+
+    // When the player stops falling, we make sure the player snaps to the
+    // top of a surface
+    if (!is_falling) {
+        pos.y += 0.2f;
+        pos.y = std::round(pos.y);
+        pos.y -= 0.2f;
+    }
 
     blk = wrld->worldData[wrld->getIdx(pos.x, pos.y - 2.0f, pos.z)];
 
