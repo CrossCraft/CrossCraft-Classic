@@ -1,25 +1,22 @@
 #include "Particles.hpp"
 #include "ChunkMesh.hpp"
 
-namespace CrossCraft {
-ParticleSystem::ParticleSystem(uint32_t tex) : texture(tex) { idx_counter = 0; }
-ParticleSystem::~ParticleSystem() {
-    m_verts.clear();
-    m_index.clear();
-}
+namespace CrossCraft
+{
+    ParticleSystem::ParticleSystem(uint32_t tex) : texture(tex) { idx_counter = 0; }
+    ParticleSystem::~ParticleSystem()
+    {
+        m_verts.clear();
+        m_index.clear();
+    }
 
-void ParticleSystem::initialize(uint32_t type, glm::vec3 pos) {
-    particles.clear();
-    srand(pos.x + pos.y + pos.z);
-    for (int i = 0; i < 32; i++) {
-        Particle particle;
-        particle.position = pos;
-        particle.position.x += ((rand() % 16) - 8) * (1.0f / 16.0f);
-        particle.position.y += ((rand() % 16) - 8) * (1.0f / 16.0f);
-        particle.position.z += ((rand() % 16) - 8) * (1.0f / 16.0f);
-        particle.velocity = glm::vec3(rand() % 10, rand() % 37, rand() % 10);
-        particle.velocity /= 10.0f;
+    auto rand_pos() -> float
+    {
+        return ((rand() % 16) - 8) * (1.0f / 16.0f);
+    }
 
+    auto bind_texture(Particle &particle, uint32_t type) -> void
+    {
         particle.uv = ChunkMesh::getTexCoord(type, 0xFFCCCCCC);
 
         const float UV_SIZE = (2.0f / 16.0f) / 16.0f;
@@ -43,108 +40,132 @@ void ParticleSystem::initialize(uint32_t type, glm::vec3 pos) {
         particle.uv[5] = uv_offset.y;
         particle.uv[6] = uv_offset.x;
         particle.uv[7] = uv_offset.y;
-
-        particles.push_back(particle);
-    }
-}
-void ParticleSystem::generate() {
-    mesh.delete_data();
-    idx_counter = 0;
-    m_verts.clear();
-    m_index.clear();
-
-    for (auto &p : particles) {
-        const std::array<float, 12> cFace{
-            0,            // 0
-            0,            // 1
-            0,            // 2
-            0,            // 3
-            1.0f / 16.0f, // 4
-            0,            // 5
-            1.0f / 16.0f, // 6
-            1.0f / 16.0f, // 7
-            1.0f / 16.0f, // 8
-            1.0f / 16.0f, // 9
-            0,            // 10
-            1.0f / 16.0f,
-        }; // 11
-
-        Rendering::Color c;
-        c.color = 0xFFFFFFFF;
-
-        m_verts.push_back(Rendering::Vertex{
-            p.uv[0],
-            p.uv[1],
-            c,
-            cFace[0] + p.position.x,
-            cFace[1] + p.position.y,
-            cFace[2] + p.position.z,
-        });
-
-        m_verts.push_back(Rendering::Vertex{
-            p.uv[2],
-            p.uv[3],
-            c,
-            cFace[3] + p.position.x,
-            cFace[4] + p.position.y,
-            cFace[5] + p.position.z,
-        });
-
-        m_verts.push_back(Rendering::Vertex{
-            p.uv[4],
-            p.uv[5],
-            c,
-            cFace[6] + p.position.x,
-            cFace[7] + p.position.y,
-            cFace[8] + p.position.z,
-        });
-
-        m_verts.push_back(Rendering::Vertex{
-            p.uv[6],
-            p.uv[7],
-            c,
-            cFace[9] + p.position.x,
-            cFace[10] + p.position.y,
-            cFace[11] + p.position.z,
-        });
-
-        m_index.push_back(idx_counter);
-        m_index.push_back(idx_counter + 1);
-        m_index.push_back(idx_counter + 2);
-        m_index.push_back(idx_counter + 2);
-        m_index.push_back(idx_counter + 3);
-        m_index.push_back(idx_counter + 0);
-        idx_counter += 4;
     }
 
-    mesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
-                  m_index.size());
-}
+    void ParticleSystem::initialize(uint32_t type, glm::vec3 pos)
+    {
+        particles.clear();
+        srand(pos.x + pos.y + pos.z);
+        for (int i = 0; i < 32; i++)
+        {
 
-void ParticleSystem::update(double dt) {
-    for (auto &p : particles) {
-        p.velocity.y -= 16.0f * (float)dt;
-        p.position += p.velocity * (float)dt;
+            Particle particle;
+            particle.position = pos;
+            particle.position.x += rand_pos();
+            particle.position.y += rand_pos();
+            particle.position.z += rand_pos();
+            particle.velocity = glm::vec3(rand() % 10, rand() % 37, rand() % 10);
+            particle.velocity /= 10.0f;
+
+            bind_texture(particle, type);
+
+            particles.push_back(particle);
+        }
     }
 
-    generate();
-}
-void ParticleSystem::draw() {
-    Rendering::TextureManager::get().bind_texture(texture);
+    void ParticleSystem::generate()
+    {
+        mesh.delete_data();
+        idx_counter = 0;
+        m_verts.clear();
+        m_index.clear();
+
+        for (auto &p : particles)
+        {
+            const std::array<float, 12> cFace{
+                0,            // 0
+                0,            // 1
+                0,            // 2
+                0,            // 3
+                1.0f / 16.0f, // 4
+                0,            // 5
+                1.0f / 16.0f, // 6
+                1.0f / 16.0f, // 7
+                1.0f / 16.0f, // 8
+                1.0f / 16.0f, // 9
+                0,            // 10
+                1.0f / 16.0f, // 11
+            };
+
+            Rendering::Color c;
+            c.color = 0xFFFFFFFF;
+
+            m_verts.push_back(Rendering::Vertex{
+                p.uv[0],
+                p.uv[1],
+                c,
+                cFace[0] + p.position.x,
+                cFace[1] + p.position.y,
+                cFace[2] + p.position.z,
+            });
+
+            m_verts.push_back(Rendering::Vertex{
+                p.uv[2],
+                p.uv[3],
+                c,
+                cFace[3] + p.position.x,
+                cFace[4] + p.position.y,
+                cFace[5] + p.position.z,
+            });
+
+            m_verts.push_back(Rendering::Vertex{
+                p.uv[4],
+                p.uv[5],
+                c,
+                cFace[6] + p.position.x,
+                cFace[7] + p.position.y,
+                cFace[8] + p.position.z,
+            });
+
+            m_verts.push_back(Rendering::Vertex{
+                p.uv[6],
+                p.uv[7],
+                c,
+                cFace[9] + p.position.x,
+                cFace[10] + p.position.y,
+                cFace[11] + p.position.z,
+            });
+
+            m_index.push_back(idx_counter);
+            m_index.push_back(idx_counter + 1);
+            m_index.push_back(idx_counter + 2);
+            m_index.push_back(idx_counter + 2);
+            m_index.push_back(idx_counter + 3);
+            m_index.push_back(idx_counter + 0);
+            idx_counter += 4;
+        }
+
+        mesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
+                      m_index.size());
+    }
+
+    void ParticleSystem::update(double dt)
+    {
+        for (auto &p : particles)
+        {
+            p.velocity.y -= 16.0f * (float)dt;
+            p.position += p.velocity * (float)dt;
+        }
+
+        generate();
+    }
+    void ParticleSystem::draw()
+    {
+        Rendering::TextureManager::get().bind_texture(texture);
 #if BUILD_PC
-    glDisable(GL_CULL_FACE);
+        glDisable(GL_CULL_FACE);
 #else
-    sceGuDisable(GU_CULL_FACE);
+        sceGuDisable(GU_CULL_FACE);
 #endif
 
-    mesh.bind();
-    mesh.draw();
+        mesh.bind();
+        mesh.draw();
 
 #if BUILD_PC
-    glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
 #else
-    sceGuEnable(GU_CULL_FACE);
+        sceGuEnable(GU_CULL_FACE);
 #endif
-}
+    }
 
 } // namespace CrossCraft

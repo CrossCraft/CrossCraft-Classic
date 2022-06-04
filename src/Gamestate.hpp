@@ -23,7 +23,7 @@ namespace CrossCraft {
  */
 class GameState : public Core::ApplicationState {
   public:
-    GameState() = default;
+    GameState():config(), key_controller(nullptr), psp_controller(nullptr), mouse_controller(nullptr), ref(nullptr) {};
     ~GameState();
 
     void on_start();

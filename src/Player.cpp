@@ -277,8 +277,8 @@ auto Player::rotate(float dt, float sense) -> void {
     cX = get_axis("Mouse", "X");
     cY = get_axis("Mouse", "Y");
 
-    cX * 4.0f;
-    cY * 4.0f;
+    cX *= 3.0f;
+    cY *= 3.0f;
 #else
     cX = get_axis("PSP", "X");
     cY = get_axis("PSP", "Y");

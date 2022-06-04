@@ -4,7 +4,7 @@
 namespace CrossCraft {
 
 ChunkMesh::ChunkMesh(int x, int y, int z)
-    : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z), rtcounter(0),
+    : idx_counter(0), tidx_counter(0), cX(x), cY(y), cZ(z), rtcounter(0), fidx_counter(0),
       needsRegen(0) {}
 
 ChunkMesh::~ChunkMesh() {
