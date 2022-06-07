@@ -1,6 +1,6 @@
+#include "../World/World.hpp"
 #include "ChunkMesh.hpp"
 #include "ChunkUtil.hpp"
-#include "World.hpp"
 #include <Rendering/Rendering.hpp>
 
 using namespace Stardust_Celeste;

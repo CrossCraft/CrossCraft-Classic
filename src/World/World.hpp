@@ -9,11 +9,11 @@
  *
  */
 #pragma once
-#include "ChunkStack.hpp"
+#include "../Chunk/ChunkStack.hpp"
+#include "../Config.hpp"
+#include "../Player/Player.hpp"
 #include "Clouds.hpp"
-#include "Config.hpp"
 #include "Particles.hpp"
-#include "Player.hpp"
 #include <FastNoiseLite.h>
 #include <Utilities/Types.hpp>
 #include <glm.hpp>

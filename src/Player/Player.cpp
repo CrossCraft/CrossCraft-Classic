@@ -1,6 +1,6 @@
 #include "Player.hpp"
-#include "BlockConst.hpp"
-#include "ChunkUtil.hpp"
+#include "../BlockConst.hpp"
+#include "../Chunk/ChunkUtil.hpp"
 #include <Platform/Platform.hpp>
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>

@@ -9,8 +9,8 @@
  *
  */
 #pragma once
+#include "../World/World.hpp"
 #include "ChunkUtil.hpp"
-#include "World.hpp"
 #include <Rendering/Rendering.hpp>
 
 using namespace Stardust_Celeste;

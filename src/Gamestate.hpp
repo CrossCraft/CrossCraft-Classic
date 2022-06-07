@@ -9,7 +9,7 @@
  *
  */
 #include "Config.hpp"
-#include "World.hpp"
+#include "World/World.hpp"
 #include <Core/Application.hpp>
 #include <Utilities/Input.hpp>
 
@@ -23,7 +23,9 @@ namespace CrossCraft {
  */
 class GameState : public Core::ApplicationState {
   public:
-    GameState():config(), key_controller(nullptr), psp_controller(nullptr), mouse_controller(nullptr), ref(nullptr) {};
+    GameState()
+        : config(), key_controller(nullptr), psp_controller(nullptr),
+          mouse_controller(nullptr), ref(nullptr){};
     ~GameState();
 
     void on_start();

@@ -9,8 +9,8 @@
  *
  */
 #pragma once
+#include "../World/World.hpp"
 #include "AABB.hpp"
-#include "World.hpp"
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
 #include <any>

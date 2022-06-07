@@ -1,5 +1,5 @@
 #pragma once
-#include "BlockConst.hpp"
+#include "../BlockConst.hpp"
 #include <Rendering/RenderTypes.hpp>
 #include <Rendering/Rendering.hpp>
 #include <memory>

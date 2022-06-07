@@ -9,8 +9,8 @@
  *
  */
 #pragma once
+#include "../World/World.hpp"
 #include "ChunkMesh.hpp"
-#include "World.hpp"
 #include <array>
 #include <glm.hpp>
 #include <vector>

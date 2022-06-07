@@ -1,5 +1,5 @@
 #include "Particles.hpp"
-#include "ChunkUtil.hpp"
+#include "../Chunk/ChunkUtil.hpp"
 
 namespace CrossCraft {
 ParticleSystem::ParticleSystem(uint32_t tex) : texture(tex) { idx_counter = 0; }
