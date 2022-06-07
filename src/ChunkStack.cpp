@@ -148,21 +148,21 @@ void ChunkStack::generate(World *wrld) {
 void ChunkStack::draw() {
     // Draw meshes
     for (int i = 0; i < 4; i++) {
-        stack[i]->draw();
+        stack[i]->draw(ChunkMeshSelection::Opaque);
     }
 }
 
 void ChunkStack::draw_transparent() {
     // Draw transparent meshes
     for (int i = 0; i < 4; i++) {
-        stack[i]->draw_transparent();
+        stack[i]->draw(ChunkMeshSelection::Transparent);
     }
 }
 
 void ChunkStack::draw_flora() {
     // Draw transparent meshes
     for (int i = 0; i < 4; i++) {
-        stack[i]->draw_flora();
+        stack[i]->draw(ChunkMeshSelection::Flora);
     }
 }
 

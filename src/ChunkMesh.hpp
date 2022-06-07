@@ -9,6 +9,7 @@
  *
  */
 #pragma once
+#include "ChunkUtil.hpp"
 #include "World.hpp"
 #include <Rendering/Rendering.hpp>
 
@@ -23,15 +24,6 @@ class World;
  */
 class ChunkMesh {
   public:
-    /**
-     * @brief Get the Tex Coords
-     *
-     * @param idx
-     * @param lv
-     * @return std::array<float, 8>
-     */
-    static std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv);
-
     /**
      * @brief Construct a new Chunk Mesh object at a location
      *
@@ -57,7 +49,7 @@ class ChunkMesh {
      * @brief Draw the chunk mesh
      *
      */
-    void draw();
+    void draw(ChunkMeshSelection meshSel);
 
     /**
      * @brief Random Ticks the section
@@ -65,14 +57,6 @@ class ChunkMesh {
      * @param wrld
      */
     void rtick(World *wrld);
-
-    /**
-     * @brief Draw the transparency layer
-     *
-     */
-    void draw_transparent();
-
-    void draw_flora();
 
     bool needsRegen;
 
@@ -89,42 +73,12 @@ class ChunkMesh {
      */
     void finalize_mesh();
 
-    /**
-     * @brief Attempt to add a face to the mesh
-     *
-     */
-    void try_add_face(const World *wrld, std::array<float, 12> data,
-                      uint8_t blk, glm::vec3 pos, glm::vec3 posCheck,
-                      uint32_t lightVal);
-
-    /**
-     * @brief Add a face to the mesh
-     *
-     */
-    void add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
-                          glm::vec3 pos, uint32_t lightVal, int m);
-
-    void add_xface_to_mesh(std::array<float, 8> uv, glm::vec3 pos,
-                           uint32_t lightVal, const World *wrld);
-
     int cX, cY, cZ;
     int rtcounter;
 
-    uint16_t idx_counter;
-    std::vector<Rendering::Vertex> m_verts;
-    std::vector<uint16_t> m_index;
+    ChunkMeshCollection meshCollection;
 
-    uint16_t tidx_counter;
-    std::vector<Rendering::Vertex> t_verts;
-    std::vector<uint16_t> t_index;
-
-    uint16_t fidx_counter;
-    std::vector<Rendering::Vertex> f_verts;
-    std::vector<uint16_t> f_index;
-
-    Rendering::Mesh mesh;
-    Rendering::Mesh transMesh;
-    Rendering::Mesh floraMesh;
+    friend class ChunkMeshBuilder;
 };
 
 } // namespace CrossCraft

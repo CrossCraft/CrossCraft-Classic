@@ -1,5 +1,6 @@
 #include "Player.hpp"
 #include "BlockConst.hpp"
+#include "ChunkUtil.hpp"
 #include <Platform/Platform.hpp>
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
@@ -142,34 +143,33 @@ auto Player::setup_model(uint8_t type) -> void {
 
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40) {
 
-        add_face_to_mesh(xFace1, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, p, type);
-        add_face_to_mesh(xFace2, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, p, type);
+        add_face_to_mesh(xFace1, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE, p,
+                         type);
+        add_face_to_mesh(xFace2, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE, p,
+                         type);
     } else if (type == 44) {
-        add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
-                         LIGHT_TOP, {0, -0.5, 0}, type);
-        add_face_to_mesh(leftFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_BOT, p, type);
-        add_face_to_mesh(backFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+        add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP,
+                         {0, -0.5, 0}, type);
+        add_face_to_mesh(leftFaceHalf, getTexCoord(type, LIGHT_SIDE), LIGHT_BOT,
+                         p, type);
+        add_face_to_mesh(backFaceHalf, getTexCoord(type, LIGHT_SIDE),
                          LIGHT_SIDE, {0, 0, 1}, type);
-        add_face_to_mesh(frontFaceHalf,
-                         ChunkMesh::getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE,
-                         {0, 0, 1}, type);
-        add_face_to_mesh(backFaceHalf, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
+        add_face_to_mesh(frontFaceHalf, getTexCoord(type, LIGHT_SIDE),
+                         LIGHT_SIDE, {0, 0, 1}, type);
+        add_face_to_mesh(backFaceHalf, getTexCoord(type, LIGHT_SIDE),
                          LIGHT_SIDE, p, type);
     } else {
 
-        add_face_to_mesh(topFace, ChunkMesh::getTexCoord(type, LIGHT_TOP),
-                         LIGHT_TOP, p, type);
-        add_face_to_mesh(leftFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_BOT, p, type);
-        add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, {0, 0, 1}, type);
-        add_face_to_mesh(frontFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, {0, 0, 1}, type);
-        add_face_to_mesh(backFace, ChunkMesh::getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, p, type);
+        add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP, p,
+                         type);
+        add_face_to_mesh(leftFace, getTexCoord(type, LIGHT_SIDE), LIGHT_BOT, p,
+                         type);
+        add_face_to_mesh(backFace, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE,
+                         {0, 0, 1}, type);
+        add_face_to_mesh(frontFace, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE,
+                         {0, 0, 1}, type);
+        add_face_to_mesh(backFace, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE, p,
+                         type);
     }
 
     blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
