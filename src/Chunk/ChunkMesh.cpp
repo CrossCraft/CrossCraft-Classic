@@ -48,20 +48,24 @@ void ChunkMesh::rtick(World *wrld) {
     auto blk2 = wrld->worldData[idx2];
     auto blk = wrld->worldData[idx];
 
-    if (blk == 3 && !(blk2 == 0 || blk2 == 6 || blk2 == 37 || blk2 == 38 ||
-                      blk2 == 39 || blk2 == 40)) {
-        wrld->worldData[idx] = 2;
+    auto blk2_is_valid_grass =
+        (blk2 == Block::Air || blk2 == Block::Sapling ||
+         blk2 == Block::Flower1 || blk2 == Block::Flower2 ||
+         blk2 == Block::Mushroom1 || blk2 == Block::Mushroom2);
+
+    if (blk == Block::Grass && !blk2_is_valid_grass) {
+        wrld->worldData[idx] = Block::Dirt;
         needsRegen = true;
     }
 
-    if (blk == 2 && blk2 == 0) {
-        wrld->worldData[idx] = 3;
+    if (blk == Block::Dirt && blk2_is_valid_grass) {
+        wrld->worldData[idx] = Block::Grass;
         needsRegen = true;
     }
 
-    if (blk == 6) {
+    if (blk == Block::Sapling) {
         if (is_dark) {
-            wrld->worldData[idx] = 0;
+            wrld->worldData[idx] = Block::Air;
             needsRegen = true;
         } else {
             wrld->make_tree(x, z, y - 1);
@@ -72,18 +76,18 @@ void ChunkMesh::rtick(World *wrld) {
         }
     }
 
-    if (blk == 37 || blk == 38) {
+    if (blk == Block::Flower1 || blk == Block::Flower2) {
         if (is_dark) {
-            wrld->worldData[idx] = 0;
+            wrld->worldData[idx] = Block::Air;
             needsRegen = true;
         }
     }
 
-    if (blk == 39 || blk == 40) {
+    if (blk == Block::Mushroom1 || blk == Block::Mushroom2) {
         int idxl = ((x)*256 * 4) + ((z * 16) * 4) + cY;
 
         if (!is_dark) {
-            wrld->worldData[idx] = 0;
+            wrld->worldData[idx] = Block::Air;
             needsRegen = true;
         }
     }

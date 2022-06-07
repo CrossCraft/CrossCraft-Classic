@@ -26,7 +26,7 @@ auto water_can_flow(glm::ivec3 ivec, World *wrld) -> bool {
         for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
             for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
                 auto idx = (i * 256 * 64) + (k * 64) + j;
-                if (wrld->worldData[idx] == 19)
+                if (wrld->worldData[idx] == Block::Sponge)
                     return false;
             }
         }
@@ -40,9 +40,9 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
         auto idx = (chk.x * 256 * 64) + (chk.z * 64) + chk.y;
 
         auto blk = wrld->worldData[idx];
-        if (blk == 0) {
+        if (blk == Block::Air) {
 
-            if (blkr == 8 && water_can_flow(chk, wrld)) {
+            if (blkr == Block::Water && water_can_flow(chk, wrld)) {
                 uint16_t x = chk.x / 16;
                 uint16_t y = chk.z / 16;
                 uint32_t id = x << 16 | (y & 0x00FF);
@@ -56,8 +56,9 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
                 wrld->update_surroundings(chk.x, chk.z);
 
                 updated.push_back(chk);
-            } else if (blkr == 6 || blkr == 37 || blkr == 38 || blkr == 39 ||
-                       blkr == 40) {
+            } else if (blkr == Block::Sapling || blkr == Block::Flower1 ||
+                       blkr == Block::Flower2 || blkr == Block::Mushroom1 ||
+                       blkr == Block::Mushroom2) {
                 uint16_t x = chk.x / 16;
                 uint16_t y = chk.z / 16;
                 uint32_t id = x << 16 | (y & 0x00FF);
@@ -97,14 +98,15 @@ void ChunkStack::chunk_update(World *wrld) {
         auto idx = (pos.x * 256 * 64) + (pos.z * 64) + pos.y;
         auto blk = wrld->worldData[idx];
 
-        if (blk == 8) {
+        if (blk == Block::Water) {
             update_check(wrld, blk, {pos.x, pos.y - 1, pos.z});
             update_check(wrld, blk, {pos.x - 1, pos.y, pos.z});
             update_check(wrld, blk, {pos.x + 1, pos.y, pos.z});
             update_check(wrld, blk, {pos.x, pos.y, pos.z + 1});
             update_check(wrld, blk, {pos.x, pos.y, pos.z - 1});
-        } else if (blk == 6 || blk == 37 || blk == 38 || blk == 39 ||
-                   blk == 40) {
+        } else if (blk == Block::Sapling || blk == Block::Flower1 ||
+                   blk == Block::Flower2 || blk == Block::Mushroom1 ||
+                   blk == Block::Mushroom2) {
             update_check(wrld, blk, {pos.x, pos.y - 1, pos.z});
         }
     }
