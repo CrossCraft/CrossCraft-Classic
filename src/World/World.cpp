@@ -1,4 +1,5 @@
 #include "World.hpp"
+#include "NoiseUtil.hpp"
 #include <Platform/Platform.hpp>
 #include <Rendering/Rendering.hpp>
 #include <Utilities/Input.hpp>
@@ -28,10 +29,7 @@ World::World(std::shared_ptr<Player> p) {
         true, false);
     p->terrain_atlas = terrain_atlas;
 
-    fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    fsl.SetFrequency(0.001f * 5.f);
-    seed = time(NULL);
-    fsl.SetSeed(seed);
+    NoiseUtil::initialize();
 
     clouds = create_scopeptr<Clouds>();
     psystem = create_scopeptr<ParticleSystem>(terrain_atlas);
@@ -178,50 +176,6 @@ void World::update(double dt) {
         }
     }
 }
-/**
- * @brief Remap floats into a range
- *
- * @param input To be remapped
- * @param curr_range_min Current Min
- * @param curr_range_max Current Max
- * @param range_min New Range Min
- * @param range_max New Range Max
- */
-inline auto range_map(float &input, float curr_range_min, float curr_range_max,
-                      float range_min, float range_max) -> void {
-    input = (input - curr_range_min) * (range_max - range_min) /
-                (curr_range_max - curr_range_min) +
-            range_min;
-}
-
-auto World::get_noise(float x, float y, NoiseSettings *settings) -> float {
-
-    float amp = settings->amplitude;
-    float freq = settings->frequency;
-
-    float sum_noise = 0.0f;
-    float sum_amp = 0.0f;
-
-    // Create octaves
-    for (auto i = 0; i < settings->octaves; i++) {
-        auto noise = fsl.GetNoise(x * freq, y * freq);
-
-        noise *= amp;
-        sum_noise += noise;
-        sum_amp += amp;
-
-        amp *= settings->persistence;
-        freq *= settings->mod_freq;
-    }
-
-    // Reset range
-    auto divided = sum_noise / sum_amp;
-
-    // Map to the new range;
-    range_map(divided, -1.0f, 1.0f, settings->range_min, settings->range_max);
-
-    return divided;
-}
 
 auto World::getIdx(int x, int y, int z) -> uint32_t {
     if (x < 0 || x >= 256 || y >= 64 || y < 0 || z < 0 || z >= 256)
@@ -280,7 +234,9 @@ void World::generate() {
     // Create a height map
     hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
 
-    NoiseSettings settings = {2, 1.0f, 2.0f, 0.42f, 4.5f, 0.0f, 0.15f, 0.85f};
+    // Noise Map Settings
+    NoiseUtil::NoiseSettings settings = {2,    1.0f, 2.0f,  0.42f,
+                                         4.5f, 0.0f, 0.15f, 0.85f};
 
     // Generate HMAP
     for (int x = 0; x < 256; x++) {
@@ -296,32 +252,33 @@ void World::generate() {
             for (int y = 0; y < h; y++) {
                 auto idx = (x * 256 * 64) + (z * 64) + y;
                 if (y < (h - 4))
-                    worldData[idx] = 1;
+                    worldData[idx] = Block::Stone;
                 else if (y >= (h - 4) && y < (h - 1))
-                    worldData[idx] = 2;
+                    worldData[idx] = Block::Dirt;
                 else {
                     if (h < 32)
-                        worldData[idx] = 2;
+                        worldData[idx] = Block::Dirt;
                     else if (h == 32)
-                        worldData[idx] = 12;
+                        worldData[idx] = Block::Sand;
                     else
-                        worldData[idx] = 3;
+                        worldData[idx] = Block::Grass;
                 }
             }
 
             if (h < 32) {
                 for (int y = h; y < 32; y++) {
                     auto idx = (x * 256 * 64) + (z * 64) + y;
-                    worldData[idx] = 8;
+                    worldData[idx] = Block::Water;
                 }
             }
         }
     }
 
+    // Generate flowers
     for (int x = 0; x < 32; x++) {
         for (int z = 0; z < 32; z++) {
 
-            srand((x | 1) << z * ~seed);
+            srand((x | 1) << z * ~NoiseUtil::seed);
             uint8_t res = rand() % 37;
 
             if (res < 2) {
@@ -336,7 +293,7 @@ void World::generate() {
 
                 auto idx = (xf * 256 * 64) + (zf * 64) + h;
 
-                worldData[idx] = 37 + res % 2;
+                worldData[idx] = Block::Flower1 + res % 2;
 
                 continue;
             } else if (res < 6)
@@ -346,30 +303,18 @@ void World::generate() {
         }
     }
 
+    // Bottom of World = Bedrock
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
             auto idx = (x * 256 * 64) + (z * 64) + 0;
-
-            worldData[idx] = 7;
+            worldData[idx] = Block::Bedrock;
         }
     }
 
+    // Update Lighting
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
-            for (int y = 63; y >= 0; y--) {
-                auto idx = (x * 256 * 64) + (z * 64) + y;
-                auto blk = worldData[idx];
-                if (blk == 0 || blk == 37 || blk == 20 || blk == 38 ||
-                    blk == 39 || blk == 40 || blk == 6) {
-                    auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
-                    lightData[idx2] |= 1 << (y % 16);
-                    continue;
-                }
-
-                auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
-                lightData[idx2] |= 1 << (y % 16);
-                break;
-            }
+            update_lighting(x, z);
         }
     }
 
@@ -411,8 +356,6 @@ void World::draw() {
 
     player->draw();
 }
-
-template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
 auto World::update_surroundings(int x, int z) -> void {
     auto localX = x % 16;
@@ -476,11 +419,6 @@ auto World::update_lighting(int x, int z) -> void {
     }
 }
 
-auto validate_ivec3(glm::ivec3 ivec) -> bool {
-    return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
-           ivec.z >= 0 && ivec.z < 256;
-}
-
 auto World::add_update(glm::ivec3 ivec) -> void {
     if (!validate_ivec3(ivec))
         return;
@@ -502,251 +440,6 @@ auto World::update_nearby_blocks(glm::ivec3 ivec) -> void {
     add_update({ivec.x + 1, ivec.y, ivec.z});
     add_update({ivec.x, ivec.y, ivec.z + 1});
     add_update({ivec.x, ivec.y, ivec.z - 1});
-}
-
-auto World::dig(std::any d) -> void {
-    auto w = std::any_cast<World *>(d);
-
-    if (w->break_icd < 0)
-        w->break_icd = 0.2f;
-    else
-        return;
-
-    auto pos = w->player->get_pos();
-    auto default_vec = glm::vec3(0, 0, 1);
-
-    if (w->player->in_inventory) {
-        using namespace Stardust_Celeste::Utilities;
-        auto cX = (Input::get_axis("Mouse", "X") + 1.0f) / 2.0f;
-        auto cY = (Input::get_axis("Mouse", "Y") + 1.0f) / 2.0f;
-
-#if PSP
-        cX = w->player->vcursor_x / 480.0f;
-        cY = 1.0f - (w->player->vcursor_y / 272.0f);
-#endif
-
-        if (cX > 0.3125f && cX < 0.675f)
-            cX = (cX - 0.3125f) / .04f;
-        else
-            return;
-
-        if (cY > 0.3125f && cY < 0.7188f)
-            cY = (cY - 0.3125f) / .08f;
-        else
-            return;
-
-        int iX = cX;
-        int iY = cY;
-
-        int idx = iY * 9 + iX;
-
-        if (idx > 41)
-            return;
-
-        w->player->itemSelections[w->player->selectorIDX] =
-            w->player->inventorySelection[idx];
-
-        return;
-    }
-
-    default_vec = glm::rotateX(default_vec, DEGTORAD(w->player->get_rot().x));
-    default_vec =
-        glm::rotateY(default_vec, DEGTORAD(-w->player->get_rot().y + 180));
-
-    const float REACH_DISTANCE = 4.0f;
-    default_vec *= REACH_DISTANCE;
-
-    const u32 NUM_STEPS = 50;
-
-    for (u32 i = 0; i < NUM_STEPS; i++) {
-        float percentage =
-            static_cast<float>(i) / static_cast<float>(NUM_STEPS);
-
-        auto cast_pos = pos + (default_vec * percentage);
-
-        auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
-                               static_cast<s32>(cast_pos.y),
-                               static_cast<s32>(cast_pos.z));
-
-        if (!validate_ivec3(ivec))
-            continue;
-
-        u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
-        auto blk = w->worldData[idx];
-
-        if (blk == 0 || blk == 7 || blk == 8)
-            continue;
-
-        w->psystem->initialize(blk, cast_pos);
-
-        uint16_t x = ivec.x / 16;
-        uint16_t y = ivec.z / 16;
-        uint32_t id = x << 16 | (y & 0x00FF);
-
-        bool was_sponge = false;
-        if (w->worldData[idx] == 19) {
-            was_sponge = true;
-        }
-
-        w->worldData[idx] = 0;
-
-        // Update surrounding blocks on a larger radius for water filling
-        if (was_sponge == true) {
-            for (auto i = ivec.x - 3; i <= ivec.x + 3; i++) {
-                for (auto j = ivec.z - 3; j <= ivec.z + 3; j++) {
-                    w->add_update({i, ivec.y, j});
-                    w->add_update({i, ivec.y + 1, j});
-                    w->add_update({i, ivec.y - 1, j});
-                    w->add_update({i, ivec.y + 2, j});
-                    w->add_update({i, ivec.y - 2, j});
-                }
-            }
-        }
-
-        // Update Lighting
-        w->update_lighting(ivec.x, ivec.z);
-
-        if (w->chunks.find(id) != w->chunks.end())
-            w->chunks[id]->generate(w);
-
-        w->update_surroundings(ivec.x, ivec.z);
-        w->update_nearby_blocks(ivec);
-
-        break;
-    }
-}
-
-auto World::place(std::any d) -> void {
-    auto w = std::any_cast<World *>(d);
-
-    if (w->place_icd < 0)
-        w->place_icd = 0.2f;
-    else
-        return;
-
-    auto pos = w->player->get_pos();
-
-    if (w->player->in_inventory)
-        return;
-
-    auto pos_ivec = glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
-                               static_cast<s32>(pos.z));
-
-    if (!validate_ivec3(pos_ivec))
-        return;
-
-    auto pidx = (pos_ivec.x * 256 * 64) + (pos_ivec.z * 64) + pos_ivec.y;
-    if (w->worldData[pidx] != 0 && w->worldData[pidx] != 8)
-        return;
-
-    auto default_vec = glm::vec3(0, 0, 1);
-
-    default_vec = glm::rotateX(default_vec, DEGTORAD(w->player->get_rot().x));
-    default_vec =
-        glm::rotateY(default_vec, DEGTORAD(-w->player->get_rot().y + 180));
-
-    const float REACH_DISTANCE = 4.0f;
-    default_vec *= REACH_DISTANCE;
-
-    const u32 NUM_STEPS = 50;
-
-    for (u32 i = 0; i < NUM_STEPS; i++) {
-        float percentage =
-            static_cast<float>(i) / static_cast<float>(NUM_STEPS);
-
-        auto cast_pos = pos + (default_vec * percentage);
-
-        auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
-                               static_cast<s32>(cast_pos.y),
-                               static_cast<s32>(cast_pos.z));
-
-        auto posivec =
-            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
-                       static_cast<s32>(pos.z));
-        auto posivec2 =
-            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y - 1),
-                       static_cast<s32>(pos.z));
-        auto posivec3 =
-            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y - 1.8f),
-                       static_cast<s32>(pos.z));
-
-        if (!validate_ivec3(ivec) || ivec == posivec)
-            continue;
-
-        u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
-        auto blk = w->worldData[idx];
-
-        if (blk == 0 || blk == 8)
-            continue;
-
-        cast_pos = pos + (default_vec * static_cast<float>(i - 1) /
-                          static_cast<float>(NUM_STEPS));
-
-        ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
-                          static_cast<s32>(cast_pos.y),
-                          static_cast<s32>(cast_pos.z));
-
-        if (!validate_ivec3(ivec))
-            return;
-
-        auto bk = w->player->itemSelections[w->player->selectorIDX];
-        if ((ivec == posivec || ivec == posivec2 || ivec == posivec3) &&
-            (bk != 6 && bk != 37 && bk != 38 && bk != 39 && bk != 40))
-            return;
-
-        idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
-
-        auto idx2 = (ivec.x * 256 * 64) + (ivec.z * 64) + (ivec.y - 1);
-
-        uint16_t x = ivec.x / 16;
-        uint16_t y = ivec.z / 16;
-        uint32_t id = x << 16 | (y & 0x00FF);
-
-        blk = w->player->itemSelections[w->player->selectorIDX];
-
-        auto blk2 = w->worldData[idx2];
-
-        if ((blk == 37 || blk == 38) && blk2 != 3)
-            return;
-
-        if (blk == 6 && (blk2 != 3 && blk2 != 2))
-            return;
-
-        if ((blk == 39 || blk == 40) && (blk2 != 1 && blk2 != 4 && blk2 != 13))
-            return;
-
-        w->worldData[idx] = blk;
-
-        // Drain water in a surrounding 5x5x5 area if a sponge was placed.
-        if (bk == 19) {
-            for (auto i = ivec.x - 2; i <= ivec.x + 2; i++) {
-                for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
-                    for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
-                        idx = (i * 256 * 64) + (k * 64) + j;
-
-                        // If it's water or flowing water, replace with air.
-                        if (w->worldData[idx] == 8 || w->worldData[idx] == 9) {
-                            w->worldData[idx] = 0;
-
-                            w->update_surroundings(i, k);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Update Lighting
-        w->update_lighting(ivec.x, ivec.z);
-
-        if (w->chunks.find(id) != w->chunks.end())
-            w->chunks[id]->generate(w);
-
-        w->update_surroundings(ivec.x, ivec.z);
-        w->update_nearby_blocks(ivec);
-
-        return;
-        break;
-    }
 }
 
 } // namespace CrossCraft

@@ -14,7 +14,6 @@
 #include "../Player/Player.hpp"
 #include "Clouds.hpp"
 #include "Particles.hpp"
-#include <FastNoiseLite.h>
 #include <Utilities/Types.hpp>
 #include <glm.hpp>
 #include <map>
@@ -24,26 +23,15 @@
 
 namespace CrossCraft {
 
+inline auto validate_ivec3(glm::ivec3 ivec) -> bool {
+    return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
+           ivec.z >= 0 && ivec.z < 256;
+}
+
 class Player;
 
 typedef uint8_t block_t;
 class ChunkStack;
-
-/**
- * @brief Describes a noise profile for the world generator
- *
- */
-struct NoiseSettings {
-    uint8_t octaves;
-    float amplitude;
-    float frequency;
-    float persistence;
-    float mod_freq;
-    float offset;
-
-    float range_min;
-    float range_max;
-};
 
 /**
  * @brief The world
@@ -99,9 +87,6 @@ class World {
     ScopePtr<Clouds> clouds;
     Config cfg;
 
-    static auto dig(std::any d) -> void;
-    static auto place(std::any d) -> void;
-
     /**
      * @brief Updates surrounding chunks
      *
@@ -137,16 +122,6 @@ class World {
 
   private:
     /**
-     * @brief Get noise from a position and settings
-     *
-     * @param x X position
-     * @param y Y position
-     * @param settings Noise profile
-     * @return float
-     */
-    auto get_noise(float x, float y, NoiseSettings *settings) -> float;
-
-    /**
      * @brief Get the needed chunks
      *
      * @return std::vector<glm::ivec2>
@@ -163,12 +138,13 @@ class World {
 
     ScopePtr<ParticleSystem> psystem;
     unsigned int terrain_atlas;
-    FastNoiseLite fsl;
     float *hmap;
-    uint32_t seed;
     float tick_counter;
 
     float place_icd, break_icd;
+
+    friend class DigAction;
+    friend class PlaceAction;
 };
 
 } // namespace CrossCraft
