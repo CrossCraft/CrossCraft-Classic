@@ -66,7 +66,7 @@ auto PlaceAction::place(std::any d) -> void {
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = w->worldData[idx];
 
-        if (blk == 0 || blk == 8)
+        if (blk == Block::Air || blk == Block::Water)
             continue;
 
         cast_pos = pos + (default_vec * static_cast<float>(i - 1) /
@@ -96,27 +96,32 @@ auto PlaceAction::place(std::any d) -> void {
 
         auto blk2 = w->worldData[idx2];
 
-        if ((blk == 37 || blk == 38) && blk2 != 3)
+        if ((blk == Block::Flower1 || blk == Block::Flower2) &&
+            blk2 != Block::Grass)
             return;
 
-        if (blk == 6 && (blk2 != 3 && blk2 != 2))
+        if (blk == Block::Sapling &&
+            (blk2 != Block::Grass && blk2 != Block::Dirt))
             return;
 
-        if ((blk == 39 || blk == 40) && (blk2 != 1 && blk2 != 4 && blk2 != 13))
+        if ((blk == Block::Mushroom1 || blk == Block::Mushroom2) &&
+            (blk2 != Block::Stone && blk2 != Block::Cobblestone &&
+             blk2 != Block::Gravel))
             return;
 
         w->worldData[idx] = blk;
 
         // Drain water in a surrounding 5x5x5 area if a sponge was placed.
-        if (bk == 19) {
+        if (bk == Block::Sponge) {
             for (auto i = ivec.x - 2; i <= ivec.x + 2; i++) {
                 for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
                     for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
                         idx = (i * 256 * 64) + (k * 64) + j;
 
                         // If it's water or flowing water, replace with air.
-                        if (w->worldData[idx] == 8 || w->worldData[idx] == 9) {
-                            w->worldData[idx] = 0;
+                        if (w->worldData[idx] == Block::Water ||
+                            w->worldData[idx] == Block::Still_Water) {
+                            w->worldData[idx] = Block::Air;
 
                             w->update_surroundings(i, k);
                         }

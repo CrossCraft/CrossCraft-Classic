@@ -66,12 +66,6 @@ class World {
     auto draw() -> void;
 
     /**
-     * @brief Generate the entire world with perlin noise
-     *
-     */
-    auto generate() -> void;
-
-    /**
      * @brief Get a World Index
      *
      * @param x Position
@@ -118,8 +112,6 @@ class World {
 
     std::map<int, ChunkStack *> chunks;
 
-    auto make_tree(int x, int z, int h) -> void;
-
   private:
     /**
      * @brief Get the needed chunks
@@ -145,6 +137,7 @@ class World {
 
     friend class DigAction;
     friend class PlaceAction;
+    friend class CrossCraftGenerator;
 };
 
 } // namespace CrossCraft

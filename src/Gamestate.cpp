@@ -1,5 +1,6 @@
 #include "Gamestate.hpp"
 #include "World/DigAction.hpp"
+#include "World/Generation/CrossCraftGenerator.hpp"
 #include "World/PlaceAction.hpp"
 #include <Stardust-Celeste.hpp>
 #include <Utilities/Controllers/KeyboardController.hpp>
@@ -18,7 +19,8 @@ GameState::~GameState() { on_cleanup(); }
 void GameState::on_start() {
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
-    world->generate();
+    CrossCraftGenerator::generate(world.get());
+    world->player->spawn(world.get());
 
     // Make new controllers
     psp_controller = new Input::PSPController();

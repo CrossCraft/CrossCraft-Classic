@@ -1,4 +1,5 @@
 #include "ChunkMesh.hpp"
+#include "../World/Generation/WorldGenUtil.hpp"
 #include "ChunkMeshBuilder.hpp"
 
 namespace CrossCraft {
@@ -68,7 +69,7 @@ void ChunkMesh::rtick(World *wrld) {
             wrld->worldData[idx] = Block::Air;
             needsRegen = true;
         } else {
-            wrld->make_tree(x, z, y - 1);
+            WorldGenUtil::make_tree(wrld, x, z, y - 1);
             for (int tx = -2; tx < 3; tx++)
                 for (int tz = -2; tz < 3; tz++)
                     wrld->update_lighting(x + tx, z + tz);

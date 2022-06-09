@@ -76,7 +76,7 @@ auto DigAction::dig(std::any d) -> void {
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = w->worldData[idx];
 
-        if (blk == 0 || blk == 7 || blk == 8)
+        if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water)
             continue;
 
         w->psystem->initialize(blk, cast_pos);
@@ -86,7 +86,7 @@ auto DigAction::dig(std::any d) -> void {
         uint32_t id = x << 16 | (y & 0x00FF);
 
         bool was_sponge = false;
-        if (w->worldData[idx] == 19) {
+        if (w->worldData[idx] == Block::Sponge) {
             was_sponge = true;
         }
 
