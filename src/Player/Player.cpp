@@ -410,7 +410,7 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
             }
         }
 
-    if (test({testpos.x, testpos.y + 0.1f, testpos.z}, wrld)) {
+    if (test({testpos.x, testpos.y + 0.05f, testpos.z}, wrld)) {
         vel.y = 0;
         is_falling = true;
     }
