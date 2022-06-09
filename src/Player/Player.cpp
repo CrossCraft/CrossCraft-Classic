@@ -257,6 +257,8 @@ auto Player::toggle_inv(std::any d) -> void {
         glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     else
         glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    Utilities::Input::set_cursor_center();
 #else
     p->vcursor_x = 240;
     p->vcursor_y = 136;
