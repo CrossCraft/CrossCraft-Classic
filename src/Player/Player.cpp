@@ -211,18 +211,19 @@ auto Player::move_right(std::any d) -> void {
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory) {
-        if (!p->jumping && p->on_ground && p->jump_icd < 0.0f &&
-            !p->is_underwater) {
+        if (!p->jumping && p->jump_icd < 0.0f && !p->is_underwater &&
+            !p->is_falling) {
             p->vel.y = 8.4f;
             p->jumping = true;
-            p->jump_icd = 0.2f;
+            p->jump_icd = 0.33f;
+            p->is_falling = false;
         }
 
-        if (p->is_underwater && p->jump_icd < 0.0f) {
+        if (p->is_underwater && p->water_cutoff) {
             p->vel.y = 3.2f;
             p->jumping = true;
-            p->is_falling = false;
-            p->jump_icd = 0.01f;
+            p->jump_icd = 0.33f;
+            p->is_falling = true;
         }
     }
 }
@@ -439,15 +440,21 @@ void Player::update(float dt, World *wrld) {
     else
         is_head_water = false;
 
-    blk = wrld->worldData[wrld->getIdx(testpos.x, testpos.y - 1.5f, testpos.z)];
+    blk = wrld->worldData[wrld->getIdx(testpos.x, testpos.y - 1.9f, testpos.z)];
     if (blk == 8)
         is_underwater = true;
     else
         is_underwater = false;
 
+    blk = wrld->worldData[wrld->getIdx(testpos.x, testpos.y - 1.2f, testpos.z)];
+    if (blk == 8)
+        water_cutoff = true;
+    else
+        water_cutoff = false;
+
     test_collide(testpos, wrld, dt);
 
-    if (is_underwater) {
+    if (is_underwater || is_head_water || water_cutoff) {
         vel.x *= 0.5f;
         vel.z *= 0.5f;
         vel.y *= 0.9f;
@@ -455,7 +462,7 @@ void Player::update(float dt, World *wrld) {
 
     pos += vel * dt;
 
-    blk = wrld->worldData[wrld->getIdx(pos.x, pos.y - 2.0f, pos.z)];
+    blk = wrld->worldData[wrld->getIdx(pos.x, pos.y - 1.85f, pos.z)];
 
     on_ground = (blk != 0 && blk != 8);
 

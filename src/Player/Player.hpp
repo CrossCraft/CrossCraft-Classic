@@ -122,7 +122,7 @@ class Player {
 
     AABB model;
 
-    bool is_falling, is_underwater, is_head_water;
+    bool is_falling, is_underwater, is_head_water, water_cutoff;
     bool on_ground, jumping;
 
     // Block Drawing
