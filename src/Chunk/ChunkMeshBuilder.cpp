@@ -46,6 +46,21 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
                                     glm::vec3 pos, glm::vec3 posCheck,
                                     uint32_t lightVal) {
 
+    int idxl = ((posCheck.x + chunkMesh->cX * 16) * 256 * 4) +
+               ((posCheck.z + chunkMesh->cZ * 16) * 4) +
+               (posCheck.y + chunkMesh->cY * 16) / 16;
+
+    auto lv = lightVal;
+
+    if (!((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
+        if (lv == LIGHT_TOP)
+            lv = LIGHT_TOP_DARK;
+        else if (lv == LIGHT_SIDE)
+            lv = LIGHT_SIDE_DARK;
+        else
+            lv = LIGHT_BOT_DARK;
+    }
+
     // Bounds check
     if (!((posCheck.x == 16 && chunkMesh->cX == 15) ||
           (posCheck.x == -1 && chunkMesh->cX == 0) ||
@@ -58,21 +73,6 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
         int idx = ((posCheck.x + chunkMesh->cX * 16) * 256 * 64) +
                   ((posCheck.z + chunkMesh->cZ * 16) * 64) +
                   (posCheck.y + chunkMesh->cY * 16);
-
-        int idxl = ((pos.x + chunkMesh->cX * 16) * 256 * 4) +
-                   ((pos.z + chunkMesh->cZ * 16) * 4) + chunkMesh->cY;
-
-        auto lv = lightVal;
-
-        if (!((wrld->lightData[idxl] >> (int)pos.y) & 1)) {
-            if (lv == LIGHT_TOP)
-                lv = LIGHT_TOP_DARK;
-            else if (lv == LIGHT_SIDE)
-                lv = LIGHT_SIDE_DARK;
-            else
-                lv = LIGHT_BOT_DARK;
-        }
-
         // Add face to mesh
         if (wrld->worldData[idx] == Block::Air ||
             wrld->worldData[idx] == Block::Water ||
