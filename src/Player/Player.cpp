@@ -455,14 +455,6 @@ void Player::update(float dt, World *wrld) {
 
     pos += vel * dt;
 
-    // When the player stops falling, we make sure the player snaps to the
-    // top of a surface
-    if (!is_falling) {
-        pos.y += 0.2f;
-        pos.y = std::round(pos.y);
-        pos.y -= 0.2f;
-    }
-
     blk = wrld->worldData[wrld->getIdx(pos.x, pos.y - 2.0f, pos.z)];
 
     on_ground = (blk != 0 && blk != 8);
@@ -477,8 +469,6 @@ void Player::update(float dt, World *wrld) {
     cam.update();
     vel = glm::vec3(0.f, vel.y, 0.f);
 }
-// template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f
-// * 3.14159; }
 
 auto Player::drawBlk(uint8_t type, int x, int y) -> void {
     Rendering::RenderContext::get().matrix_view(glm::mat4(1));
