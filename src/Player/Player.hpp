@@ -11,6 +11,7 @@
 #pragma once
 #include "../World/World.hpp"
 #include "AABB.hpp"
+#include "Graphics/2D/FontRenderer.hpp"
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
 #include <any>
@@ -118,7 +119,7 @@ class Player {
     ScopePtr<Graphics::G2D::Sprite> crosshair;
     ScopePtr<Graphics::G2D::Sprite> water;
     ScopePtr<Graphics::G2D::Sprite> overlay;
-    uint32_t gui_texture, water_texture, overlay_texture;
+    uint32_t gui_texture, water_texture, overlay_texture, font_texture;
 
     AABB model;
 
@@ -131,6 +132,8 @@ class Player {
     std::vector<Rendering::Vertex> m_verts[50];
     std::vector<uint16_t> m_index[50];
     Rendering::Mesh blockMesh[50];
+
+    ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
 };
 
 struct SelData {

@@ -44,6 +44,14 @@ Player::Player()
     overlay_texture = Rendering::TextureManager::get().load_texture(
         "./assets/overlay.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
+    font_texture = Rendering::TextureManager::get().load_texture(
+        "./assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, false);
+    fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
+        font_texture, glm::vec2(16, 16));
+
+    fontRenderer->add_text("Hello", {0, 0});
+
     item_box = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
         Rendering::Rectangle{{0, (256.0f - 22.0f) / 256.0f},
@@ -580,6 +588,8 @@ auto Player::draw() -> void {
     selector->set_position({148 + 20 * selectorIDX, 0});
     selector->set_layer(-2);
     selector->draw();
+
+    fontRenderer->draw();
 
     for (int i = 0; i < 9; i++)
         drawBlk(itemSelections[i], i, 0);
