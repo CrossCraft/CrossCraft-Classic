@@ -2,10 +2,9 @@ cmake_minimum_required(VERSION 3.17)
 project(CrossCraft-Classic)
 
 set(CMAKE_CXX_STANDARD 17)
-#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=leak")
-#set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=leak")
 
-
+# set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=leak")
+# set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=leak")
 if(WIN32)
     add_compile_definitions(BUILD_PLAT=0)
 elseif(PSP)
@@ -15,25 +14,25 @@ else()
 endif()
 
 add_subdirectory(ext/Stardust-Celeste Stardust)
+add_subdirectory(ext/zlib ZLib)
 
 file(GLOB_RECURSE SRC_FILES src/*.cpp)
 file(GLOB_RECURSE INC_FILES include/*.hpp)
 
 add_executable(CrossCraft-Classic ${SRC_FILES} ${INC_FILES})
 target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp)
-target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste)
+target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlib)
 
 if(WIN32)
     target_link_libraries(CrossCraft-Classic ws2_32.lib)
 endif()
 
 if(PSP)
-create_pbp_file(
-    TARGET CrossCraft-Classic
-    TITLE CrossCraft-Classic
-    ICON_PATH ../src/assets/psp/ICON0.png
-    BACKGROUND_PATH ../src/assets/psp/PIC1.png
-    BUILD_PRX 1
-)
-
+    create_pbp_file(
+        TARGET CrossCraft-Classic
+        TITLE CrossCraft-Classic
+        ICON_PATH ../src/assets/psp/ICON0.png
+        BACKGROUND_PATH ../src/assets/psp/PIC1.png
+        BUILD_PRX 1
+    )
 endif()
