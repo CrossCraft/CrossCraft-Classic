@@ -22,8 +22,9 @@ void GameState::on_start() {
     world = create_scopeptr<World>(create_refptr<Player>());
 
     FILE *fptr = fopen("save.ccc", "r");
-    if (fptr == nullptr || !world->load_world(fptr))
+    if (fptr == nullptr || !world->load_world())
         CrossCraftGenerator::generate(world.get());
+    fclose(fptr);
 
     world->player->spawn(world.get());
 

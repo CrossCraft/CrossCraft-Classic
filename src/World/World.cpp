@@ -6,6 +6,7 @@
 #include <Utilities/Input.hpp>
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
+#include <zlib.h>
 
 #if PSP
 #include <pspctrl.h>
@@ -48,17 +49,20 @@ World::World(std::shared_ptr<Player> p) {
     break_icd = 0.0f;
 }
 
-auto World::load_world(FILE *fptr) -> bool {
+auto World::load_world() -> bool {
+    gzFile save_file = gzopen("save.ccc", "rb");
+    gzrewind(save_file);
+
     int version = 0;
-    fread(&version, sizeof(int), 1, fptr);
+    gzread(save_file, &version, sizeof(int) * 1);
 
     SC_APP_DEBUG("READING FILE -- VERSION {}", version);
 
     if (version != 1)
         return false;
 
-    fread(worldData, sizeof(block_t), 256 * 64 * 256, fptr);
-    fclose(fptr);
+    gzread(save_file, worldData, 256 * 64 * 256);
+    gzclose(save_file);
 
     // Update Lighting
     for (int x = 0; x < 256; x++) {
@@ -74,15 +78,13 @@ auto World::save(std::any p) -> void {
     auto wrld = std::any_cast<World *>(p);
     SC_APP_DEBUG("SAVING!");
 
-    FILE *save_file = fopen("save.ccc", "w+");
+    gzFile save_file = gzopen("save.ccc", "wb");
     if (save_file != nullptr) {
         const int save_version = 1;
-        fwrite(&save_version, sizeof(int), 1, save_file);
+        gzwrite(save_file, &save_version, 1 * sizeof(int));
+        gzwrite(save_file, wrld->worldData, 256 * 64 * 256);
 
-        // TODO: ZIP DATA
-        fwrite(wrld->worldData, sizeof(block_t), 256 * 64 * 256, save_file);
-
-        fclose(save_file);
+        gzclose(save_file);
     }
 }
 

@@ -53,7 +53,7 @@ class World {
      */
     ~World();
 
-    auto load_world(FILE *fptr) -> bool;
+    auto load_world() -> bool;
 
     /**
      * @brief Update (checks chunks, run chunk updates, tick updates);
