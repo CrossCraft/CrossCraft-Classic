@@ -5,7 +5,9 @@
 namespace CrossCraft {
 
 ChunkMesh::ChunkMesh(int x, int y, int z)
-    : cX(x), cY(y), cZ(z), rtcounter(0), needsRegen(0) {}
+    : cX(x), cY(y), cZ(z), rtcounter(0), needsRegen(0) {
+    blank = false;
+}
 
 ChunkMesh::~ChunkMesh() {}
 
@@ -144,8 +146,107 @@ void ChunkMesh::generate(const World *wrld) {
     // Finalize the mesh
     finalize_mesh();
 }
+void ChunkMesh::generate_blank() {
+    // Reset + Allocate
+    reset_allocate();
+    // Finalize the mesh
+    finalize_mesh();
+
+    blank = true;
+}
+
+void ChunkMesh::generate_border() {
+
+    // Reset + Allocate
+    reset_allocate();
+
+    // Loop over the mesh
+    for (int x = 0; x < 16; x++) {
+        for (int z = 0; z < 16; z++) {
+            for (int y = 0; y < 16; y++) {
+
+                auto h = cY * 16 + y;
+
+                // Get block
+                block_t blk = Block::Bedrock;
+                if (h >= 30)
+                    blk = Block::Water;
+
+                // Update surrounding positions
+                SurroundPos surround;
+                surround.update(x, y, z);
+
+                // Add 6 faces
+                if (blk != Block::Water) {
+                    if (h == 29) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, topFace, getTexCoord(blk, LIGHT_TOP),
+                            {x, y, z}, LIGHT_TOP, ChunkMeshSelection::Opaque);
+                    }
+
+                    if (x == 0) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, leftFace, getTexCoord(blk, LIGHT_SIDE),
+                            {x, y, z}, LIGHT_SIDE, ChunkMeshSelection::Opaque);
+                    } else if (x == 15) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, rightFace, getTexCoord(blk, LIGHT_SIDE),
+                            {x, y, z}, LIGHT_SIDE, ChunkMeshSelection::Opaque);
+                    }
+                    if (z == 0) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, backFace, getTexCoord(blk, LIGHT_SIDE),
+                            {x, y, z}, LIGHT_SIDE, ChunkMeshSelection::Opaque);
+                    } else if (z == 15) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, frontFace, getTexCoord(blk, LIGHT_SIDE),
+                            {x, y, z}, LIGHT_SIDE, ChunkMeshSelection::Opaque);
+                    }
+
+                } else {
+
+                    if (h == 31) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, topFace, getTexCoord(blk, LIGHT_TOP),
+                            {x, y - 0.1f, z}, LIGHT_TOP,
+                            ChunkMeshSelection::Transparent);
+                    }
+
+                    if (x == 0 && cX == 16) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, leftFace, getTexCoord(blk, LIGHT_SIDE),
+                            {x, y, z}, LIGHT_SIDE,
+                            ChunkMeshSelection::Transparent);
+                    } else if (x == 15 && cX == -1) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, rightFace, getTexCoord(blk, LIGHT_SIDE),
+                            {x, y, z}, LIGHT_SIDE,
+                            ChunkMeshSelection::Transparent);
+                    }
+                    if (z == 0 && cZ == 16) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, backFace, getTexCoord(blk, LIGHT_SIDE),
+                            {x, y, z}, LIGHT_SIDE,
+                            ChunkMeshSelection::Transparent);
+                    } else if (z == 15 && cZ == -1) {
+                        ChunkMeshBuilder::add_face_to_mesh(
+                            this, frontFace, getTexCoord(blk, LIGHT_SIDE),
+                            {x, y, z}, LIGHT_SIDE,
+                            ChunkMeshSelection::Transparent);
+                    }
+                }
+            }
+        }
+    }
+
+    // Finalize the mesh
+    finalize_mesh();
+}
 
 void ChunkMesh::draw(ChunkMeshSelection meshSel) {
+    if (blank)
+        return;
+
     // Set matrix
     Rendering::RenderContext::get().matrix_translate(
         {cX * 16, cY * 16, cZ * 16});

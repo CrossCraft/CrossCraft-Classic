@@ -7,6 +7,7 @@ ChunkStack::ChunkStack(int x, int z) : cX(x), cZ(z) {
         ChunkMesh *mesh = new ChunkMesh(cX, i, cZ);
         stack[i] = mesh;
     }
+    border = false;
 }
 
 ChunkStack::~ChunkStack() {
@@ -145,6 +146,16 @@ void ChunkStack::generate(World *wrld) {
     for (int i = 0; i < 4; i++) {
         stack[i]->generate(wrld);
     }
+}
+
+void ChunkStack::generate_border() {
+    // Generate meshes
+    stack[0]->generate_border();
+    stack[1]->generate_border();
+    stack[2]->generate_blank();
+    stack[3]->generate_blank();
+
+    border = true;
 }
 
 void ChunkStack::draw() {

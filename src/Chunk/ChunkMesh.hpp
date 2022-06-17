@@ -46,6 +46,15 @@ class ChunkMesh {
     void generate(const World *wrld);
 
     /**
+     * @brief Generate a brand new mesh
+     *
+     * @param wrld - World to reference
+     */
+    void generate_border();
+
+    void generate_blank();
+
+    /**
      * @brief Draw the chunk mesh
      *
      */
@@ -79,6 +88,7 @@ class ChunkMesh {
     ChunkMeshCollection meshCollection;
 
     friend class ChunkMeshBuilder;
+    bool blank;
 };
 
 } // namespace CrossCraft

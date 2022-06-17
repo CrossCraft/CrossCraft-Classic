@@ -45,6 +45,12 @@ class ChunkStack {
      * @param wrld The world to reference
      */
     void generate(World *wrld);
+    /**
+     * @brief Generate the stack
+     *
+     * @param wrld The world to reference
+     */
+    void generate_border();
 
     /**
      * @brief Update Chunk
@@ -84,6 +90,7 @@ class ChunkStack {
     inline auto get_chunk_pos() -> glm::ivec2 { return {cX, cZ}; }
 
     std::vector<glm::ivec3> posUpdate;
+    bool border;
 
   private:
     auto update_check(World *wrld, int blkr, glm::ivec3 chk) -> void;

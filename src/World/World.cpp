@@ -119,20 +119,18 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
             auto bx = x + pchunk_pos.x;
             auto by = y + pchunk_pos.y;
 
-            if (bx >= 0 && bx < 16 && by >= 0 && by < 16) {
-                // Okay - this is in bounds - now, we check if in radius
-                auto dx = (bx - pchunk_pos.x);
-                dx *= dx;
+            // Okay - this is in bounds - now, we check if in radius
+            auto dx = (bx - pchunk_pos.x);
+            dx *= dx;
 
-                auto dy = (by - pchunk_pos.y);
-                dy *= dy;
+            auto dy = (by - pchunk_pos.y);
+            dy *= dy;
 
-                auto d = dx + dy;
+            auto d = dx + dy;
 
-                // If distance <= radius
-                if (d <= rad * rad) {
-                    needed_chunks.push_back({bx, by});
-                }
+            // If distance <= radius
+            if (d <= rad * rad) {
+                needed_chunks.push_back({bx, by});
             }
         }
     }
@@ -209,13 +207,23 @@ void World::update(double dt) {
 
         // Generate remaining
         for (auto &ipos : to_generate) {
-            ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
-            stack->generate(this);
+            if (ipos.x >= 0 && ipos.x < 16 && ipos.y >= 0 && ipos.y < 16) {
+                ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
+                stack->generate(this);
 
-            uint16_t x = ipos.x;
-            uint16_t y = ipos.y;
-            uint32_t id = x << 16 | (y & 0x00FF);
-            chunks.emplace(id, stack);
+                uint16_t x = ipos.x;
+                uint16_t y = ipos.y;
+                uint32_t id = x << 16 | (y & 0x00FF);
+                chunks.emplace(id, stack);
+            } else if (cfg.compat) {
+                ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
+                stack->generate_border();
+
+                uint16_t x = ipos.x;
+                uint16_t y = ipos.y;
+                uint32_t id = x << 16 | (y & 0x00FF);
+                chunks.emplace(id, stack);
+            }
         }
     }
 }
@@ -253,7 +261,14 @@ void World::draw() {
 
     // Draw transparent
     for (auto const &[key, val] : chunks) {
-        val->draw_transparent();
+        if (!val->border)
+            val->draw_transparent();
+    }
+
+    // Draw transparent
+    for (auto const &[key, val] : chunks) {
+        if (val->border)
+            val->draw_transparent();
     }
 
     clouds->draw();
