@@ -35,6 +35,7 @@ void GameState::on_start() {
 
     // Read config
     world->cfg = Config::loadConfig();
+    SC_APP_INFO("COMPAT: {}", world->cfg.compat);
 }
 
 void GameState::on_cleanup() {
