@@ -25,7 +25,7 @@ class GameState : public Core::ApplicationState {
   public:
     GameState()
         : config(), key_controller(nullptr), psp_controller(nullptr),
-          mouse_controller(nullptr), ref(nullptr){};
+          mouse_controller(nullptr){};
     ~GameState();
 
     void on_start();
@@ -39,7 +39,6 @@ class GameState : public Core::ApplicationState {
     static void quit(std::any d);
 
   private:
-    Core::Application *ref;
     ScopePtr<World> world;
     Utilities::Controller *psp_controller;
     Utilities::Controller *key_controller;

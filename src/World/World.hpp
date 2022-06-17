@@ -19,6 +19,7 @@
 #include <map>
 #include <memory>
 #include <stdint.h>
+#include <stdio.h>
 #include <vector>
 
 namespace CrossCraft {
@@ -51,6 +52,8 @@ class World {
      *
      */
     ~World();
+
+    auto load_world(FILE *fptr) -> bool;
 
     /**
      * @brief Update (checks chunks, run chunk updates, tick updates);
@@ -109,6 +112,8 @@ class World {
      *
      */
     auto add_update(glm::ivec3 ivec) -> void;
+
+    static auto save(std::any p) -> void;
 
     std::map<int, ChunkStack *> chunks;
 

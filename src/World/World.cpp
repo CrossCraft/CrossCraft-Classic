@@ -24,6 +24,7 @@ World::World(std::shared_ptr<Player> p) {
     tick_counter = 0;
     player = p;
     pchunk_pos = {-1, -1};
+    hmap = nullptr;
 
     terrain_atlas = Rendering::TextureManager::get().load_texture(
         "./assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
@@ -47,12 +48,51 @@ World::World(std::shared_ptr<Player> p) {
     break_icd = 0.0f;
 }
 
+auto World::load_world(FILE *fptr) -> bool {
+    int version = 0;
+    fread(&version, sizeof(int), 1, fptr);
+
+    SC_APP_DEBUG("READING FILE -- VERSION {}", version);
+
+    if (version != 1)
+        return false;
+
+    fread(worldData, sizeof(block_t), 256 * 64 * 256, fptr);
+    fclose(fptr);
+
+    // Update Lighting
+    for (int x = 0; x < 256; x++) {
+        for (int z = 0; z < 256; z++) {
+            update_lighting(x, z);
+        }
+    }
+
+    return true;
+}
+
+auto World::save(std::any p) -> void {
+    auto wrld = std::any_cast<World *>(p);
+    SC_APP_DEBUG("SAVING!");
+
+    FILE *save_file = fopen("save.ccc", "w+");
+    if (save_file != nullptr) {
+        const int save_version = 1;
+        fwrite(&save_version, sizeof(int), 1, save_file);
+
+        // TODO: ZIP DATA
+        fwrite(wrld->worldData, sizeof(block_t), 256 * 64 * 256, save_file);
+
+        fclose(save_file);
+    }
+}
+
 World::~World() {
     Rendering::TextureManager::get().delete_texture(terrain_atlas);
     free(worldData);
     free(lightData);
     // Destroy height map
-    free(hmap);
+    if (hmap != nullptr)
+        free(hmap);
 
     for (auto const &[key, val] : chunks) {
         if (val)

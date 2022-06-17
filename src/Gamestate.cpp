@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdio.h>
 
 namespace CrossCraft {
 
@@ -19,7 +20,11 @@ GameState::~GameState() { on_cleanup(); }
 void GameState::on_start() {
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
-    CrossCraftGenerator::generate(world.get());
+
+    FILE *fptr = fopen("save.ccc", "r");
+    if (fptr == nullptr || !world->load_world(fptr))
+        CrossCraftGenerator::generate(world.get());
+
     world->player->spawn(world.get());
 
     // Make new controllers
@@ -51,17 +56,6 @@ void GameState::quit(std::any d) {
 }
 
 void GameState::on_update(Core::Application *app, double dt) {
-
-    // Setup quit command
-    if (!ref) {
-        ref = app;
-
-        psp_controller->add_command(
-            {(int)Input::PSPButtons::Start, KeyFlag::Press}, {quit, ref});
-        key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
-                                    {quit, ref});
-    }
-
     // Update the world
     world->update(dt);
 
@@ -101,6 +95,11 @@ void GameState::bind_controls() {
                                 {Player::dec_selector, world->player.get()});
     psp_controller->add_command({(int)Input::PSPButtons::Right, KeyFlag::Press},
                                 {Player::inc_selector, world->player.get()});
+
+    psp_controller->add_command({(int)Input::PSPButtons::Start, KeyFlag::Press},
+                                {World::save, world.get()});
+    key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
+                                {World::save, world.get()});
 
     key_controller->add_command(
         {(int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held},
