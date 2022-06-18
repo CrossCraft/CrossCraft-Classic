@@ -20,7 +20,7 @@ file(GLOB_RECURSE SRC_FILES src/*.cpp)
 file(GLOB_RECURSE INC_FILES include/*.hpp)
 
 add_executable(CrossCraft-Classic ${SRC_FILES} ${INC_FILES})
-target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp)
+target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp ext/zlib/)
 target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlib)
 
 if(WIN32)
