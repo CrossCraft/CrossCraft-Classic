@@ -61,7 +61,7 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
 
         auto lv = lightVal;
 
-        if (!((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
+        if (idxl >= 0 && !((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
             if (lv == LIGHT_TOP)
                 lv = LIGHT_TOP_DARK;
             else if (lv == LIGHT_SIDE)
