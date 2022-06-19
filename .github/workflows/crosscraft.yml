@@ -49,8 +49,10 @@ jobs:
         run: |
           git submodule update --init --recursive --remote
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 .
+          copy ext/zconf.h ext/zlib/zconf.h
           cmake --build . --config Release
           move Release\CrossCraft-Classic.exe CrossCraft-Classic.exe
+          move ZLib\Release\zlib.dll zlib.dll
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
