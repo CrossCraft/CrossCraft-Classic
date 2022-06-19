@@ -46,21 +46,6 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
                                     glm::vec3 pos, glm::vec3 posCheck,
                                     uint32_t lightVal) {
 
-    int idxl = ((posCheck.x + chunkMesh->cX * 16) * 256 * 4) +
-               ((posCheck.z + chunkMesh->cZ * 16) * 4) +
-               (posCheck.y + chunkMesh->cY * 16) / 16;
-
-    auto lv = lightVal;
-
-    if (!((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
-        if (lv == LIGHT_TOP)
-            lv = LIGHT_TOP_DARK;
-        else if (lv == LIGHT_SIDE)
-            lv = LIGHT_SIDE_DARK;
-        else
-            lv = LIGHT_BOT_DARK;
-    }
-
     // Bounds check
     if (!((posCheck.x == 16 && chunkMesh->cX == 15) ||
           (posCheck.x == -1 && chunkMesh->cX == 0) ||
@@ -68,6 +53,23 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
           (posCheck.y == 16 && chunkMesh->cY == 15) ||
           (posCheck.z == -1 && chunkMesh->cZ == 0) ||
           (posCheck.z == 16 && chunkMesh->cZ == 15))) {
+
+
+        int idxl = ((posCheck.x + chunkMesh->cX * 16) * 256 * 4) +
+            ((posCheck.z + chunkMesh->cZ * 16) * 4) +
+            (posCheck.y + chunkMesh->cY * 16) / 16;
+
+        auto lv = lightVal;
+
+        if (!((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
+            if (lv == LIGHT_TOP)
+                lv = LIGHT_TOP_DARK;
+            else if (lv == LIGHT_SIDE)
+                lv = LIGHT_SIDE_DARK;
+            else
+                lv = LIGHT_BOT_DARK;
+        }
+
 
         // Calculate block index to peek
         int idx = ((posCheck.x + chunkMesh->cX * 16) * 256 * 64) +

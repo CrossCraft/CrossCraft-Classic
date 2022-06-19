@@ -49,6 +49,11 @@ World::World(std::shared_ptr<Player> p) {
     break_icd = 0.0f;
 }
 
+auto World::spawn() -> void {
+    player->spawn(this);
+}
+
+
 auto World::load_world() -> bool {
     gzFile save_file = gzopen("save.ccc", "rb");
     gzrewind(save_file);

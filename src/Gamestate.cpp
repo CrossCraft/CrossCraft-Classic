@@ -22,11 +22,16 @@ void GameState::on_start() {
     world = create_scopeptr<World>(create_refptr<Player>());
 
     FILE *fptr = fopen("save.ccc", "r");
-    if (fptr == nullptr || !world->load_world())
+    if (fptr) {
+        if(!world->load_world())
+            CrossCraftGenerator::generate(world.get());
+        fclose(fptr);
+    }
+    else {
         CrossCraftGenerator::generate(world.get());
-    fclose(fptr);
+    }
 
-    world->player->spawn(world.get());
+    world->spawn();
 
     // Make new controllers
     psp_controller = new Input::PSPController();

@@ -113,6 +113,7 @@ class World {
      */
     auto add_update(glm::ivec3 ivec) -> void;
 
+    auto spawn() -> void;
     static auto save(std::any p) -> void;
 
     std::map<int, ChunkStack *> chunks;
