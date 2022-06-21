@@ -23,6 +23,7 @@ namespace CrossCraft {
 
 class World;
 
+
 /**
  * @brief Player controller object
  *
@@ -78,6 +79,8 @@ class Player {
     static auto move_up(std::any p) -> void;
     static auto move_down(std::any p) -> void;
     static auto move_reset(std::any p) -> void;
+
+    static auto respawn(std::any p) -> void;
 
     static auto change_selector(std::any p) -> void;
     static auto inc_selector(std::any p) -> void;
@@ -140,6 +143,11 @@ class Player {
 struct SelData {
     Player *player;
     int selIDX;
+};
+
+struct RespawnRequest {
+    Player* player;
+    World* wrld;
 };
 
 } // namespace CrossCraft
