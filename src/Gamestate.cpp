@@ -108,17 +108,31 @@ void GameState::bind_controls() {
                                 {World::save, world.get()});
 
     key_controller->add_command(
-        {(int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_forward, world->player.get()});
+        { (int)Input::Keys::W, KeyFlag::Release },
+        { Player::move_reset, world->player.get() });
     key_controller->add_command(
-        {(int)Input::Keys::A, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_left, world->player.get()});
+        { (int)Input::Keys::A, KeyFlag::Release },
+        { Player::move_reset, world->player.get() });
     key_controller->add_command(
-        {(int)Input::Keys::D, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_right, world->player.get()});
+        { (int)Input::Keys::D, KeyFlag::Release },
+        { Player::move_reset, world->player.get() });
     key_controller->add_command(
-        {(int)Input::Keys::S, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_backward, world->player.get()});
+        { (int)Input::Keys::S, KeyFlag::Release },
+        { Player::move_reset, world->player.get() });
+
+    key_controller->add_command(
+        { (int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held },
+        { Player::move_forward, world->player.get() });
+    key_controller->add_command(
+        { (int)Input::Keys::A, KeyFlag::Press | KeyFlag::Held },
+        { Player::move_left, world->player.get() });
+    key_controller->add_command(
+        { (int)Input::Keys::D, KeyFlag::Press | KeyFlag::Held },
+        { Player::move_right, world->player.get() });
+    key_controller->add_command(
+        { (int)Input::Keys::S, KeyFlag::Press | KeyFlag::Held },
+        { Player::move_backward, world->player.get() });
+
     key_controller->add_command(
         {(int)Input::Keys::Space, KeyFlag::Press | KeyFlag::Held},
         {Player::move_up, world->player.get()});

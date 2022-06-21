@@ -185,34 +185,41 @@ auto Player::setup_model(uint8_t type) -> void {
 }
 
 auto Player::move_forward(std::any d) -> void {
-    auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory) {
-        p->vel.x += -sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
-        p->vel.z += -cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
+    auto p = std::any_cast<Player*>(d);
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
+        p->vel.x = -sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
+        p->vel.z = -cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
     }
+}
+
+auto Player::move_reset(std::any d) -> void {
+    auto p = std::any_cast<Player*>(d);
+
+    p->vel.x = 0.0f;
+    p->vel.z = 0.0f;
 }
 
 auto Player::move_backward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory) {
-        p->vel.x += sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
-        p->vel.z += cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
+        p->vel.x = sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
+        p->vel.z = cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
     }
 }
 
 auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory) {
-        p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-        p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
+        p->vel.x = -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+        p->vel.z = -cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
     }
 }
 
 auto Player::move_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory) {
-        p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-        p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
+        p->vel.x = sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
+        p->vel.z = cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
     }
 }
 
@@ -378,25 +385,25 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                             t_collision < l_collision &&
                             t_collision < r_collision) {
                             // Top collision
-                            vel.x = 0;
+                            vel.x = 0.0f;
                         }
                         if (b_collision < t_collision &&
                             b_collision < l_collision &&
                             b_collision < r_collision) {
                             // bottom collision
-                            vel.x = 0;
+                            vel.x = -0.0f;
                         }
                         if (l_collision < r_collision &&
                             l_collision < t_collision &&
                             l_collision < b_collision) {
                             // Left collision
-                            vel.z = 0;
+                            vel.z = -0.0f;
                         }
                         if (r_collision < l_collision &&
                             r_collision < t_collision &&
                             r_collision < b_collision) {
                             // Right collision
-                            vel.z = 0;
+                            vel.z = 0.0f;
                         }
                     }
                 }
@@ -482,7 +489,6 @@ void Player::update(float dt, World *wrld) {
     cam.pos = pos;
     cam.rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
     cam.update();
-    vel = glm::vec3(0.f, vel.y, 0.f);
 }
 
 auto Player::drawBlk(uint8_t type, int x, int y) -> void {
