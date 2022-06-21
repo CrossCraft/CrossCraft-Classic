@@ -27,7 +27,7 @@ auto water_can_flow(glm::ivec3 ivec, World *wrld) -> bool {
         for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
             for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
                 auto idx = (i * 256 * 64) + (k * 64) + j;
-                if (wrld->worldData[idx] == Block::Sponge)
+                if (idx >= 0 && idx < (256 * 64 * 256) && wrld->worldData[idx] == Block::Sponge)
                     return false;
             }
         }

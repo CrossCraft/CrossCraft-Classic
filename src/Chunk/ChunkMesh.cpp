@@ -37,7 +37,7 @@ void ChunkMesh::rtick(World *wrld) {
     int idxl = ((x + cX * 16) * 256 * 4) + ((z + cZ * 16) * 4) + cY;
 
     bool is_dark = false;
-    if(idxl >= 0)
+    if(idxl >= 0 && idxl < (256 * 64 * 256))
         is_dark = (!((wrld->lightData[idxl] >> (int)y) & 1));
 
     x += cX * 16;
@@ -52,18 +52,18 @@ void ChunkMesh::rtick(World *wrld) {
 
     auto idx2 = (x * 256 * 64) + (z * 64) + y;
     auto blk2 = Block::Air;
-    if (idx2 >= 0)
+    if (idx2 >= 0 && idx2 < (256 * 64 * 256))
         blk2 = wrld->worldData[idx2];
 
 
     auto blk = Block::Air;
-    if (idx >= 0)
+    if (idx >= 0 && idx2 < (256 * 64 * 256))
         blk = wrld->worldData[idx];
 
     auto blk2_is_valid_grass =
         (blk2 == Block::Air || blk2 == Block::Sapling ||
          blk2 == Block::Flower1 || blk2 == Block::Flower2 ||
-         blk2 == Block::Mushroom1 || blk2 == Block::Mushroom2);
+         blk2 == Block::Mushroom1 || blk2 == Block::Mushroom2 || blk2 == Block::Leaves);
 
     if (blk == Block::Grass && !blk2_is_valid_grass) {
         wrld->worldData[idx] = Block::Dirt;
