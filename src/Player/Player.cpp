@@ -385,24 +385,30 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                             t_collision < l_collision &&
                             t_collision < r_collision) {
                             // Top collision
-                            vel.x = 0.0f;
-                        }
-                        if (b_collision < t_collision &&
+
+                            if (vel.x > 0)
+                                vel.x = 0.0f;
+                        } else if (b_collision < t_collision &&
                             b_collision < l_collision &&
                             b_collision < r_collision) {
                             // bottom collision
-                            vel.x = -0.0f;
-                        }
-                        if (l_collision < r_collision &&
+                            if (vel.x < 0)
+                                vel.x = 0.0f;
+                        } else if (l_collision < r_collision &&
                             l_collision < t_collision &&
                             l_collision < b_collision) {
                             // Left collision
-                            vel.z = -0.0f;
-                        }
-                        if (r_collision < l_collision &&
+                            if(vel.z > 0)
+                                vel.z = -0.0f;
+                        } else if (r_collision < l_collision &&
                             r_collision < t_collision &&
                             r_collision < b_collision) {
                             // Right collision
+                            if(vel.z < 0)
+                                vel.z = 0.0f;
+                        }
+                        else {
+                            vel.x = 0.0f;
                             vel.z = 0.0f;
                         }
                     }
