@@ -53,12 +53,6 @@ auto PlaceAction::place(std::any d) -> void {
         auto posivec =
             glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
                        static_cast<s32>(pos.z));
-        auto posivec2 =
-            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y - 1),
-                       static_cast<s32>(pos.z));
-        auto posivec3 =
-            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y - 1.8f),
-                       static_cast<s32>(pos.z));
 
         if (!validate_ivec3(ivec) || ivec == posivec)
             continue;
@@ -76,22 +70,50 @@ auto PlaceAction::place(std::any d) -> void {
                           static_cast<s32>(cast_pos.y),
                           static_cast<s32>(cast_pos.z));
 
-        if (!validate_ivec3(ivec))
-            return;
+        auto copy_ivec = ivec;
 
+
+        //Check your feet
         auto bk = w->player->itemSelections[w->player->selectorIDX];
-        if ((ivec == posivec || ivec == posivec2 || ivec == posivec3) &&
-            (bk != 6 && bk != 37 && bk != 38 && bk != 39 && bk != 40))
-            return;
+        float xm = -0.3f;
+        for (int i = 0; i < 2; i++) {
+            float ym = -0.3f;
+            for (int c = 0; c < 2; c++) {
 
+                posivec =
+                    glm::ivec3(static_cast<s32>(pos.x + xm), static_cast<s32>(pos.y),
+                        static_cast<s32>(pos.z + ym));
+                auto posivec2 =
+                    glm::ivec3(static_cast<s32>(pos.x + xm), static_cast<s32>(pos.y - 1),
+                        static_cast<s32>(pos.z + ym));
+                auto posivec3 =
+                    glm::ivec3(static_cast<s32>(pos.x + xm), static_cast<s32>(pos.y - 1.8f),
+                        static_cast<s32>(pos.z + ym));
+
+                ivec = glm::ivec3(static_cast<s32>(cast_pos.x + xm),
+                    static_cast<s32>(cast_pos.y),
+                    static_cast<s32>(cast_pos.z + ym));
+
+                if (!validate_ivec3(ivec))
+                    return;
+
+                if ((ivec == posivec || ivec == posivec2 || ivec == posivec3) &&
+                    (bk != 6 && bk != 37 && bk != 38 && bk != 39 && bk != 40))
+                    return;
+
+                ym += 0.3f;
+            }
+            xm += 0.3f;
+        }
+
+        posivec =
+            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
+                static_cast<s32>(pos.z));
+
+        ivec = copy_ivec;
         idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
 
         auto idx2 = (ivec.x * 256 * 64) + (ivec.z * 64) + (ivec.y - 1);
-
-        uint16_t x = ivec.x / 16;
-        uint16_t y = ivec.z / 16;
-        uint32_t id = x << 16 | (y & 0x00FF);
-
         blk = w->player->itemSelections[w->player->selectorIDX];
 
         auto blk2 = w->worldData[idx2];
@@ -106,7 +128,7 @@ auto PlaceAction::place(std::any d) -> void {
 
         if ((blk == Block::Mushroom1 || blk == Block::Mushroom2) &&
             (blk2 != Block::Stone && blk2 != Block::Cobblestone &&
-             blk2 != Block::Gravel))
+                blk2 != Block::Gravel))
             return;
 
         w->worldData[idx] = blk;
@@ -129,6 +151,10 @@ auto PlaceAction::place(std::any d) -> void {
                 }
             }
         }
+
+        uint16_t x = ivec.x / 16;
+        uint16_t y = ivec.z / 16;
+        uint32_t id = x << 16 | (y & 0x00FF);
 
         // Update Lighting
         w->update_lighting(ivec.x, ivec.z);

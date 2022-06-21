@@ -76,7 +76,7 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
                   ((posCheck.z + chunkMesh->cZ * 16) * 64) +
                   (posCheck.y + chunkMesh->cY * 16);
         // Add face to mesh
-        if (wrld->worldData[idx] == Block::Air ||
+        if (idx >= 0 && idx < (256 * 64 * 256) && (wrld->worldData[idx] == Block::Air ||
             wrld->worldData[idx] == Block::Water ||
             wrld->worldData[idx] == Block::Still_Water ||
 #ifndef PSP
@@ -88,7 +88,7 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
             wrld->worldData[idx] == Block::Mushroom2 ||
             wrld->worldData[idx] == Block::Sapling ||
             wrld->worldData[idx] == Block::Glass ||
-            wrld->worldData[idx] == Block::Slab) {
+            wrld->worldData[idx] == Block::Slab)) {
             if (blk == Block::Water && wrld->worldData[idx] != Block::Water) {
                 std::array<float, 12> data2 = data;
                 if (data == topFace) {
