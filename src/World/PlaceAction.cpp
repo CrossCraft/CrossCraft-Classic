@@ -119,7 +119,7 @@ auto PlaceAction::place(std::any d) -> void {
                         idx = (i * 256 * 64) + (k * 64) + j;
 
                         // If it's water or flowing water, replace with air.
-                        if (w->worldData[idx] == Block::Water ||
+                        if (idx >= 0 && idx < (256 * 64 * 256) && w->worldData[idx] == Block::Water ||
                             w->worldData[idx] == Block::Still_Water) {
                             w->worldData[idx] = Block::Air;
 

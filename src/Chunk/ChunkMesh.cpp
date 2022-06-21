@@ -65,12 +65,12 @@ void ChunkMesh::rtick(World *wrld) {
          blk2 == Block::Flower1 || blk2 == Block::Flower2 ||
          blk2 == Block::Mushroom1 || blk2 == Block::Mushroom2 || blk2 == Block::Leaves);
 
-    if (blk == Block::Grass && !blk2_is_valid_grass) {
+    if (blk == Block::Grass && (!blk2_is_valid_grass || is_dark)) {
         wrld->worldData[idx] = Block::Dirt;
         needsRegen = true;
     }
 
-    if (blk == Block::Dirt && blk2_is_valid_grass) {
+    if (blk == Block::Dirt && blk2_is_valid_grass && !is_dark) {
         wrld->worldData[idx] = Block::Grass;
         needsRegen = true;
     }
