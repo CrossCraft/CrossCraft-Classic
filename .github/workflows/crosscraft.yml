@@ -59,6 +59,7 @@ jobs:
           name: CrossCraft-Windows
           path: |
             CrossCraft-Classic.exe
+            zlib.dll
             assets\
             LICENSE
             README.md
