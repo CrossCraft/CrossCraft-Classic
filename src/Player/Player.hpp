@@ -116,6 +116,8 @@ class Player {
     glm::vec3 vel;
 
     float jump_icd;
+    float view_bob, view_timer;
+    float cube_bob;
 
     Rendering::Camera cam;
     ScopePtr<Graphics::G2D::Sprite> item_box;

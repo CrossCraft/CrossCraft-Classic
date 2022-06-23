@@ -73,6 +73,7 @@ Player::Player()
     in_inventory = false;
     jump_icd = 0.2f;
     terrain_atlas = 0;
+    view_timer = 0.0f;
 
     for (int i = 0; i < 50; i++) {
         setup_model(i);
@@ -538,8 +539,19 @@ void Player::update(float dt, World *wrld) {
         if (jumping)
             jumping = false;
 
+
+    if (vel.x != 0 || vel.z != 0) {
+        view_timer += dt;
+    }
+    else {
+        view_timer = 0;
+    }
+    view_bob = sinf(view_timer * 3.14159 * 2.5f) / 18.0f;
+    cube_bob = cosf(view_timer * 3.14159 * 2.2f) / 44.0f;
+
     // Update camera
     cam.pos = pos;
+    cam.pos.y += view_bob;
     cam.rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
     cam.update();
 }
@@ -580,7 +592,7 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     auto ctx = &Rendering::RenderContext::get();
 
     ctx->matrix_view(glm::mat4(1.0f));
-    ctx->matrix_translate({0.280f, -0.7225f, -0.725f});
+    ctx->matrix_translate({0.280f, -0.7225f + cube_bob, -0.725f});
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40 ||
         type == 44) {
         ctx->matrix_translate({0.0f, 0.175f, 0.0f});
