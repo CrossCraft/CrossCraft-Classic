@@ -258,6 +258,9 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
     case 49: // Obsidian
         return getTexture(vec, 37);
 
+    case 96:
+        return getTexture(vec, 80);
+
     default:
         return getTexture(vec, idx - 21 + 64);
     }

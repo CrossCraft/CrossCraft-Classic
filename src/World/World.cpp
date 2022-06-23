@@ -7,6 +7,7 @@
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
 #include <zlib.h>
+#include <gtx/rotate_vector.hpp>
 
 #if PSP
 #include <pspctrl.h>
@@ -21,6 +22,36 @@
 #endif
 
 namespace CrossCraft {
+    
+auto World::add_face_to_mesh(std::array<float, 12> data,
+    std::array<float, 8> uv, uint32_t lightVal,
+    glm::vec3 mypos)
+    -> void { // Create color
+    Rendering::Color c;
+    c.color = lightVal;
+
+    // Push Back Verts
+    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
+        m_verts.push_back(Rendering::Vertex{
+            uv[tx++],
+            uv[tx++],
+            c,
+            data[idx++] + mypos.x,
+            data[idx++] + mypos.y,
+            data[idx++] + mypos.z,
+            });
+    }
+
+    // Push Back Indices
+    m_index.push_back(idx_counter);
+    m_index.push_back(idx_counter + 1);
+    m_index.push_back(idx_counter + 2);
+    m_index.push_back(idx_counter + 2);
+    m_index.push_back(idx_counter + 3);
+    m_index.push_back(idx_counter + 0);
+    idx_counter += 4;
+}
+
 World::World(std::shared_ptr<Player> p) {
     tick_counter = 0;
     player = p;
@@ -47,6 +78,24 @@ World::World(std::shared_ptr<Player> p) {
 
     place_icd = 0.0f;
     break_icd = 0.0f;
+
+    idx_counter = 0;
+    m_verts.clear();
+    m_verts.shrink_to_fit();
+    m_index.clear();
+    m_index.shrink_to_fit();
+    blockMesh.delete_data();
+
+    add_face_to_mesh(bottomFace, getTexCoord(96, LIGHT_BOT), LIGHT_BOT, { 0, 0, 0 });
+    add_face_to_mesh(topFace, getTexCoord(96, LIGHT_TOP), LIGHT_TOP, { 0, 0, 0 });
+    add_face_to_mesh(frontFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 0 });
+    add_face_to_mesh(backFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 0 });
+    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 0 });
+    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 0 });
+    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 1 });
+    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 1 });
+
+    blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(), idx_counter);
 }
 
 auto World::spawn() -> void {
@@ -90,6 +139,54 @@ auto World::save(std::any p) -> void {
         gzwrite(save_file, wrld->worldData, 256 * 64 * 256);
 
         gzclose(save_file);
+    }
+}
+
+template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
+
+auto World::draw_selection() -> void {
+    auto pos = player->get_pos();
+    auto default_vec = glm::vec3(0, 0, 1);
+    default_vec = glm::rotateX(default_vec, DEGTORAD(player->get_rot().x));
+    default_vec =
+        glm::rotateY(default_vec, DEGTORAD(-player->get_rot().y + 180));
+
+    const float REACH_DISTANCE = 4.0f;
+    default_vec *= REACH_DISTANCE;
+
+    const u32 NUM_STEPS = 50;
+
+    for (u32 i = 0; i < NUM_STEPS; i++) {
+        float percentage =
+            static_cast<float>(i) / static_cast<float>(NUM_STEPS);
+
+        auto cast_pos = pos + (default_vec * percentage);
+
+        auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
+            static_cast<s32>(cast_pos.y),
+            static_cast<s32>(cast_pos.z));
+
+        u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+        auto blk = worldData[idx];
+
+        if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water)
+            continue;
+
+        auto ctx = &Rendering::RenderContext::get();
+
+        ctx->matrix_translate(glm::vec3(ivec.x - 0.01f, ivec.y - 0.01f, ivec.z - 0.01f));
+        ctx->matrix_rotate({ 0, 0, 0 });
+        ctx->matrix_scale({ 1.02f, 1.02f, 1.02f });
+
+        blockMesh.draw();
+
+        ctx->matrix_rotate({ 0, 90, 0 });
+        ctx->matrix_translate({ -1.005f, -0.005f, 0.005f });
+
+        blockMesh.draw();
+
+        ctx->matrix_clear();
+        return;
     }
 }
 
@@ -253,6 +350,8 @@ void World::draw() {
     for (auto const &[key, val] : chunks) {
         val->draw();
     }
+
+    draw_selection();
 
 #if !BUILD_PC
     sceGuEnable(GU_BLEND);

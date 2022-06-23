@@ -592,15 +592,15 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     auto ctx = &Rendering::RenderContext::get();
 
     ctx->matrix_view(glm::mat4(1.0f));
-    ctx->matrix_translate({0.280f, -0.7225f + cube_bob, -0.725f});
+    ctx->matrix_translate({ 0.280f, -0.7225f + cube_bob, -0.725f });
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40 ||
         type == 44) {
-        ctx->matrix_translate({0.0f, 0.175f, 0.0f});
+        ctx->matrix_translate({ 0.0f, 0.175f, 0.0f });
     }
-    ctx->matrix_rotate({0, 45.0f, 0});
-    ctx->matrix_scale({0.40f, 0.40f, 0.40f});
+    ctx->matrix_rotate({ 0, 45.0f, 0 });
+    ctx->matrix_scale({ 0.40f, 0.40f, 0.40f });
 
-// DISABLE CULL
+    // DISABLE CULL
 #if BUILD_PC
     glDisable(GL_CULL_FACE);
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -613,7 +613,7 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
     blockMesh[type].draw();
 
-// ENABLE CULL
+    // ENABLE CULL
 #if BUILD_PC
     glEnable(GL_CULL_FACE);
 #else
