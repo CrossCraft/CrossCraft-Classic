@@ -31,15 +31,16 @@ auto ClassicGenerator::generate(World *wrld) -> void {
     wrld->hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
 
     // Noise Map Settings
-    NoiseUtil::NoiseSettings settings = {2,    1.0f, 2.0f,  0.42f,
-                                         4.5f, 0.0f, 0.15f, 0.85f};
+    NoiseUtil::NoiseSettings settings = {1,    1.0f, 16.0f, 0.8f,
+                                         4.0f, 0.0f, 0.4f,  0.7f};
     NoiseUtil::NoiseSettings settings2 = {1,    1.0f, 32.0f, 0.42f,
                                           4.5f, 0.0f, 0.0f,  1.0f};
 
     // Generate HMAP
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
-            wrld->hmap[x * 256 + z] = get_noise(x, z, &settings);
+            wrld->hmap[x * 256 + z] = get_noise(x, z, &settings) +
+                                      0.025f; // * get_noise(x, z, &settings3);
         }
     }
 
@@ -98,7 +99,7 @@ auto ClassicGenerator::generate(World *wrld) -> void {
     }
 
     // Generate trees
-    for (int i = 0; i < 384; i++) {
+    for (int i = 0; i < 256; i++) {
         uint8_t x = rand() % 256;
         uint8_t z = rand() % 256;
 
