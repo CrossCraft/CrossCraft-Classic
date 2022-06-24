@@ -8,6 +8,6 @@ class ClassicGenerator {
     static auto generate(World *wrld) -> void;
 
   private:
-    static auto generate_tree(World *wrld, int x, int z, int hash) -> void;
+    static auto generate_tree(World *wrld, int x, int z) -> void;
 };
 } // namespace CrossCraft

@@ -4,13 +4,7 @@
 
 namespace CrossCraft {
 
-auto ClassicGenerator::generate_tree(World *wrld, int x, int z, int hash)
-    -> void {
-    x *= 8;
-    z *= 8;
-
-    x += rand() % 5 - 2;
-    z += rand() % 5 - 2;
+auto ClassicGenerator::generate_tree(World *wrld, int x, int z) -> void {
 
     if (!(x >= 0 && x < 256 && z >= 0 && z < 256))
         return;
@@ -30,6 +24,8 @@ auto ClassicGenerator::generate(World *wrld) -> void {
     // Noise Map Settings
     NoiseUtil::NoiseSettings settings = {2,    1.0f, 2.0f,  0.42f,
                                          4.5f, 0.0f, 0.15f, 0.85f};
+    NoiseUtil::NoiseSettings settings2 = {1,    1.0f, 32.0f, 0.42f,
+                                          4.5f, 0.0f, 0.0f,  1.0f};
 
     // Generate HMAP
     for (int x = 0; x < 256; x++) {
@@ -69,33 +65,31 @@ auto ClassicGenerator::generate(World *wrld) -> void {
         }
     }
 
+    srand(NoiseUtil::seed);
+
     // Generate flowers
-    for (int x = 0; x < 32; x++) {
-        for (int z = 0; z < 32; z++) {
 
-            srand((x | 1) << z * ~NoiseUtil::seed);
-            uint8_t res = rand() % 37;
+    for (int x = 0; x < 256; x++) {
+        for (int z = 0; z < 256; z++) {
+            int h = wrld->hmap[x * 256 + z] * 64.f;
+            auto idx = (x * 256 * 64) + (z * 64) + h;
 
-            if (res < 2) {
-                int xf = x * 8 + rand() % 5 - 2;
-                int zf = z * 8 + rand() % 5 - 2;
-                if (xf < 0 || xf >= 256 || zf < 0 || zf >= 256)
-                    continue;
+            auto v = get_noise(x, z, &settings2);
 
-                int h = wrld->hmap[xf * 256 + zf] * 64.f;
-                if ((h + 1) <= 33)
-                    continue;
-
-                auto idx = (xf * 256 * 64) + (zf * 64) + h;
-
-                wrld->worldData[idx] = Block::Flower1 + res % 2;
-
-                continue;
-            } else if (res < 6)
-                continue;
-
-            generate_tree(wrld, x, z, res);
+            if (v > 0.8f && h >= 33) {
+                int r = rand() % 5;
+                if (r < 2)
+                    wrld->worldData[idx] = Block::Flower1 + r;
+            }
         }
+    }
+
+    // Generate trees
+    for (int i = 0; i < 384; i++) {
+        uint8_t x = rand() % 256;
+        uint8_t z = rand() % 256;
+
+        generate_tree(wrld, x, z);
     }
 
     // Bottom of World = Bedrock
