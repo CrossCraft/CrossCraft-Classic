@@ -87,17 +87,17 @@ World::World(std::shared_ptr<Player> p) {
     add_face_to_mesh(bottomFace, getTexCoord(96, LIGHT_BOT), LIGHT_BOT,
                      {0, 0, 0});
     add_face_to_mesh(topFace, getTexCoord(96, LIGHT_TOP), LIGHT_TOP, {0, 0, 0});
-    add_face_to_mesh(frontFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+    add_face_to_mesh(frontFace, getTexCoord(96, LIGHT_SIDE_Z), LIGHT_SIDE_Z,
                      {0, 0, 0});
-    add_face_to_mesh(backFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+    add_face_to_mesh(backFace, getTexCoord(96, LIGHT_SIDE_Z), LIGHT_SIDE_Z,
                      {0, 0, 0});
-    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE_X), LIGHT_SIDE_X,
                      {0, 0, 0});
-    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE_X), LIGHT_SIDE_X,
                      {0, 0, 0});
-    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE_X), LIGHT_SIDE_X,
                      {0, 0, 1});
-    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE_X), LIGHT_SIDE_X,
                      {0, 0, 1});
 
     blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),

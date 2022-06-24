@@ -150,33 +150,33 @@ auto Player::setup_model(uint8_t type) -> void {
 
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40) {
 
-        add_face_to_mesh(xFace1, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE, p,
-                         type);
-        add_face_to_mesh(xFace2, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE, p,
-                         type);
+        add_face_to_mesh(xFace1, getTexCoord(type, LIGHT_SIDE_X), LIGHT_SIDE_X,
+                         p, type);
+        add_face_to_mesh(xFace2, getTexCoord(type, LIGHT_SIDE_X), LIGHT_SIDE_X,
+                         p, type);
     } else if (type == 44) {
         add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP,
                          {0, -0.5, 0}, type);
-        add_face_to_mesh(leftFaceHalf, getTexCoord(type, LIGHT_SIDE), LIGHT_BOT,
-                         p, type);
-        add_face_to_mesh(backFaceHalf, getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, {0, 0, 1}, type);
-        add_face_to_mesh(frontFaceHalf, getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, {0, 0, 1}, type);
-        add_face_to_mesh(backFaceHalf, getTexCoord(type, LIGHT_SIDE),
-                         LIGHT_SIDE, p, type);
+        add_face_to_mesh(leftFaceHalf, getTexCoord(type, LIGHT_SIDE_X),
+                         LIGHT_BOT, p, type);
+        add_face_to_mesh(backFaceHalf, getTexCoord(type, LIGHT_SIDE_X),
+                         LIGHT_SIDE_X, {0, 0, 1}, type);
+        add_face_to_mesh(frontFaceHalf, getTexCoord(type, LIGHT_SIDE_Z),
+                         LIGHT_SIDE_Z, {0, 0, 1}, type);
+        add_face_to_mesh(backFaceHalf, getTexCoord(type, LIGHT_SIDE_Z),
+                         LIGHT_SIDE_Z, p, type);
     } else {
 
         add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP, p,
                          type);
-        add_face_to_mesh(leftFace, getTexCoord(type, LIGHT_SIDE), LIGHT_BOT, p,
-                         type);
-        add_face_to_mesh(backFace, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE,
-                         {0, 0, 1}, type);
-        add_face_to_mesh(frontFace, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE,
-                         {0, 0, 1}, type);
-        add_face_to_mesh(backFace, getTexCoord(type, LIGHT_SIDE), LIGHT_SIDE, p,
-                         type);
+        add_face_to_mesh(leftFace, getTexCoord(type, LIGHT_SIDE_X), LIGHT_BOT,
+                         p, type);
+        add_face_to_mesh(backFace, getTexCoord(type, LIGHT_SIDE_X),
+                         LIGHT_SIDE_X, {0, 0, 1}, type);
+        add_face_to_mesh(frontFace, getTexCoord(type, LIGHT_SIDE_Z),
+                         LIGHT_SIDE_Z, {0, 0, 1}, type);
+        add_face_to_mesh(backFace, getTexCoord(type, LIGHT_SIDE_Z),
+                         LIGHT_SIDE_Z, p, type);
     }
 
     blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),

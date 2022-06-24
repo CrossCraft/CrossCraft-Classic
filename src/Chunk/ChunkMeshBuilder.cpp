@@ -12,14 +12,14 @@ void ChunkMeshBuilder::add_slab_to_mesh(ChunkMesh *chunkMesh, const World *wrld,
                      ChunkMeshSelection::Opaque);
 
     try_add_face(chunkMesh, wrld, leftFaceHalf, blk, pos, surround.left,
-                 LIGHT_SIDE);
+                 LIGHT_SIDE_X);
     try_add_face(chunkMesh, wrld, rightFaceHalf, blk, pos, surround.right,
-                 LIGHT_SIDE);
+                 LIGHT_SIDE_X);
 
     try_add_face(chunkMesh, wrld, frontFaceHalf, blk, pos, surround.front,
-                 LIGHT_SIDE);
+                 LIGHT_SIDE_Z);
     try_add_face(chunkMesh, wrld, backFaceHalf, blk, pos, surround.back,
-                 LIGHT_SIDE);
+                 LIGHT_SIDE_Z);
 }
 
 void ChunkMeshBuilder::add_block_to_mesh(ChunkMesh *chunkMesh,
@@ -31,14 +31,14 @@ void ChunkMeshBuilder::add_block_to_mesh(ChunkMesh *chunkMesh,
     try_add_face(chunkMesh, wrld, topFace, blk, pos, surround.up, LIGHT_TOP);
 
     try_add_face(chunkMesh, wrld, leftFace, blk, pos, surround.left,
-                 LIGHT_SIDE);
+                 LIGHT_SIDE_X);
     try_add_face(chunkMesh, wrld, rightFace, blk, pos, surround.right,
-                 LIGHT_SIDE);
+                 LIGHT_SIDE_X);
 
     try_add_face(chunkMesh, wrld, frontFace, blk, pos, surround.front,
-                 LIGHT_SIDE);
+                 LIGHT_SIDE_Z);
     try_add_face(chunkMesh, wrld, backFace, blk, pos, surround.back,
-                 LIGHT_SIDE);
+                 LIGHT_SIDE_Z);
 }
 
 void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
@@ -54,41 +54,41 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
           (posCheck.z == -1 && chunkMesh->cZ == 0) ||
           (posCheck.z == 16 && chunkMesh->cZ == 15))) {
 
-
         int idxl = ((posCheck.x + chunkMesh->cX * 16) * 256 * 4) +
-            ((posCheck.z + chunkMesh->cZ * 16) * 4) +
-            (posCheck.y + chunkMesh->cY * 16) / 16;
+                   ((posCheck.z + chunkMesh->cZ * 16) * 4) +
+                   (posCheck.y + chunkMesh->cY * 16) / 16;
 
         auto lv = lightVal;
 
-        if (idxl >= 0 && !((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
+        if (idxl >= 0 &&
+            !((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
             if (lv == LIGHT_TOP)
                 lv = LIGHT_TOP_DARK;
-            else if (lv == LIGHT_SIDE)
+            else if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
                 lv = LIGHT_SIDE_DARK;
             else
                 lv = LIGHT_BOT_DARK;
         }
-
 
         // Calculate block index to peek
         int idx = ((posCheck.x + chunkMesh->cX * 16) * 256 * 64) +
                   ((posCheck.z + chunkMesh->cZ * 16) * 64) +
                   (posCheck.y + chunkMesh->cY * 16);
         // Add face to mesh
-        if (idx >= 0 && idx < (256 * 64 * 256) && (wrld->worldData[idx] == Block::Air ||
-            wrld->worldData[idx] == Block::Water ||
-            wrld->worldData[idx] == Block::Still_Water ||
+        if (idx >= 0 && idx < (256 * 64 * 256) &&
+            (wrld->worldData[idx] == Block::Air ||
+             wrld->worldData[idx] == Block::Water ||
+             wrld->worldData[idx] == Block::Still_Water ||
 #ifndef PSP
-            wrld->worldData[idx] == Block::Leaves ||
+             wrld->worldData[idx] == Block::Leaves ||
 #endif
-            wrld->worldData[idx] == Block::Flower1 ||
-            wrld->worldData[idx] == Block::Flower2 ||
-            wrld->worldData[idx] == Block::Mushroom1 ||
-            wrld->worldData[idx] == Block::Mushroom2 ||
-            wrld->worldData[idx] == Block::Sapling ||
-            wrld->worldData[idx] == Block::Glass ||
-            wrld->worldData[idx] == Block::Slab)) {
+             wrld->worldData[idx] == Block::Flower1 ||
+             wrld->worldData[idx] == Block::Flower2 ||
+             wrld->worldData[idx] == Block::Mushroom1 ||
+             wrld->worldData[idx] == Block::Mushroom2 ||
+             wrld->worldData[idx] == Block::Sapling ||
+             wrld->worldData[idx] == Block::Glass ||
+             wrld->worldData[idx] == Block::Slab)) {
             if (blk == Block::Water && wrld->worldData[idx] != Block::Water) {
                 std::array<float, 12> data2 = data;
                 if (data == topFace) {
@@ -128,7 +128,7 @@ void ChunkMeshBuilder::add_xface_to_mesh(ChunkMesh *chunkMesh,
     if (!((wrld->lightData[idxl] >> (int)pos.y) & 1)) {
         if (lv == LIGHT_TOP)
             lv = LIGHT_TOP_DARK;
-        else if (lv == LIGHT_SIDE)
+        else if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
             lv = LIGHT_SIDE_DARK;
         else
             lv = LIGHT_BOT_DARK;

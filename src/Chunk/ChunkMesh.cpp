@@ -37,7 +37,7 @@ void ChunkMesh::rtick(World *wrld) {
     int idxl = ((x + cX * 16) * 256 * 4) + ((z + cZ * 16) * 4) + cY;
 
     bool is_dark = false;
-    if(idxl >= 0 && idxl < (256 * 4 * 256))
+    if (idxl >= 0 && idxl < (256 * 4 * 256))
         is_dark = (!((wrld->lightData[idxl] >> (int)y) & 1));
 
     x += cX * 16;
@@ -55,7 +55,6 @@ void ChunkMesh::rtick(World *wrld) {
     if (idx2 >= 0 && idx2 < (256 * 64 * 256))
         blk2 = wrld->worldData[idx2];
 
-
     auto blk = Block::Air;
     if (idx >= 0 && idx2 < (256 * 64 * 256))
         blk = wrld->worldData[idx];
@@ -63,7 +62,8 @@ void ChunkMesh::rtick(World *wrld) {
     auto blk2_is_valid_grass =
         (blk2 == Block::Air || blk2 == Block::Sapling ||
          blk2 == Block::Flower1 || blk2 == Block::Flower2 ||
-         blk2 == Block::Mushroom1 || blk2 == Block::Mushroom2 || blk2 == Block::Leaves);
+         blk2 == Block::Mushroom1 || blk2 == Block::Mushroom2 ||
+         blk2 == Block::Leaves);
 
     if (blk == Block::Grass && (!blk2_is_valid_grass || is_dark)) {
         wrld->worldData[idx] = Block::Dirt;
@@ -120,9 +120,8 @@ void ChunkMesh::generate(const World *wrld) {
 
                 // Get block
                 block_t blk = Block::Air;
-                
 
-                if(idx >= 0)
+                if (idx >= 0)
                     blk = wrld->worldData[idx];
 
                 // Skip air
@@ -199,21 +198,25 @@ void ChunkMesh::generate_border() {
 
                     if (x == 0) {
                         ChunkMeshBuilder::add_face_to_mesh(
-                            this, leftFace, getTexCoord(blk, LIGHT_SIDE),
-                            {x, y, z}, LIGHT_SIDE, ChunkMeshSelection::Opaque);
+                            this, leftFace, getTexCoord(blk, LIGHT_SIDE_X),
+                            {x, y, z}, LIGHT_SIDE_X,
+                            ChunkMeshSelection::Opaque);
                     } else if (x == 15) {
                         ChunkMeshBuilder::add_face_to_mesh(
-                            this, rightFace, getTexCoord(blk, LIGHT_SIDE),
-                            {x, y, z}, LIGHT_SIDE, ChunkMeshSelection::Opaque);
+                            this, rightFace, getTexCoord(blk, LIGHT_SIDE_X),
+                            {x, y, z}, LIGHT_SIDE_X,
+                            ChunkMeshSelection::Opaque);
                     }
                     if (z == 0) {
                         ChunkMeshBuilder::add_face_to_mesh(
-                            this, backFace, getTexCoord(blk, LIGHT_SIDE),
-                            {x, y, z}, LIGHT_SIDE, ChunkMeshSelection::Opaque);
+                            this, backFace, getTexCoord(blk, LIGHT_SIDE_Z),
+                            {x, y, z}, LIGHT_SIDE_Z,
+                            ChunkMeshSelection::Opaque);
                     } else if (z == 15) {
                         ChunkMeshBuilder::add_face_to_mesh(
-                            this, frontFace, getTexCoord(blk, LIGHT_SIDE),
-                            {x, y, z}, LIGHT_SIDE, ChunkMeshSelection::Opaque);
+                            this, frontFace, getTexCoord(blk, LIGHT_SIDE_Z),
+                            {x, y, z}, LIGHT_SIDE_Z,
+                            ChunkMeshSelection::Opaque);
                     }
 
                 } else {
@@ -227,24 +230,24 @@ void ChunkMesh::generate_border() {
 
                     if (x == 0 && cX == 16) {
                         ChunkMeshBuilder::add_face_to_mesh(
-                            this, leftFace, getTexCoord(blk, LIGHT_SIDE),
-                            {x, y, z}, LIGHT_SIDE,
+                            this, leftFace, getTexCoord(blk, LIGHT_SIDE_X),
+                            {x, y, z}, LIGHT_SIDE_X,
                             ChunkMeshSelection::Transparent);
                     } else if (x == 15 && cX == -1) {
                         ChunkMeshBuilder::add_face_to_mesh(
-                            this, rightFace, getTexCoord(blk, LIGHT_SIDE),
-                            {x, y, z}, LIGHT_SIDE,
+                            this, rightFace, getTexCoord(blk, LIGHT_SIDE_X),
+                            {x, y, z}, LIGHT_SIDE_X,
                             ChunkMeshSelection::Transparent);
                     }
                     if (z == 0 && cZ == 16) {
                         ChunkMeshBuilder::add_face_to_mesh(
-                            this, backFace, getTexCoord(blk, LIGHT_SIDE),
-                            {x, y, z}, LIGHT_SIDE,
+                            this, backFace, getTexCoord(blk, LIGHT_SIDE_Z),
+                            {x, y, z}, LIGHT_SIDE_Z,
                             ChunkMeshSelection::Transparent);
                     } else if (z == 15 && cZ == -1) {
                         ChunkMeshBuilder::add_face_to_mesh(
-                            this, frontFace, getTexCoord(blk, LIGHT_SIDE),
-                            {x, y, z}, LIGHT_SIDE,
+                            this, frontFace, getTexCoord(blk, LIGHT_SIDE_Z),
+                            {x, y, z}, LIGHT_SIDE_Z,
                             ChunkMeshSelection::Transparent);
                     }
                 }

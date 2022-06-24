@@ -56,7 +56,8 @@ const std::array<float, 12> xFace4{
 };
 
 constexpr uint32_t LIGHT_TOP = 0xFFFFFFFF;
-constexpr uint32_t LIGHT_SIDE = 0xFFCCCCCC;
+constexpr uint32_t LIGHT_SIDE_X = 0xFFDDDDDD;
+constexpr uint32_t LIGHT_SIDE_Z = 0xFFBBBBBB;
 constexpr uint32_t LIGHT_BOT = 0xFF999999;
 
 constexpr uint32_t LIGHT_TOP_DARK = 0xFF888888;

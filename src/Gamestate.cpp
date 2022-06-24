@@ -1,5 +1,6 @@
 #include "Gamestate.hpp"
 #include "World/DigAction.hpp"
+#include "World/Generation/ClassicGenerator.hpp"
 #include "World/Generation/CrossCraftGenerator.hpp"
 #include "World/PlaceAction.hpp"
 #include <Stardust-Celeste.hpp>
@@ -23,12 +24,17 @@ void GameState::on_start() {
 
     FILE *fptr = fopen("save.ccc", "r");
     if (fptr) {
-        if(!world->load_world())
-            CrossCraftGenerator::generate(world.get());
+        if (!world->load_world())
+            if (world->cfg.compat)
+                ClassicGenerator::generate(world.get());
+            else
+                CrossCraftGenerator::generate(world.get());
         fclose(fptr);
-    }
-    else {
-        CrossCraftGenerator::generate(world.get());
+    } else {
+        if (world->cfg.compat)
+            ClassicGenerator::generate(world.get());
+        else
+            CrossCraftGenerator::generate(world.get());
     }
 
     world->spawn();
@@ -74,33 +80,33 @@ void GameState::on_draw(Core::Application *app, double dt) { world->draw(); }
 
 void GameState::bind_controls() {
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Triangle, KeyFlag::Release },
-        { Player::move_reset, world->player.get() });
+        {(int)Input::PSPButtons::Triangle, KeyFlag::Release},
+        {Player::move_reset, world->player.get()});
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Cross, KeyFlag::Release },
-        { Player::move_reset, world->player.get() });
+        {(int)Input::PSPButtons::Cross, KeyFlag::Release},
+        {Player::move_reset, world->player.get()});
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Square, KeyFlag::Release },
-        { Player::move_reset, world->player.get() });
+        {(int)Input::PSPButtons::Square, KeyFlag::Release},
+        {Player::move_reset, world->player.get()});
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Circle, KeyFlag::Release },
-        { Player::move_reset, world->player.get() });
+        {(int)Input::PSPButtons::Circle, KeyFlag::Release},
+        {Player::move_reset, world->player.get()});
 
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Triangle, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_forward, world->player.get() });
+        {(int)Input::PSPButtons::Triangle, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_forward, world->player.get()});
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Cross, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_backward, world->player.get() });
+        {(int)Input::PSPButtons::Cross, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_backward, world->player.get()});
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Square, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_left, world->player.get() });
+        {(int)Input::PSPButtons::Square, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_left, world->player.get()});
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Circle, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_right, world->player.get() });
+        {(int)Input::PSPButtons::Circle, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_right, world->player.get()});
     psp_controller->add_command(
-        { (int)Input::PSPButtons::Up, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_up, world->player.get() });
+        {(int)Input::PSPButtons::Up, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_up, world->player.get()});
 
     psp_controller->add_command(
         {(int)Input::PSPButtons::Select, KeyFlag::Press},
@@ -121,36 +127,31 @@ void GameState::bind_controls() {
     key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
                                 {World::save, world.get()});
 
-    key_controller->add_command(
-        { (int)Input::Keys::W, KeyFlag::Release },
-        { Player::move_reset, world->player.get() });
-    key_controller->add_command(
-        { (int)Input::Keys::S, KeyFlag::Release },
-        { Player::move_reset, world->player.get() });
-    key_controller->add_command(
-        { (int)Input::Keys::A, KeyFlag::Release },
-        { Player::move_reset, world->player.get() });
-    key_controller->add_command(
-        { (int)Input::Keys::D, KeyFlag::Release },
-        { Player::move_reset, world->player.get() });
+    key_controller->add_command({(int)Input::Keys::W, KeyFlag::Release},
+                                {Player::move_reset, world->player.get()});
+    key_controller->add_command({(int)Input::Keys::S, KeyFlag::Release},
+                                {Player::move_reset, world->player.get()});
+    key_controller->add_command({(int)Input::Keys::A, KeyFlag::Release},
+                                {Player::move_reset, world->player.get()});
+    key_controller->add_command({(int)Input::Keys::D, KeyFlag::Release},
+                                {Player::move_reset, world->player.get()});
 
     key_controller->add_command(
-        { (int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_forward, world->player.get() });
+        {(int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_forward, world->player.get()});
     key_controller->add_command(
-        { (int)Input::Keys::S, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_backward, world->player.get() });
+        {(int)Input::Keys::S, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_backward, world->player.get()});
     key_controller->add_command(
-        { (int)Input::Keys::A, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_left, world->player.get() });
+        {(int)Input::Keys::A, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_left, world->player.get()});
     key_controller->add_command(
-        { (int)Input::Keys::D, KeyFlag::Press | KeyFlag::Held },
-        { Player::move_right, world->player.get() });
+        {(int)Input::Keys::D, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_right, world->player.get()});
 
-
     key_controller->add_command(
-        { (int)Input::Keys::R, KeyFlag::Press | KeyFlag::Held },
-        { Player::respawn, RespawnRequest{world->player.get(), world.get()} });
+        {(int)Input::Keys::R, KeyFlag::Press | KeyFlag::Held},
+        {Player::respawn, RespawnRequest{world->player.get(), world.get()}});
 
     key_controller->add_command(
         {(int)Input::Keys::Space, KeyFlag::Press | KeyFlag::Held},

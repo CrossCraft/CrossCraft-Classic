@@ -160,7 +160,7 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
     case 2: // Dirt
         return getTexture(vec, 2);
     case 3: { // Grass
-        if (lv == LIGHT_SIDE)
+        if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
             return getTexture(vec, 3);
         else if (lv == LIGHT_BOT)
             return getTexture(vec, 2);
@@ -212,7 +212,7 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
     case 40: // Mushroom2
         return getTexture(vec, 28);
     case 41: { // Gold
-        if (lv == LIGHT_SIDE)
+        if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
             return getTexture(vec, 40);
         else if (lv == LIGHT_BOT)
             return getTexture(vec, 56);
@@ -220,7 +220,7 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
             return getTexture(vec, 24);
     }
     case 42: { // Iron
-        if (lv == LIGHT_SIDE)
+        if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
             return getTexture(vec, 39);
         else if (lv == LIGHT_BOT)
             return getTexture(vec, 55);
@@ -230,7 +230,7 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
     case 43: // DSLAB
         return getTexture(vec, 5);
     case 44: { // HSLAB
-        if (lv == LIGHT_SIDE)
+        if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
             return getTexture(vec, 25);
         else
             return getTexture(vec, 6);
@@ -239,7 +239,7 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
         return getTexture(vec, 7);
     case 46: // TNT
     {
-        if (lv == LIGHT_SIDE)
+        if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
             return getTexture(vec, 8);
         else if (lv == LIGHT_BOT)
             return getTexture(vec, 10);

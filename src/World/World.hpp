@@ -135,21 +135,20 @@ class World {
 
     float place_icd, break_icd;
 
-
     uint16_t idx_counter;
     std::vector<Rendering::Vertex> m_verts;
     std::vector<uint16_t> m_index;
     Rendering::Mesh blockMesh;
 
-    auto add_face_to_mesh(std::array<float, 12> data,
-        std::array<float, 8> uv, uint32_t lightVal,
-        glm::vec3 mypos) -> void;
+    auto add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
+                          uint32_t lightVal, glm::vec3 mypos) -> void;
 
     auto draw_selection() -> void;
 
     friend class DigAction;
     friend class PlaceAction;
     friend class CrossCraftGenerator;
+    friend class ClassicGenerator;
 };
 
 } // namespace CrossCraft
