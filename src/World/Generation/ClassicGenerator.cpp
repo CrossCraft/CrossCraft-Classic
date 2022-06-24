@@ -17,6 +17,14 @@ auto ClassicGenerator::generate_tree(World *wrld, int x, int z) -> void {
     WorldGenUtil::make_tree(wrld, x, z, h);
 }
 
+auto setBlk(int x, int y, int z, uint8_t blk, uint8_t *data) {
+    auto idx = (x * 256 * 64) + (z * 64) + y;
+
+    if (data[idx] == Block::Stone) {
+        data[idx] = blk;
+    }
+}
+
 auto ClassicGenerator::generate(World *wrld) -> void {
     // Create a height map
     wrld->hmap = reinterpret_cast<float *>(malloc(sizeof(float) * 256 * 256));
@@ -94,6 +102,43 @@ auto ClassicGenerator::generate(World *wrld) -> void {
         uint8_t z = rand() % 256;
 
         generate_tree(wrld, x, z);
+    }
+
+    // Generate Coal
+    for (int c = 0; c < 256 * 64; c++) {
+        uint8_t x = rand() % 256;
+        uint8_t z = rand() % 256;
+        uint8_t y = rand() % 20 + 10;
+
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++)
+                for (int k = 0; k < 2; k++)
+                    setBlk(x + i, y + j, z + k, Block::Coal_Ore,
+                           wrld->worldData);
+    }
+    // Generate Iron
+    for (int c = 0; c < 256 * 32; c++) {
+        uint8_t x = rand() % 256;
+        uint8_t z = rand() % 256;
+        uint8_t y = rand() % 15 + 7;
+
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++)
+                for (int k = 0; k < 2; k++)
+                    setBlk(x + i, y + j, z + k, Block::Iron_Ore,
+                           wrld->worldData);
+    }
+    // Generate Gold
+    for (int c = 0; c < 256 * 20; c++) {
+        uint8_t x = rand() % 256;
+        uint8_t z = rand() % 256;
+        uint8_t y = rand() % 10 + 5;
+
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++)
+                for (int k = 0; k < 2; k++)
+                    setBlk(x + i, y + j, z + k, Block::Gold_Ore,
+                           wrld->worldData);
     }
 
     // Bottom of World = Bedrock
