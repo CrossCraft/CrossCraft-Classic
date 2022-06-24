@@ -183,9 +183,8 @@ auto Player::setup_model(uint8_t type) -> void {
                              m_index[type].data(), idx_counter[type]);
 }
 
-
 auto Player::move_reset(std::any d) -> void {
-    auto p = std::any_cast<Player*>(d);
+    auto p = std::any_cast<Player *>(d);
 
     p->vel.x = 0.0f;
     p->vel.z = 0.0f;
@@ -194,7 +193,7 @@ auto Player::move_reset(std::any d) -> void {
 bool hasDir = false;
 
 auto Player::move_forward(std::any d) -> void {
-    auto p = std::any_cast<Player*>(d);
+    auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
 
         if (!hasDir) {
@@ -214,7 +213,6 @@ auto Player::move_backward(std::any d) -> void {
             p->vel.z = cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
             hasDir = true;
         }
-
     }
 }
 
@@ -225,14 +223,12 @@ auto Player::move_left(std::any d) -> void {
         if (!hasDir) {
             p->vel.x = -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
             p->vel.z = -cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-        }
-        else {
+        } else {
             p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
             p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
         }
     }
 }
-
 
 auto Player::respawn(std::any d) -> void {
     auto p = std::any_cast<RespawnRequest>(d);
@@ -246,8 +242,7 @@ auto Player::move_right(std::any d) -> void {
         if (!hasDir) {
             p->vel.x = sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
             p->vel.z = cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-        }
-        else {
+        } else {
             p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
             p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
         }
@@ -393,8 +388,9 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                 float xoff = x;
                 float zoff = z;
 
-                auto new_vec = glm::vec3(testpos.x + xoff, testpos.y - 3.8f + (float)y,
-                                         testpos.z + zoff);
+                auto new_vec =
+                    glm::vec3(testpos.x + xoff, testpos.y - 3.8f + (float)y,
+                              testpos.z + zoff);
 
                 if (test(new_vec, wrld)) {
                     AABB test_box =
@@ -420,25 +416,24 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
                             if (vel.x > 0)
                                 vel.x = 0.0f;
                         } else if (b_collision < t_collision &&
-                            b_collision < l_collision &&
-                            b_collision < r_collision) {
+                                   b_collision < l_collision &&
+                                   b_collision < r_collision) {
                             // bottom collision
                             if (vel.x < 0)
                                 vel.x = 0.0f;
                         } else if (l_collision < r_collision &&
-                            l_collision < t_collision &&
-                            l_collision < b_collision) {
+                                   l_collision < t_collision &&
+                                   l_collision < b_collision) {
                             // Left collision
-                            if(vel.z > 0)
+                            if (vel.z > 0)
                                 vel.z = -0.0f;
                         } else if (r_collision < l_collision &&
-                            r_collision < t_collision &&
-                            r_collision < b_collision) {
+                                   r_collision < t_collision &&
+                                   r_collision < b_collision) {
                             // Right collision
-                            if(vel.z < 0)
+                            if (vel.z < 0)
                                 vel.z = 0.0f;
-                        }
-                        else {
+                        } else {
                             vel.x = 0.0f;
                             vel.z = 0.0f;
                         }
@@ -523,7 +518,6 @@ void Player::update(float dt, World *wrld) {
 
     pos += vel * dt;
 
-
     auto diff = (pos.y - 1.80f) - static_cast<float>((int)(pos.y - 1.80f));
     if ((diff > 0.875f) && on_ground) {
         pos.y -= 1.80f;
@@ -539,11 +533,9 @@ void Player::update(float dt, World *wrld) {
         if (jumping)
             jumping = false;
 
-
     if (vel.x != 0 || vel.z != 0) {
         view_timer += dt;
-    }
-    else {
+    } else {
         view_timer = 0;
     }
     view_bob = sinf(view_timer * 3.14159 * 2.5f) / 18.0f;
@@ -592,13 +584,13 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     auto ctx = &Rendering::RenderContext::get();
 
     ctx->matrix_view(glm::mat4(1.0f));
-    ctx->matrix_translate({ 0.280f, -0.7225f + cube_bob, -0.725f });
+    ctx->matrix_translate({0.280f, -0.7225f + cube_bob, -0.725f});
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40 ||
         type == 44) {
-        ctx->matrix_translate({ 0.0f, 0.175f, 0.0f });
+        ctx->matrix_translate({0.0f, 0.175f, 0.0f});
     }
-    ctx->matrix_rotate({ 0, 45.0f, 0 });
-    ctx->matrix_scale({ 0.40f, 0.40f, 0.40f });
+    ctx->matrix_rotate({0, 45.0f, 0});
+    ctx->matrix_scale({0.40f, 0.40f, 0.40f});
 
     // DISABLE CULL
 #if BUILD_PC
@@ -661,7 +653,13 @@ auto Player::draw() -> void {
     selector->draw();
 
     fontRenderer->clear();
-    fontRenderer->add_text("Position: " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z), { 0, 256 });
+    fontRenderer->add_text("Position: " + std::to_string(pos.x) + " " +
+                               std::to_string(pos.y) + " " +
+                               std::to_string(pos.z),
+                           {0, 256});
+#if PSP
+    sceKernelDcacheWritebackInvalidateAll();
+#endif
     fontRenderer->draw();
 
     for (int i = 0; i < 9; i++)

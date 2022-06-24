@@ -7,7 +7,6 @@
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
 #include <zlib.h>
-#include <gtx/rotate_vector.hpp>
 
 #if PSP
 #include <pspctrl.h>
@@ -22,11 +21,10 @@
 #endif
 
 namespace CrossCraft {
-    
+
 auto World::add_face_to_mesh(std::array<float, 12> data,
-    std::array<float, 8> uv, uint32_t lightVal,
-    glm::vec3 mypos)
-    -> void { // Create color
+                             std::array<float, 8> uv, uint32_t lightVal,
+                             glm::vec3 mypos) -> void { // Create color
     Rendering::Color c;
     c.color = lightVal;
 
@@ -39,7 +37,7 @@ auto World::add_face_to_mesh(std::array<float, 12> data,
             data[idx++] + mypos.x,
             data[idx++] + mypos.y,
             data[idx++] + mypos.z,
-            });
+        });
     }
 
     // Push Back Indices
@@ -86,22 +84,27 @@ World::World(std::shared_ptr<Player> p) {
     m_index.shrink_to_fit();
     blockMesh.delete_data();
 
-    add_face_to_mesh(bottomFace, getTexCoord(96, LIGHT_BOT), LIGHT_BOT, { 0, 0, 0 });
-    add_face_to_mesh(topFace, getTexCoord(96, LIGHT_TOP), LIGHT_TOP, { 0, 0, 0 });
-    add_face_to_mesh(frontFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 0 });
-    add_face_to_mesh(backFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 0 });
-    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 0 });
-    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 0 });
-    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 1 });
-    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE, { 0, 0, 1 });
+    add_face_to_mesh(bottomFace, getTexCoord(96, LIGHT_BOT), LIGHT_BOT,
+                     {0, 0, 0});
+    add_face_to_mesh(topFace, getTexCoord(96, LIGHT_TOP), LIGHT_TOP, {0, 0, 0});
+    add_face_to_mesh(frontFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+                     {0, 0, 0});
+    add_face_to_mesh(backFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+                     {0, 0, 0});
+    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+                     {0, 0, 0});
+    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+                     {0, 0, 0});
+    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+                     {0, 0, 1});
+    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE), LIGHT_SIDE,
+                     {0, 0, 1});
 
-    blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(), idx_counter);
+    blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
+                       idx_counter);
 }
 
-auto World::spawn() -> void {
-    player->spawn(this);
-}
-
+auto World::spawn() -> void { player->spawn(this); }
 
 auto World::load_world() -> bool {
     gzFile save_file = gzopen("save.ccc", "rb");
@@ -163,8 +166,8 @@ auto World::draw_selection() -> void {
         auto cast_pos = pos + (default_vec * percentage);
 
         auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
-            static_cast<s32>(cast_pos.y),
-            static_cast<s32>(cast_pos.z));
+                               static_cast<s32>(cast_pos.y),
+                               static_cast<s32>(cast_pos.z));
 
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = worldData[idx];
@@ -172,16 +175,21 @@ auto World::draw_selection() -> void {
         if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water)
             continue;
 
+        if (ivec.x < 0 || ivec.x > 255 || ivec.y < 0 || ivec.y > 255 ||
+            ivec.z < 0 || ivec.z > 255)
+            return;
+
         auto ctx = &Rendering::RenderContext::get();
 
-        ctx->matrix_translate(glm::vec3(ivec.x - 0.01f, ivec.y - 0.01f, ivec.z - 0.01f));
-        ctx->matrix_rotate({ 0, 0, 0 });
-        ctx->matrix_scale({ 1.02f, 1.02f, 1.02f });
+        ctx->matrix_translate(
+            glm::vec3(ivec.x - 0.01f, ivec.y - 0.01f, ivec.z - 0.01f));
+        ctx->matrix_rotate({0, 0, 0});
+        ctx->matrix_scale({1.02f, 1.02f, 1.02f});
 
         blockMesh.draw();
 
-        ctx->matrix_rotate({ 0, 90, 0 });
-        ctx->matrix_translate({ -1.005f, -0.005f, 0.005f });
+        ctx->matrix_rotate({0, 90, 0});
+        ctx->matrix_translate({-1.005f, -0.005f, 0.005f});
 
         blockMesh.draw();
 
@@ -351,12 +359,12 @@ void World::draw() {
         val->draw();
     }
 
-    draw_selection();
-
 #if !BUILD_PC
     sceGuEnable(GU_BLEND);
     sceGuEnable(GU_ALPHA_TEST);
 #endif
+
+    draw_selection();
 
     // Draw flora
     for (auto const &[key, val] : chunks) {
