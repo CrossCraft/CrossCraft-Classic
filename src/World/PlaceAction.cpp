@@ -60,7 +60,7 @@ auto PlaceAction::place(std::any d) -> void {
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = w->worldData[idx];
 
-        if (blk == Block::Air || blk == Block::Water)
+        if (blk == Block::Air || blk == Block::Water || blk == Block::Lava)
             continue;
 
         cast_pos = pos + (default_vec * static_cast<float>(i - 1) /
@@ -72,27 +72,26 @@ auto PlaceAction::place(std::any d) -> void {
 
         auto copy_ivec = ivec;
 
-
-        //Check your feet
+        // Check your feet
         auto bk = w->player->itemSelections[w->player->selectorIDX];
         float xm = -0.3f;
         for (int i = 0; i < 2; i++) {
             float ym = -0.3f;
             for (int c = 0; c < 2; c++) {
 
-                posivec =
-                    glm::ivec3(static_cast<s32>(pos.x + xm), static_cast<s32>(pos.y),
-                        static_cast<s32>(pos.z + ym));
-                auto posivec2 =
-                    glm::ivec3(static_cast<s32>(pos.x + xm), static_cast<s32>(pos.y - 1),
-                        static_cast<s32>(pos.z + ym));
-                auto posivec3 =
-                    glm::ivec3(static_cast<s32>(pos.x + xm), static_cast<s32>(pos.y - 1.8f),
-                        static_cast<s32>(pos.z + ym));
+                posivec = glm::ivec3(static_cast<s32>(pos.x + xm),
+                                     static_cast<s32>(pos.y),
+                                     static_cast<s32>(pos.z + ym));
+                auto posivec2 = glm::ivec3(static_cast<s32>(pos.x + xm),
+                                           static_cast<s32>(pos.y - 1),
+                                           static_cast<s32>(pos.z + ym));
+                auto posivec3 = glm::ivec3(static_cast<s32>(pos.x + xm),
+                                           static_cast<s32>(pos.y - 1.8f),
+                                           static_cast<s32>(pos.z + ym));
 
                 ivec = glm::ivec3(static_cast<s32>(cast_pos.x + xm),
-                    static_cast<s32>(cast_pos.y),
-                    static_cast<s32>(cast_pos.z + ym));
+                                  static_cast<s32>(cast_pos.y),
+                                  static_cast<s32>(cast_pos.z + ym));
 
                 if (!validate_ivec3(ivec))
                     return;
@@ -106,9 +105,8 @@ auto PlaceAction::place(std::any d) -> void {
             xm += 0.3f;
         }
 
-        posivec =
-            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
-                static_cast<s32>(pos.z));
+        posivec = glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
+                             static_cast<s32>(pos.z));
 
         ivec = copy_ivec;
         idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
@@ -128,7 +126,7 @@ auto PlaceAction::place(std::any d) -> void {
 
         if ((blk == Block::Mushroom1 || blk == Block::Mushroom2) &&
             (blk2 != Block::Stone && blk2 != Block::Cobblestone &&
-                blk2 != Block::Gravel))
+             blk2 != Block::Gravel))
             return;
 
         w->worldData[idx] = blk;
@@ -141,7 +139,8 @@ auto PlaceAction::place(std::any d) -> void {
                         idx = (i * 256 * 64) + (k * 64) + j;
 
                         // If it's water or flowing water, replace with air.
-                        if (idx >= 0 && idx < (256 * 64 * 256) && w->worldData[idx] == Block::Water ||
+                        if (idx >= 0 && idx < (256 * 64 * 256) &&
+                                w->worldData[idx] == Block::Water ||
                             w->worldData[idx] == Block::Still_Water) {
                             w->worldData[idx] = Block::Air;
 

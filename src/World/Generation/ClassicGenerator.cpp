@@ -44,7 +44,9 @@ auto ClassicGenerator::generate(World *wrld) -> void {
             int h = wrld->hmap[x * 256 + z] * 64.f;
             for (int y = 0; y < h; y++) {
                 auto idx = (x * 256 * 64) + (z * 64) + y;
-                if (y < (h - 4))
+                if (y == 1)
+                    wrld->worldData[idx] = Block::Lava;
+                else if (y < (h - 4))
                     wrld->worldData[idx] = Block::Stone;
                 else if (y >= (h - 4) && y < (h - 1))
                     wrld->worldData[idx] = Block::Dirt;

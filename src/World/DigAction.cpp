@@ -76,7 +76,8 @@ auto DigAction::dig(std::any d) -> void {
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = w->worldData[idx];
 
-        if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water)
+        if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water ||
+            blk == Block::Lava)
             continue;
 
         w->psystem->initialize(blk, cast_pos);

@@ -172,7 +172,8 @@ auto World::draw_selection() -> void {
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
         auto blk = worldData[idx];
 
-        if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water)
+        if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water ||
+            blk == Block::Lava)
             continue;
 
         if (ivec.x < 0 || ivec.x > 255 || ivec.y < 0 || ivec.y > 255 ||
@@ -260,7 +261,7 @@ void World::update(double dt) {
     break_icd -= dt;
     place_icd -= dt;
 
-    if (tick_counter > 0.15) {
+    if (tick_counter > 0.5f) {
         tick_counter = 0;
 
         for (auto &[key, value] : chunks) {

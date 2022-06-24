@@ -376,7 +376,7 @@ const float GRAVITY_ACCELERATION = 28.0f;
 auto test(glm::vec3 pos, World *wrld) -> bool {
     auto blk = wrld->worldData[wrld->getIdx(pos.x, pos.y, pos.z)];
     return blk != 0 && blk != 8 && blk != 6 && blk != 37 && blk != 38 &&
-           blk != 39 && blk != 40;
+           blk != 39 && blk != 40 && blk != 10;
 }
 
 void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
@@ -491,19 +491,19 @@ void Player::update(float dt, World *wrld) {
 
     auto blk =
         wrld->worldData[wrld->getIdx(testpos.x, testpos.y + 0.2f, testpos.z)];
-    if (blk == 8)
+    if (blk == 8 || blk == 10)
         is_head_water = true;
     else
         is_head_water = false;
 
     blk = wrld->worldData[wrld->getIdx(testpos.x, testpos.y - 1.9f, testpos.z)];
-    if (blk == 8)
+    if (blk == 8 || blk == 10)
         is_underwater = true;
     else
         is_underwater = false;
 
     blk = wrld->worldData[wrld->getIdx(testpos.x, testpos.y - 1.2f, testpos.z)];
-    if (blk == 8)
+    if (blk == 8 || blk == 10)
         water_cutoff = true;
     else
         water_cutoff = false;
@@ -527,7 +527,7 @@ void Player::update(float dt, World *wrld) {
 
     blk = wrld->worldData[wrld->getIdx(pos.x, pos.y - 1.85f, pos.z)];
 
-    on_ground = (blk != 0 && blk != 8);
+    on_ground = (blk != 0 && blk != 8 && blk != 10);
 
     if (on_ground)
         if (jumping)
