@@ -22,6 +22,10 @@ void GameState::on_start() {
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
 
+    // Read config
+    world->cfg = Config::loadConfig();
+    SC_APP_INFO("COMPAT: {}", world->cfg.compat);
+
     FILE *fptr = fopen("save.ccc", "r");
     if (fptr) {
         if (!world->load_world())
@@ -49,10 +53,6 @@ void GameState::on_start() {
 
     // Request 3D Mode
     Rendering::RenderContext::get().set_mode_3D();
-
-    // Read config
-    world->cfg = Config::loadConfig();
-    SC_APP_INFO("COMPAT: {}", world->cfg.compat);
 }
 
 void GameState::on_cleanup() {
