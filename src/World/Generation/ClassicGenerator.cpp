@@ -17,7 +17,8 @@ auto ClassicGenerator::generate_tree(World *wrld, int x, int z) -> void {
     WorldGenUtil::make_tree(wrld, x, z, h);
 }
 
-auto setBlk(int x, int y, int z, uint8_t blk, uint8_t *data) {
+auto ClassicGenerator::setBlk(int x, int y, int z, uint8_t blk, uint8_t *data)
+    -> void {
     auto idx = (x * 256 * 64) + (z * 64) + y;
 
     if (data[idx] == Block::Stone) {
