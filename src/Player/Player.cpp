@@ -656,7 +656,7 @@ auto Player::draw() -> void {
     fontRenderer->add_text("Position: " + std::to_string(pos.x) + " " +
                                std::to_string(pos.y) + " " +
                                std::to_string(pos.z),
-                           {0, 256});
+                           {1, 272 - 9}, {255, 255, 255, 255});
 #if PSP
     sceKernelDcacheWritebackInvalidateAll();
 #endif
