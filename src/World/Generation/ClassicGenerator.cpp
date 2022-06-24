@@ -47,9 +47,13 @@ auto ClassicGenerator::generate(World *wrld) -> void {
                 else if (y >= (h - 4) && y < (h - 1))
                     wrld->worldData[idx] = Block::Dirt;
                 else {
-                    if (h < 32)
-                        wrld->worldData[idx] = Block::Dirt;
-                    else if (h == 32)
+                    if (h < 32) {
+                        auto v = get_noise(x, z, &settings2);
+                        if (v > 0.4f)
+                            wrld->worldData[idx] = Block::Dirt;
+                        else
+                            wrld->worldData[idx] = Block::Gravel;
+                    } else if (h == 32)
                         wrld->worldData[idx] = Block::Sand;
                     else
                         wrld->worldData[idx] = Block::Grass;
