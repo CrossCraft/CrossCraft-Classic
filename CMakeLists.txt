@@ -3,8 +3,6 @@ project(CrossCraft-Classic)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-# set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 if(WIN32)
     add_compile_definitions(BUILD_PLAT=0)
 elseif(PSP)
@@ -27,6 +25,8 @@ if(WIN32)
     target_link_libraries(CrossCraft-Classic ws2_32.lib)
 endif()
 
+# target_compile_options(CrossCraft-Classic PRIVATE -fsanitize=address)
+# target_link_options(CrossCraft-Classic PRIVATE -fsanitize=address)
 if(PSP)
     create_pbp_file(
         TARGET CrossCraft-Classic
