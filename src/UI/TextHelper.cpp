@@ -12,13 +12,6 @@ TextHelper::TextHelper() {
 }
 
 auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col, u8 alpha, bool draw_bg) -> void {
-
-    // FIXME this is probably junk
-    if (draw_bg == true) {
-        Rendering::RenderContext rect;
-        rect.draw_rect({pos.x - 1, pos.y - 2}, {std::size(text)*6, 12}, {0, 0, 0, 224}, 10);
-    }
-
     // Generate RGB color values
     Rendering::Color front;
     Rendering::Color back;
@@ -85,6 +78,7 @@ auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col, u
             front = {255, 255, 85, alpha};
             back = {63, 63, 21, alpha};
             break;
+        default:
         case CC_TEXT_COLOR_WHITE:
             front = {255, 255, 255, alpha};
             back = {63, 63, 63, alpha};
@@ -93,17 +87,23 @@ auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col, u
             front = {221, 214, 5, alpha};
             back = {55, 53, 1, alpha};
             break;
+
     }
 
     fontRenderer->clear();
 
-    fontRenderer->add_text(text, {pos.x, pos.y}, front);
-    fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back);
+    fontRenderer->add_text(text, {pos.x, pos.y}, front, 0.0f);
+    fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, 0.0f);
 
 #if PSP
     sceKernelDcacheWritebackInvalidateAll();
 #endif // PSP
     fontRenderer->draw();
+
+
+    if (draw_bg == true) {
+        Rendering::RenderContext::get().draw_rect({ pos.x - 1, pos.y - 2 }, { std::size(text) * 6, 12 }, { 0, 0, 0, 224 }, 0);
+    }
 }
 
 } // namespace CrossCraft
