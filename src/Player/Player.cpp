@@ -655,6 +655,7 @@ auto Player::draw() -> void {
     selector->set_layer(-2);
     selector->draw();
 
+    textHelper->clear();
     textHelper->draw_text("Black Text", {200, 272 - 15}, CC_TEXT_COLOR_BLACK,
                           255, false);
     textHelper->draw_text("Dark Blue Text", {200, 272 - 24},
@@ -695,6 +696,8 @@ auto Player::draw() -> void {
             std::to_string(static_cast<int>(pos.y)) + ", " +
             std::to_string(static_cast<int>(pos.z)) + " ",
         {1, 272 - 10}, CC_TEXT_COLOR_WHITE, 255, true);
+
+    textHelper->draw();
 
     for (int i = 0; i < 9; i++)
         drawBlk(itemSelections[i], i, 0);
