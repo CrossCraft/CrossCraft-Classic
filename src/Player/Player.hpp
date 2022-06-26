@@ -14,6 +14,7 @@
 #include "Graphics/2D/FontRenderer.hpp"
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
+#include "../UI/TextHelper.hpp"
 #include <any>
 #include <glm.hpp>
 
@@ -139,7 +140,7 @@ class Player {
     std::vector<uint16_t> m_index[50];
     Rendering::Mesh blockMesh[50];
 
-    ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
+    ScopePtr<TextHelper> textHelper;
 };
 
 struct SelData {

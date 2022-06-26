@@ -47,8 +47,6 @@ Player::Player()
     font_texture = Rendering::TextureManager::get().load_texture(
         "./assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, false);
-    fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
-        font_texture, glm::vec2(16, 16));
 
     item_box = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
@@ -67,6 +65,8 @@ Player::Player()
         water_texture, Rendering::Rectangle{{0, 0}, {480, 272}});
     overlay = create_scopeptr<Graphics::G2D::Sprite>(
         overlay_texture, Rendering::Rectangle{{120 - 8, 64 - 44}, {256, 256}});
+
+    textHelper = create_scopeptr<TextHelper>();
 
     selectorIDX = 0;
     is_underwater = false;
@@ -652,15 +652,28 @@ auto Player::draw() -> void {
     selector->set_layer(-2);
     selector->draw();
 
-    fontRenderer->clear();
-    fontRenderer->add_text("Position: " + std::to_string(pos.x) + " " +
-                               std::to_string(pos.y) + " " +
-                               std::to_string(pos.z),
-                           {1, 272 - 9}, {255, 255, 255, 255});
-#if PSP
-    sceKernelDcacheWritebackInvalidateAll();
-#endif
-    fontRenderer->draw();
+    textHelper->draw_text("Black Text", {200, 272 - 15}, CC_TEXT_COLOR_BLACK, 255, false);
+    textHelper->draw_text("Dark Blue Text", {200, 272 - 24}, CC_TEXT_COLOR_DARK_BLUE, 255, false);
+    textHelper->draw_text("Dark Green Text", {200, 272 - 33}, CC_TEXT_COLOR_DARK_GREEN, 255, false);
+    textHelper->draw_text("Dark Aqua Text", {200, 272 - 42}, CC_TEXT_COLOR_DARK_AQUA, 255, false);
+    textHelper->draw_text("Dark Red Text", {200, 272 - 51}, CC_TEXT_COLOR_DARK_RED, 255, false);
+    textHelper->draw_text("Dark Purple Text", {200, 272 - 60}, CC_TEXT_COLOR_DARK_PURPLE, 255, false);
+    textHelper->draw_text("Gold Text", {200, 272 - 69}, CC_TEXT_COLOR_GOLD, 255, false);
+    textHelper->draw_text("Gray Text", {200, 272 - 78}, CC_TEXT_COLOR_GRAY, 255, false);
+    textHelper->draw_text("Dark Gray Text", {200, 272 - 87}, CC_TEXT_COLOR_DARK_GRAY, 255, false);
+    textHelper->draw_text("Blue Text", {200, 272 - 96}, CC_TEXT_COLOR_BLUE, 255, false);
+    textHelper->draw_text("Green Text", {200, 272 - 105}, CC_TEXT_COLOR_GREEN, 255, false);
+    textHelper->draw_text("Aqua Text", {200, 272 - 114}, CC_TEXT_COLOR_AQUA, 255, false);
+    textHelper->draw_text("Red Text", {200, 272 - 123}, CC_TEXT_COLOR_RED, 255, false);
+    textHelper->draw_text("Light Purple Text", {200, 272 - 132}, CC_TEXT_COLOR_LIGHT_PURPLE, 255, false);
+    textHelper->draw_text("Yellow Text", {200, 272 - 141}, CC_TEXT_COLOR_YELLOW, 255, false);
+    textHelper->draw_text("White Text", {200, 272 - 150}, CC_TEXT_COLOR_WHITE, 255, false);
+    textHelper->draw_text("Bedrock MTX Gold Text", {200, 272 - 159}, CC_TEXT_COLOR_BE_MTX_GOLD, 255, false);
+
+    textHelper->draw_text("Position: " + std::to_string(static_cast<int>(pos.x)) + ", " +
+                               std::to_string(static_cast<int>(pos.y)) + ", " +
+                               std::to_string(static_cast<int>(pos.z)) + " ",
+                          {1, 272 - 10}, CC_TEXT_COLOR_WHITE, 255, true);
 
     for (int i = 0; i < 9; i++)
         drawBlk(itemSelections[i], i, 0);
