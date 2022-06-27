@@ -67,6 +67,7 @@ Player::Player()
         overlay_texture, Rendering::Rectangle{{120 - 8, 64 - 44}, {256, 256}});
 
     textHelper = create_scopeptr<TextHelper>();
+    playerHUD = create_scopeptr<UserInterface>();
 
     selectorIDX = 0;
     is_underwater = false;
@@ -620,8 +621,8 @@ auto Player::drawBlkHand(uint8_t type) -> void {
 
 auto Player::draw() -> void {
     drawBlkHand(itemSelections[selectorIDX]);
-    Rendering::RenderContext::get().set_mode_2D();
-    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 100, -100);
+
+    playerHUD->begin2D();
 
     if (is_head_water) {
         water->set_position({0, 0});
@@ -655,49 +656,54 @@ auto Player::draw() -> void {
     selector->set_layer(-2);
     selector->draw();
 
-    textHelper->clear();
-    textHelper->draw_text("Black Text", {200, 272 - 15}, CC_TEXT_COLOR_BLACK,
-                          255, false);
-    textHelper->draw_text("Dark Blue Text", {200, 272 - 24},
-                          CC_TEXT_COLOR_DARK_BLUE, 255, false);
-    textHelper->draw_text("Dark Green Text", {200, 272 - 33},
-                          CC_TEXT_COLOR_DARK_GREEN, 255, false);
-    textHelper->draw_text("Dark Aqua Text", {200, 272 - 42},
-                          CC_TEXT_COLOR_DARK_AQUA, 255, false);
-    textHelper->draw_text("Dark Red Text", {200, 272 - 51},
-                          CC_TEXT_COLOR_DARK_RED, 255, false);
-    textHelper->draw_text("Dark Purple Text", {200, 272 - 60},
-                          CC_TEXT_COLOR_DARK_PURPLE, 255, false);
-    textHelper->draw_text("Gold Text", {200, 272 - 69}, CC_TEXT_COLOR_GOLD, 255,
-                          false);
-    textHelper->draw_text("Gray Text", {200, 272 - 78}, CC_TEXT_COLOR_GRAY, 255,
-                          false);
-    textHelper->draw_text("Dark Gray Text", {200, 272 - 87},
-                          CC_TEXT_COLOR_DARK_GRAY, 255, false);
-    textHelper->draw_text("Blue Text", {200, 272 - 96}, CC_TEXT_COLOR_BLUE, 255,
-                          false);
-    textHelper->draw_text("Green Text", {200, 272 - 105}, CC_TEXT_COLOR_GREEN,
-                          255, false);
-    textHelper->draw_text("Aqua Text", {200, 272 - 114}, CC_TEXT_COLOR_AQUA,
-                          255, false);
-    textHelper->draw_text("Red Text", {200, 272 - 123}, CC_TEXT_COLOR_RED, 255,
-                          false);
-    textHelper->draw_text("Light Purple Text", {200, 272 - 132},
-                          CC_TEXT_COLOR_LIGHT_PURPLE, 255, false);
-    textHelper->draw_text("Yellow Text", {200, 272 - 141}, CC_TEXT_COLOR_YELLOW,
-                          255, false);
-    textHelper->draw_text("White Text", {200, 272 - 150}, CC_TEXT_COLOR_WHITE,
-                          255, false);
-    textHelper->draw_text("Bedrock MTX Gold Text", {200, 272 - 159},
-                          CC_TEXT_COLOR_BE_MTX_GOLD, 255, false);
-
-    textHelper->draw_text(
-        "Position: " + std::to_string(static_cast<int>(pos.x)) + ", " +
+    playerHUD->draw_text("Position: " + std::to_string(static_cast<int>(pos.x)) + ", " +
             std::to_string(static_cast<int>(pos.y)) + ", " +
-            std::to_string(static_cast<int>(pos.z)) + " ",
-        {1, 272 - 10}, CC_TEXT_COLOR_WHITE, 255, true);
+            std::to_string(static_cast<int>(pos.z)), CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_DYNAMIC);
 
-    textHelper->draw();
+    playerHUD->draw_text("Top Right", CC_TEXT_COLOR_DARK_AQUA, CC_TEXT_ALIGN_RIGHT,
+                         CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Center Right", CC_TEXT_COLOR_LIGHT_PURPLE, CC_TEXT_ALIGN_RIGHT,
+                         CC_TEXT_ALIGN_CENTER, 0, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Bottom Right", CC_TEXT_COLOR_GRAY, CC_TEXT_ALIGN_RIGHT,
+                         CC_TEXT_ALIGN_BOTTOM, 0, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Center Top", CC_TEXT_COLOR_DARK_GRAY, CC_TEXT_ALIGN_CENTER,
+                         CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Center Center", CC_TEXT_COLOR_BLACK, CC_TEXT_ALIGN_CENTER,
+                         CC_TEXT_ALIGN_CENTER, 0, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Top Left", CC_TEXT_COLOR_YELLOW, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_TOP, 0, -1, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Top Left Y Indent", CC_TEXT_COLOR_GREEN, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_TOP, 0, -2, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Top Left X Indent", CC_TEXT_COLOR_AQUA, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_TOP, 10, -1, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Cen. Left", CC_TEXT_COLOR_DARK_GREEN, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_CENTER, 0, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Cen. Left Y Indent", CC_TEXT_COLOR_DARK_AQUA, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_CENTER, 0, -1, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Cen. Left X Indent", CC_TEXT_COLOR_BE_MTX_GOLD, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_CENTER, 10, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Bot. Left", CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_BOTTOM, 0, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Bot. Left Y Indent", CC_TEXT_COLOR_DARK_PURPLE, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_BOTTOM, 0, 1, CC_TEXT_BG_NONE);
+
+    playerHUD->draw_text("Bot. Left X Indent", CC_TEXT_COLOR_DARK_RED, CC_TEXT_ALIGN_LEFT,
+                         CC_TEXT_ALIGN_BOTTOM, 10, 0, CC_TEXT_BG_NONE);
+
+    playerHUD->end2D();
 
     for (int i = 0; i < 9; i++)
         drawBlk(itemSelections[i], i, 0);
@@ -706,5 +712,7 @@ auto Player::draw() -> void {
         for (int i = 0; i < 42; i++)
             drawBlk(inventorySelection[i], i % 9, 7 - i / 9);
     }
+
 }
+
 } // namespace CrossCraft

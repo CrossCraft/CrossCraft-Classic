@@ -22,8 +22,12 @@ auto TextHelper::draw() -> void {
     fontRenderer->draw();
 }
 
+auto TextHelper::get_width(std::string text) -> float {
+    return fontRenderer->calculate_size(text);
+}
+
 auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col,
-                           u8 alpha, bool draw_bg) -> void {
+                           u8 alpha, short bg_mode) -> void {
     // Generate RGB color values
     Rendering::Color front;
     Rendering::Color back;
@@ -101,11 +105,11 @@ auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col,
         break;
     }
 
-    if (draw_bg == true) {
-        Rendering::RenderContext::get().draw_rect({pos.x - 1, pos.y - 2},
-                                                  {std::size(text) * 6, 12},
-                                                  {0, 0, 0, 224}, 2);
-    }
+    // FIXME: Rect is somehow broken again
+    /*if (bg_mode == CC_TEXT_BG_DYNAMIC) {
+        Rendering::RenderContext::get().draw_rect({50, 50}, {100, 12},
+                                                  {0, 0, 0, 128}, 2);
+    }*/
 
     fontRenderer->add_text(text, {pos.x, pos.y}, front, 0.0f);
     fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, 1.0f);

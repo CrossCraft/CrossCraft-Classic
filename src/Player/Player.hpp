@@ -15,6 +15,7 @@
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
 #include "../UI/TextHelper.hpp"
+#include "../UI/UserInterface.hpp"
 #include <any>
 #include <glm.hpp>
 
@@ -141,6 +142,7 @@ class Player {
     Rendering::Mesh blockMesh[50];
 
     ScopePtr<TextHelper> textHelper;
+    ScopePtr<UserInterface> playerHUD;
 };
 
 struct SelData {

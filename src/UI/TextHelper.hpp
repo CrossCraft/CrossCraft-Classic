@@ -24,6 +24,10 @@
 #define CC_TEXT_COLOR_WHITE 15
 #define CC_TEXT_COLOR_BE_MTX_GOLD 16
 
+// For fixed, just specify length..
+#define CC_TEXT_BG_NONE 0
+#define CC_TEXT_BG_DYNAMIC 1
+
 using namespace Stardust_Celeste;
 
 namespace CrossCraft {
@@ -43,6 +47,13 @@ class TextHelper {
      */
     ~TextHelper() = default;
 
+    /*
+     * @breif Wrapper for FontRenderer::calculate_size
+     *
+     * @param text Text to get the pixel size of
+     */
+    auto get_width(std::string text) -> float;
+
     /**
      * @brief Enhanced wrapper for FontRenderer
      *
@@ -53,7 +64,7 @@ class TextHelper {
      * @param draw_bg Draw a rectangle under the text to improve legibility.
      */
     auto draw_text(std::string text, glm::vec2 pos, unsigned char col, u8 alpha,
-                   bool draw_bg) -> void;
+                   short bg_mode) -> void;
     auto clear() -> void;
     auto draw() -> void;
 
