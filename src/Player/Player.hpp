@@ -82,6 +82,11 @@ class Player {
     static auto move_down(std::any p) -> void;
     static auto move_reset(std::any p) -> void;
 
+    static auto press_up(std::any p) -> void;
+    static auto press_down(std::any p) -> void;
+    static auto press_left(std::any p) -> void;
+    static auto press_right(std::any p) -> void;
+
     static auto respawn(std::any p) -> void;
 
     static auto change_selector(std::any p) -> void;
@@ -110,7 +115,7 @@ class Player {
                           uint32_t lightVal, glm::vec3 pos, uint8_t type)
         -> void;
 
-    auto drawBlk(uint8_t type, int x, int y) -> void;
+    auto drawBlk(uint8_t type, int x, int y, float scale) -> void;
     auto drawBlkHand(uint8_t type) -> void;
 
     glm::vec3 pos;
@@ -120,6 +125,9 @@ class Player {
     float jump_icd;
     float view_bob, view_timer;
     float cube_bob;
+
+    int in_cursor_x;
+    int in_cursor_y;
 
     Rendering::Camera cam;
     ScopePtr<Graphics::G2D::Sprite> item_box;
@@ -141,7 +149,6 @@ class Player {
     std::vector<uint16_t> m_index[50];
     Rendering::Mesh blockMesh[50];
 
-    ScopePtr<TextHelper> textHelper;
     ScopePtr<UserInterface> playerHUD;
 };
 

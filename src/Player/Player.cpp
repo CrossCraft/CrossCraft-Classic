@@ -66,7 +66,6 @@ Player::Player()
     overlay = create_scopeptr<Graphics::G2D::Sprite>(
         overlay_texture, Rendering::Rectangle{{120 - 8, 64 - 44}, {256, 256}});
 
-    textHelper = create_scopeptr<TextHelper>();
     playerHUD = create_scopeptr<UserInterface>();
 
     selectorIDX = 0;
@@ -85,6 +84,8 @@ Player::Player()
 
     vcursor_x = 240;
     vcursor_y = 136;
+    in_cursor_x = 0;
+    in_cursor_y = 0;
 }
 
 const auto playerSpeed = 4.3f;
@@ -270,6 +271,55 @@ auto Player::move_up(std::any d) -> void {
             p->jump_icd = 0.33f;
             p->is_falling = true;
         }
+    }
+}
+
+auto Player::press_up(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    if (p->in_inventory) {
+        p->in_cursor_y -= 1;
+        if (p->in_cursor_y <= -1) p->in_cursor_y = 4;
+
+        if (p->in_cursor_x >= 6 && p->in_cursor_y == 4)
+            p->in_cursor_y = 3;
+    } else {
+        move_up(d);
+    }
+}
+
+auto Player::press_down(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    if (p->in_inventory) {
+        p->in_cursor_y += 1;
+        if (p->in_cursor_y >= 5) p->in_cursor_y = 0;
+
+        if (p->in_cursor_x >= 6 && p->in_cursor_y == 4)
+            p->in_cursor_y = 0;
+    }
+}
+
+auto Player::press_left(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    if (p->in_inventory) {
+        p->in_cursor_x -= 1;
+
+        if (p->in_cursor_x <= -1)
+            if (p->in_cursor_y == 4) p->in_cursor_x = 5;
+            else p->in_cursor_x = 8;
+    } else {
+        dec_selector(d);
+    }
+}
+
+auto Player::press_right(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    if (p->in_inventory) {
+        p->in_cursor_x += 1;
+
+        if (p->in_cursor_x >= 9 || (p->in_cursor_y == 4 && p->in_cursor_x >= 6))
+            p->in_cursor_x = 0;
+    } else {
+        inc_selector(d);
     }
 }
 
@@ -552,7 +602,7 @@ void Player::update(float dt, World *wrld) {
     cam.update();
 }
 
-auto Player::drawBlk(uint8_t type, int x, int y) -> void {
+auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {
     Rendering::RenderContext::get().matrix_view(glm::mat4(1));
     Rendering::RenderContext::get().matrix_translate(
         {153.5f + x * 20, 8 + y * 24, -20});
@@ -561,7 +611,7 @@ auto Player::drawBlk(uint8_t type, int x, int y) -> void {
     else
         Rendering::RenderContext::get().matrix_rotate({30.0f, 45.0f, 0});
 
-    Rendering::RenderContext::get().matrix_scale({9.0f, 9.0f, 9.0f});
+    Rendering::RenderContext::get().matrix_scale({scale, scale, scale});
 
 // DISABLE CULL
 #if BUILD_PC
@@ -620,6 +670,9 @@ auto Player::drawBlkHand(uint8_t type) -> void {
 }
 
 auto Player::draw() -> void {
+    int selectedBlock;
+    selectedBlock = (in_cursor_x) + (in_cursor_y * 9);
+
     drawBlkHand(itemSelections[selectorIDX]);
 
     playerHUD->begin2D();
@@ -630,22 +683,22 @@ auto Player::draw() -> void {
         water->draw();
     }
 
-    if (!in_inventory) {
+    if (in_inventory) {
+        playerHUD->draw_text("Select block", CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER,
+                             CC_TEXT_ALIGN_CENTER, 0, 7, CC_TEXT_BG_NONE);
+        playerHUD->draw_text(playerHUD->get_block_name(inventorySelection[selectedBlock]),
+                         CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM,
+                         0, 6, CC_TEXT_BG_NONE);
+        Rendering::RenderContext::get().draw_rect({126, 55}, {226, 167},
+                                                  {0, 0, 0, 128}, 2);
+    } else {
         crosshair->set_position({240 - 8, 136 - 8});
         crosshair->set_layer(-1);
         crosshair->draw();
-    } else {
-#if PSP
-        crosshair->set_position({vcursor_x, vcursor_y});
-        crosshair->set_layer(1);
-        crosshair->draw();
-#endif
-    }
 
-    if (in_inventory) {
-        overlay->set_position({120 - 8, 64 - 44});
-        overlay->set_layer(0);
-        overlay->draw();
+        playerHUD->draw_text(playerHUD->get_block_name(itemSelections[selectorIDX]),
+                         CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM,
+                         0, 3, CC_TEXT_BG_NONE);
     }
 
     item_box->set_position({149, 1});
@@ -661,56 +714,18 @@ auto Player::draw() -> void {
             std::to_string(static_cast<int>(pos.z)), CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
                          CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_DYNAMIC);
 
-    playerHUD->draw_text("Top Right", CC_TEXT_COLOR_DARK_AQUA, CC_TEXT_ALIGN_RIGHT,
-                         CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Center Right", CC_TEXT_COLOR_LIGHT_PURPLE, CC_TEXT_ALIGN_RIGHT,
-                         CC_TEXT_ALIGN_CENTER, 0, 0, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Bottom Right", CC_TEXT_COLOR_GRAY, CC_TEXT_ALIGN_RIGHT,
-                         CC_TEXT_ALIGN_BOTTOM, 0, 0, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Center Top", CC_TEXT_COLOR_DARK_GRAY, CC_TEXT_ALIGN_CENTER,
-                         CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Center Center", CC_TEXT_COLOR_BLACK, CC_TEXT_ALIGN_CENTER,
-                         CC_TEXT_ALIGN_CENTER, 0, 0, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Top Left", CC_TEXT_COLOR_YELLOW, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_TOP, 0, -1, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Top Left Y Indent", CC_TEXT_COLOR_GREEN, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_TOP, 0, -2, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Top Left X Indent", CC_TEXT_COLOR_AQUA, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_TOP, 10, -1, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Cen. Left", CC_TEXT_COLOR_DARK_GREEN, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_CENTER, 0, 0, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Cen. Left Y Indent", CC_TEXT_COLOR_DARK_AQUA, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_CENTER, 0, -1, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Cen. Left X Indent", CC_TEXT_COLOR_BE_MTX_GOLD, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_CENTER, 10, 0, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Bot. Left", CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_BOTTOM, 0, 0, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Bot. Left Y Indent", CC_TEXT_COLOR_DARK_PURPLE, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_BOTTOM, 0, 1, CC_TEXT_BG_NONE);
-
-    playerHUD->draw_text("Bot. Left X Indent", CC_TEXT_COLOR_DARK_RED, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_BOTTOM, 10, 0, CC_TEXT_BG_NONE);
-
     playerHUD->end2D();
 
     for (int i = 0; i < 9; i++)
-        drawBlk(itemSelections[i], i, 0);
+        drawBlk(itemSelections[i], i, 0, 9.0f);
 
     if (in_inventory) {
-        for (int i = 0; i < 42; i++)
-            drawBlk(inventorySelection[i], i % 9, 7 - i / 9);
+        for (int i = 0; i < 42; i++) {
+            if (i == selectedBlock)
+                drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 13.0f);
+            else
+                drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 9.0f);
+        }
     }
 
 }

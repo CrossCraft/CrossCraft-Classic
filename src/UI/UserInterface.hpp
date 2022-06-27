@@ -32,6 +32,8 @@ class UserInterface {
                    unsigned char y_align, short x_line, short y_line,
                    short bg_mode) -> void;
 
+    auto get_block_name(uint8_t id) -> std::string;
+
     auto begin2D() -> void;
     auto end2D() -> void;
 
