@@ -92,8 +92,10 @@ const auto playerSpeed = 4.3f;
 
 auto Player::spawn(World *wrld) -> void {
     bool spawned = false;
+    int count = 30;
 
-    while (!spawned) {
+    while (!spawned && count >= 0) {
+        count--;
         int x = rand() % 64 - 32 + 128;
         int z = rand() % 64 - 32 + 128;
 
@@ -112,6 +114,9 @@ auto Player::spawn(World *wrld) -> void {
             }
         }
     }
+
+    pos = { 128 + 0.5f, 40 + 1, 128 + 0.5f };
+    pos.y += 1.8f;
 }
 
 auto Player::add_face_to_mesh(std::array<float, 12> data,
@@ -593,7 +598,7 @@ void Player::update(float dt, World *wrld) {
         view_timer = 0;
     }
     view_bob = sinf(view_timer * 3.14159 * 2.5f) / 18.0f;
-    cube_bob = cosf(view_timer * 3.14159 * 2.2f) / 44.0f;
+    cube_bob = cosf(view_timer * 3.14159 * 4.8f) / 44.0f;
 
     // Update camera
     cam.pos = pos;
