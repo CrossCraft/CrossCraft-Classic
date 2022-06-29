@@ -28,6 +28,7 @@ jobs:
           make
           cd ..
           mv build/CrossCraft-Classic CrossCraft-Classic
+          chmod +x ./CrossCraft-Classic
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -53,6 +54,7 @@ jobs:
           make
           cd ..
           mv build/CrossCraft-Classic CrossCraft-Classic
+          chmod +x ./CrossCraft-Classic
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
