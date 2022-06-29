@@ -27,6 +27,9 @@ namespace CrossCraft::MP
 
         std::vector<RefPtr<Network::ByteBuffer>> packetsOut;
 
+        auto set_block(short x, short y, short z, uint8_t mode, uint8_t block) -> void;
+
+        float update_timer;
         World* wrld;
         bool is_ready;
     private:

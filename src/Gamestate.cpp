@@ -30,6 +30,7 @@ namespace CrossCraft
         if (world->cfg.client)
         {
             client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip);
+            world->client = client.get();
         }
         else
         {

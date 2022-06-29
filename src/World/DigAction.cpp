@@ -93,6 +93,12 @@ auto DigAction::dig(std::any d) -> void {
 
         w->worldData[idx] = 0;
 
+
+        if (w->cfg.client) {
+            w->set_block(ivec.x, ivec.y, ivec.z, 0, w->player->itemSelections[w->player->selectorIDX]);
+        }
+
+
         // Update surrounding blocks on a larger radius for water filling
         if (was_sponge == true) {
             for (auto i = ivec.x - 3; i <= ivec.x + 3; i++) {

@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <vector>
+#include "../MP/Client.hpp"
 
 namespace CrossCraft {
 
@@ -30,6 +31,7 @@ inline auto validate_ivec3(glm::ivec3 ivec) -> bool {
 }
 
 class Player;
+class MP::Client;
 
 typedef uint8_t block_t;
 class ChunkStack;
@@ -117,6 +119,10 @@ class World {
     static auto save(std::any p) -> void;
 
     std::map<int, ChunkStack *> chunks;
+
+    auto set_block(short x, short y, short z, uint8_t mode, uint8_t block) -> void;
+
+    MP::Client* client;
 
   private:
     /**

@@ -157,9 +157,9 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
     switch (idx) {
     case 1: // Stone
         return getTexture(vec, 1);
-    case 2: // Dirt
+    case 3: // Dirt
         return getTexture(vec, 2);
-    case 3: { // Grass
+    case 2: { // Grass
         if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
             return getTexture(vec, 3);
         else if (lv == LIGHT_BOT)
