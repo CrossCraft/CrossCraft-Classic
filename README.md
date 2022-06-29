@@ -4,6 +4,8 @@
 
 CrossCraft-Classic is a project that aims to recreate Minecraft Java Edition: Classic without looking at any of the source code of the original application and without using the original copyrighted assets. All knowledge is figured out with an understanding of in-game mechanics and is approximated to be as close as possible to the original.
 
+[Check out the Server!](https://github.com/CrossCraft/CrossCraft-Classic-Server)
+
 Textures are a combination of handmade and adaptations from [Unity Pack](https://www.curseforge.com/minecraft/texture-packs/unity) under CC0
 
 CrossCraft's goal is to be platform-independent and work across all PC platforms and many major game consoles. The original release of CrossCraft will include Windows, Linux, and PSP support. Further support will be added over time as systems change and upgrade.
