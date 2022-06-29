@@ -79,6 +79,9 @@ void GameState::on_draw(Core::Application *app, double dt) { world->draw(); }
 /* Ugly Key-Binding Function */
 
 void GameState::bind_controls() {
+    //
+    // PSP Face Buttons: Release
+    //
     psp_controller->add_command(
         {(int)Input::PSPButtons::Triangle, KeyFlag::Release},
         {Player::move_reset, world->player.get()});
@@ -92,6 +95,9 @@ void GameState::bind_controls() {
         {(int)Input::PSPButtons::Circle, KeyFlag::Release},
         {Player::move_reset, world->player.get()});
 
+    //
+    // PSP Face Buttons: Press/Hold
+    //
     psp_controller->add_command(
         {(int)Input::PSPButtons::Triangle, KeyFlag::Press | KeyFlag::Held},
         {Player::move_forward, world->player.get()});
@@ -104,26 +110,45 @@ void GameState::bind_controls() {
     psp_controller->add_command(
         {(int)Input::PSPButtons::Circle, KeyFlag::Press | KeyFlag::Held},
         {Player::move_right, world->player.get()});
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Up, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_up, world->player.get()});
 
+    //
+    // PSP Directional Buttons: Press/Hold
+    //
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Up, KeyFlag::Held},
+        {Player::move_up, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Up, KeyFlag::Press},
+        {Player::press_up, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Down, KeyFlag::Press},
+        {Player::press_down, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Left, KeyFlag::Press},
+        {Player::press_left, world->player.get()});
+    psp_controller->add_command(
+        {(int)Input::PSPButtons::Right, KeyFlag::Press},
+        {Player::press_right, world->player.get()});
+
+    //
+    // PSP Start/Select: Press
+    //
     psp_controller->add_command(
         {(int)Input::PSPButtons::Select, KeyFlag::Press},
         {Player::toggle_inv, world->player.get()});
+    psp_controller->add_command({(int)Input::PSPButtons::Start, KeyFlag::Press},
+                                {World::save, world.get()});
+
+    //
+    // PSP Triggers: Press/Hold
+    //
     psp_controller->add_command(
         {(int)Input::PSPButtons::RTrigger, KeyFlag::Press | KeyFlag::Held},
         {DigAction::dig, world.get()});
     psp_controller->add_command(
         {(int)Input::PSPButtons::LTrigger, KeyFlag::Press | KeyFlag::Held},
         {PlaceAction::place, world.get()});
-    psp_controller->add_command({(int)Input::PSPButtons::Left, KeyFlag::Press},
-                                {Player::dec_selector, world->player.get()});
-    psp_controller->add_command({(int)Input::PSPButtons::Right, KeyFlag::Press},
-                                {Player::inc_selector, world->player.get()});
 
-    psp_controller->add_command({(int)Input::PSPButtons::Start, KeyFlag::Press},
-                                {World::save, world.get()});
     key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
                                 {World::save, world.get()});
 

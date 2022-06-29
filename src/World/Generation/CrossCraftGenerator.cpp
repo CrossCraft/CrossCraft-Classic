@@ -21,8 +21,11 @@ auto CrossCraftGenerator::setBlk(int x, int y, int z, uint8_t blk,
                                  uint8_t *data) -> void {
     auto idx = (x * 256 * 64) + (z * 64) + y;
 
-    if (data[idx] == Block::Stone) {
-        data[idx] = blk;
+    if (idx >= 0 && idx < 256 * 64 * 256) {
+
+        if (data[idx] == Block::Stone) {
+            data[idx] = blk;
+        }
     }
 }
 
