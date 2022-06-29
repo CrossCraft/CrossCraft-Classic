@@ -38,6 +38,31 @@ jobs:
             LICENSE
             README.md
             config.cfg
+  
+  Mac:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          git submodule update --init --recursive --remote
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make
+          cd ..
+          mv build/CrossCraft-Classic CrossCraft-Classic
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: CrossCraft-Mac
+          path: |
+            CrossCraft-Classic
+            assets/
+            LICENSE
+            README.md
+            config.cfg
 
   Windows:
     runs-on: windows-latest
