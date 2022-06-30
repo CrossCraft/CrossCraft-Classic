@@ -86,6 +86,8 @@ Player::Player()
     vcursor_y = 136;
     in_cursor_x = 0;
     in_cursor_y = 0;
+
+    chat = create_scopeptr<Chat>();
 }
 
 const auto playerSpeed = 4.3f;
@@ -115,7 +117,7 @@ auto Player::spawn(World *wrld) -> void {
         }
     }
 
-    pos = { 128 + 0.5f, 40 + 1, 128 + 0.5f };
+    pos = {128 + 0.5f, 40 + 1, 128 + 0.5f};
     pos.y += 1.8f;
 }
 
@@ -283,7 +285,8 @@ auto Player::press_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (p->in_inventory) {
         p->in_cursor_y -= 1;
-        if (p->in_cursor_y <= -1) p->in_cursor_y = 4;
+        if (p->in_cursor_y <= -1)
+            p->in_cursor_y = 4;
 
         if (p->in_cursor_x >= 6 && p->in_cursor_y == 4)
             p->in_cursor_y = 3;
@@ -296,7 +299,8 @@ auto Player::press_down(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (p->in_inventory) {
         p->in_cursor_y += 1;
-        if (p->in_cursor_y >= 5) p->in_cursor_y = 0;
+        if (p->in_cursor_y >= 5)
+            p->in_cursor_y = 0;
 
         if (p->in_cursor_x >= 6 && p->in_cursor_y == 4)
             p->in_cursor_y = 0;
@@ -309,8 +313,10 @@ auto Player::press_left(std::any d) -> void {
         p->in_cursor_x -= 1;
 
         if (p->in_cursor_x <= -1)
-            if (p->in_cursor_y == 4) p->in_cursor_x = 5;
-            else p->in_cursor_x = 8;
+            if (p->in_cursor_y == 4)
+                p->in_cursor_x = 5;
+            else
+                p->in_cursor_x = 8;
     } else {
         dec_selector(d);
     }
@@ -526,6 +532,7 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
 }
 
 void Player::update(float dt, World *wrld) {
+    chat->update(dt);
     hasDir = false;
     rotate(dt, wrld->cfg.sense);
     jump_icd -= dt;
@@ -689,11 +696,13 @@ auto Player::draw() -> void {
     }
 
     if (in_inventory) {
-        playerHUD->draw_text("Select block", CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER,
-                             CC_TEXT_ALIGN_CENTER, 0, 7, CC_TEXT_BG_NONE);
-        playerHUD->draw_text(playerHUD->get_block_name(inventorySelection[selectedBlock]),
-                         CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM,
-                         0, 6, CC_TEXT_BG_NONE);
+        playerHUD->draw_text("Select block", CC_TEXT_COLOR_WHITE,
+                             CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_CENTER, 0, 7,
+                             CC_TEXT_BG_NONE);
+        playerHUD->draw_text(
+            playerHUD->get_block_name(inventorySelection[selectedBlock]),
+            CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM, 0,
+            6, CC_TEXT_BG_NONE);
         Rendering::RenderContext::get().draw_rect({126, 55}, {226, 167},
                                                   {0, 0, 0, 128}, 2);
     } else {
@@ -701,9 +710,10 @@ auto Player::draw() -> void {
         crosshair->set_layer(-1);
         crosshair->draw();
 
-        playerHUD->draw_text(playerHUD->get_block_name(itemSelections[selectorIDX]),
-                         CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM,
-                         0, 3, CC_TEXT_BG_NONE);
+        playerHUD->draw_text(
+            playerHUD->get_block_name(itemSelections[selectorIDX]),
+            CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM, 0,
+            3, CC_TEXT_BG_NONE);
     }
 
     item_box->set_position({149, 1});
@@ -714,10 +724,24 @@ auto Player::draw() -> void {
     selector->set_layer(-2);
     selector->draw();
 
-    playerHUD->draw_text("Position: " + std::to_string(static_cast<int>(pos.x)) + ", " +
+    playerHUD->draw_text(
+        "Position: " + std::to_string(static_cast<int>(pos.x)) + ", " +
             std::to_string(static_cast<int>(pos.y)) + ", " +
-            std::to_string(static_cast<int>(pos.z)), CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-                         CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_DYNAMIC);
+            std::to_string(static_cast<int>(pos.z)),
+        CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT, CC_TEXT_ALIGN_TOP, 0, 0,
+        CC_TEXT_BG_DYNAMIC);
+
+    int i = 5;
+    for (int x = chat->data.size() - 1; x >= 0; x--) {
+        auto &p = chat->data.at(x);
+        if (i < 0)
+            break;
+
+        playerHUD->draw_text(p.text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
+                             CC_TEXT_ALIGN_CENTER, 0, -i - 2,
+                             CC_TEXT_BG_DYNAMIC);
+        i--;
+    }
 
     playerHUD->end2D();
 
@@ -732,7 +756,6 @@ auto Player::draw() -> void {
                 drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 9.0f);
         }
     }
-
 }
 
 } // namespace CrossCraft

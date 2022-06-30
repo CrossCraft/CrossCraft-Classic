@@ -9,13 +9,14 @@
  *
  */
 #pragma once
+#include "../UI/TextHelper.hpp"
+#include "../UI/UserInterface.hpp"
 #include "../World/World.hpp"
 #include "AABB.hpp"
+#include "Chat.hpp"
 #include "Graphics/2D/FontRenderer.hpp"
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
-#include "../UI/TextHelper.hpp"
-#include "../UI/UserInterface.hpp"
 #include <any>
 #include <glm.hpp>
 
@@ -24,7 +25,6 @@ using namespace Stardust_Celeste;
 namespace CrossCraft {
 
 class World;
-
 
 /**
  * @brief Player controller object
@@ -107,6 +107,7 @@ class Player {
 
     glm::vec3 pos;
     glm::vec2 rot;
+    ScopePtr<Chat> chat;
 
   private:
     auto rotate(float dt, float sense) -> void;
@@ -159,8 +160,8 @@ struct SelData {
 };
 
 struct RespawnRequest {
-    Player* player;
-    World* wrld;
+    Player *player;
+    World *wrld;
 };
 
 } // namespace CrossCraft

@@ -393,6 +393,8 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
 
     case Incoming::eMessage: {
         auto data2 = reinterpret_cast<Incoming::Message *>(data.get());
+        wrld->player->chat->add_message(
+            std::string((char *)data2->Message.contents));
         SC_APP_INFO("[Chat]: {}", data2->Message.contents);
         break;
     }
