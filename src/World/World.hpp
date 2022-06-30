@@ -21,24 +21,28 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <vector>
+#include "../MP/Client.hpp"
 
-namespace CrossCraft {
+namespace CrossCraft
+{
 
-inline auto validate_ivec3(glm::ivec3 ivec) -> bool {
+  inline auto validate_ivec3(glm::ivec3 ivec) -> bool
+  {
     return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
            ivec.z >= 0 && ivec.z < 256;
-}
+  }
 
-class Player;
+  class Player;
 
-typedef uint8_t block_t;
-class ChunkStack;
+  typedef uint8_t block_t;
+  class ChunkStack;
 
-/**
+  /**
  * @brief The world
  *
  */
-class World {
+  class World
+  {
   public:
     /**
      * @brief Construct a new World object
@@ -118,6 +122,10 @@ class World {
 
     std::map<int, ChunkStack *> chunks;
 
+    auto set_block(short x, short y, short z, uint8_t mode, uint8_t block) -> void;
+
+    MP::Client *client;
+
   private:
     /**
      * @brief Get the needed chunks
@@ -149,6 +157,6 @@ class World {
     friend class PlaceAction;
     friend class CrossCraftGenerator;
     friend class ClassicGenerator;
-};
+  };
 
 } // namespace CrossCraft

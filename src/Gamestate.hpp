@@ -10,18 +10,21 @@
  */
 #include "Config.hpp"
 #include "World/World.hpp"
+#include "MP/Client.hpp"
 #include <Core/Application.hpp>
 #include <Utilities/Input.hpp>
 
 using namespace Stardust_Celeste;
 
-namespace CrossCraft {
+namespace CrossCraft
+{
 
-/**
+  /**
  * @brief Game State Class
  *
  */
-class GameState : public Core::ApplicationState {
+  class GameState : public Core::ApplicationState
+  {
   public:
     GameState()
         : config(), key_controller(nullptr), psp_controller(nullptr),
@@ -39,11 +42,12 @@ class GameState : public Core::ApplicationState {
     static void quit(std::any d);
 
   private:
+    ScopePtr<MP::Client> client;
     ScopePtr<World> world;
     Utilities::Controller *psp_controller;
     Utilities::Controller *key_controller;
     Utilities::Controller *mouse_controller;
     Config config;
-};
+  };
 
 } // namespace CrossCraft

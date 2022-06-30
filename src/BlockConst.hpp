@@ -67,8 +67,8 @@ constexpr uint32_t LIGHT_BOT_DARK = 0xFF696969;
 namespace Block {
 const uint8_t Air = 0;
 const uint8_t Stone = 1;
-const uint8_t Dirt = 2;
-const uint8_t Grass = 3;
+const uint8_t Dirt = 3;
+const uint8_t Grass = 2;
 const uint8_t Cobblestone = 4;
 const uint8_t Wood = 5;
 const uint8_t Sapling = 6;

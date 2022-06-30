@@ -92,7 +92,7 @@ struct ChunkMeshCollection {
  * @param index Index of tile to get
  * @return std::array<float, 8>
  */
-inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
+inline auto getTexture(glm::vec2 sideCount, int index, bool rot = false) -> std::array<float, 8> {
     int row = index / (int)sideCount.x;
     int column = index % (int)sideCount.y;
 
@@ -103,7 +103,10 @@ inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
     float h = y + sizeY;
     float w = x + sizeX;
 
-    return {x, h, w, h, w, y, x, y};
+    if(rot)
+        return { x, y, x, h, w, h, w, y };
+    else
+        return { x, h, w, h, w, y, x, y };
 }
 
 /*
@@ -157,9 +160,9 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
     switch (idx) {
     case 1: // Stone
         return getTexture(vec, 1);
-    case 2: // Dirt
+    case 3: // Dirt
         return getTexture(vec, 2);
-    case 3: { // Grass
+    case 2: { // Grass
         if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
             return getTexture(vec, 3);
         else if (lv == LIGHT_BOT)
@@ -262,7 +265,7 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
         return getTexture(vec, 80);
 
     default:
-        return getTexture(vec, idx - 21 + 64);
+        return getTexture(vec, idx - 21 + 64, true);
     }
 }
 

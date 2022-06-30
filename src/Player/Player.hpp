@@ -105,6 +105,9 @@ class Player {
 
     float vcursor_x, vcursor_y;
 
+    glm::vec3 pos;
+    glm::vec2 rot;
+
   private:
     auto rotate(float dt, float sense) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;
@@ -118,8 +121,6 @@ class Player {
     auto drawBlk(uint8_t type, int x, int y, float scale) -> void;
     auto drawBlkHand(uint8_t type) -> void;
 
-    glm::vec3 pos;
-    glm::vec2 rot;
     glm::vec3 vel;
 
     float jump_icd;

@@ -170,6 +170,9 @@ auto World::draw_selection() -> void {
                                static_cast<s32>(cast_pos.z));
 
         u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+        if (idx < 0 || idx >= (256 * 64 * 256))
+            return;
+
         auto blk = worldData[idx];
 
         if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water ||
@@ -182,17 +185,39 @@ auto World::draw_selection() -> void {
 
         auto ctx = &Rendering::RenderContext::get();
 
-        ctx->matrix_translate(
-            glm::vec3(ivec.x - 0.01f, ivec.y - 0.01f, ivec.z - 0.01f));
+        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
         ctx->matrix_rotate({0, 0, 0});
-        ctx->matrix_scale({1.02f, 1.02f, 1.02f});
+        ctx->matrix_scale({1.01f, 1.01f, 1.01f});
+        ctx->matrix_translate({ -0.005f, -0.005f, -0.005f });
 
-        blockMesh.draw();
+        blockMesh.draw_wireframe();
 
-        ctx->matrix_rotate({0, 90, 0});
-        ctx->matrix_translate({-1.005f, -0.005f, 0.005f});
+        ctx->matrix_clear();
+        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
+        ctx->matrix_rotate({ 90, 0, 0 });
+        ctx->matrix_scale({ 1.01f, 1.01f, 1.01f });
+        ctx->matrix_translate({ -0.005f, -0.005f, -0.005f - 1.0f });
 
-        blockMesh.draw();
+
+        blockMesh.draw_wireframe();
+
+        ctx->matrix_clear();
+        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
+        ctx->matrix_rotate({ 0, 90, 0 });
+        ctx->matrix_scale({ 1.01f, 1.01f, 1.01f });
+        ctx->matrix_translate({ -0.005f - 1.0f, -0.005f, -0.005f });
+
+
+        blockMesh.draw_wireframe();
+
+        ctx->matrix_clear();
+        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
+        ctx->matrix_rotate({ 0, 0, 90 });
+        ctx->matrix_scale({ 1.01f, 1.01f, 1.01f });
+        ctx->matrix_translate({ -0.005f, -0.005f - 1.0f, -0.005f });
+
+
+        blockMesh.draw_wireframe();
 
         ctx->matrix_clear();
         return;
@@ -260,20 +285,21 @@ void World::update(double dt) {
 
     break_icd -= dt;
     place_icd -= dt;
+    if (!cfg.client) {
+        if (tick_counter > 0.5f) {
+            tick_counter = 0;
 
-    if (tick_counter > 0.5f) {
-        tick_counter = 0;
+            for (auto& [key, value] : chunks) {
+                // Random tick
+                value->rtick_update(this);
 
-        for (auto &[key, value] : chunks) {
-            // Random tick
-            value->rtick_update(this);
+                // Chunk Updates
+                value->chunk_update(this);
+            }
 
-            // Chunk Updates
-            value->chunk_update(this);
-        }
-
-        for (auto &[key, value] : chunks) {
-            value->post_update(this);
+            for (auto& [key, value] : chunks) {
+                value->post_update(this);
+            }
         }
     }
 
@@ -367,6 +393,10 @@ void World::draw() {
 
     draw_selection();
 
+
+    // Set up texture
+    Rendering::TextureManager::get().bind_texture(terrain_atlas);
+
     // Draw flora
     for (auto const &[key, val] : chunks) {
         val->draw_flora();
@@ -452,6 +482,11 @@ auto World::update_lighting(int x, int z) -> void {
         lightData[idx2] |= 1 << (y % 16);
         break;
     }
+}
+
+
+auto World::set_block(short x, short y, short z, uint8_t mode, uint8_t block) -> void {
+    client->set_block(x, y, z, mode, block);
 }
 
 auto World::add_update(glm::ivec3 ivec) -> void {
