@@ -392,10 +392,22 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
     }
 
     case Incoming::eMessage: {
-        auto data2 = reinterpret_cast<Incoming::Message *>(data.get());
+        auto data2 = reinterpret_cast<Incoming::Message*>(data.get());
         wrld->player->chat->add_message(
-            std::string((char *)data2->Message.contents));
+            std::string((char*)data2->Message.contents));
         SC_APP_INFO("[Chat]: {}", data2->Message.contents);
+        break;
+    }
+
+
+
+    case Incoming::eDespawnPlayer: {
+        auto data2 = reinterpret_cast<Incoming::DespawnPlayer*>(data.get());
+        auto id = data2->PlayerID;
+
+        if (player_rep.find(id) != player_rep.end())
+            player_rep.erase(id);
+
         break;
     }
 
