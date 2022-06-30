@@ -31,6 +31,7 @@ namespace CrossCraft
         {
             client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip);
             world->client = client.get();
+            world->player->client_ref = client.get();
         }
         else
         {
@@ -227,6 +228,18 @@ namespace CrossCraft
             {Player::move_down, world->player.get()});
         key_controller->add_command({(int)Input::Keys::B, KeyFlag::Press},
                                     {Player::toggle_inv, world->player.get()});
+
+
+        key_controller->add_command(
+            { (int)Input::Keys::Enter, KeyFlag::Press },
+            { Player::submit_chat, world->player.get() });
+        key_controller->add_command(
+            { (int)Input::Keys::T, KeyFlag::Press },
+            { Player::enter_chat, world->player.get() });
+        key_controller->add_command(
+            { (int)Input::Keys::Backspace, KeyFlag::Press },
+            { Player::delete_chat, world->player.get() });
+
         mouse_controller->add_command(
             {(int)Input::MouseButtons::Left, KeyFlag::Press | KeyFlag::Held},
             {DigAction::dig, world.get()});

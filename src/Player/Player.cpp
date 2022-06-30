@@ -5,6 +5,7 @@
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
 #include <gtx/projection.hpp>
+#include "../MP/OutPackets.hpp"
 
 #if PSP
 #include <pspctrl.h>
@@ -23,6 +24,72 @@ extern GLFWwindow *window;
 
 namespace CrossCraft {
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
+
+
+std::string chat_text;
+Player* player_ptr;
+#if BUILD_PC
+void character_callback(GLFWwindow* window, unsigned int codepoint)
+{
+    if (player_ptr != nullptr) {
+        if (player_ptr->in_chat) {
+            chat_text.push_back((char)codepoint);
+        }
+    }
+}
+#endif
+
+
+auto Player::enter_chat(std::any d) -> void {
+    auto p = std::any_cast<Player*>(d);
+
+    if (!p->in_inventory) {
+        if (p->in_chat) {
+            chat_text = "";
+        }
+
+        p->in_chat = !p->in_chat;
+
+#if BUILD_PC
+        if (p->in_chat)
+            glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        else
+            glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        Utilities::Input::set_cursor_center();
+#endif
+    }
+}
+auto Player::submit_chat(std::any d) -> void {
+    auto p = std::any_cast<Player*>(d);
+
+    if (p->client_ref != nullptr) {
+        auto ptr = create_refptr<MP::Outgoing::Message>();
+        ptr->PacketID = MP::Outgoing::eMessage;
+        memset(ptr->Message.contents, 0x20, STRING_LENGTH);
+        memcpy((char*)ptr->Message.contents, chat_text.c_str(), chat_text.size() < STRING_LENGTH ? chat_text.size() : STRING_LENGTH);
+
+        p->client_ref->packetsOut.push_back(MP::Outgoing::createOutgoingPacket(ptr.get()));
+    }
+
+    p->in_chat = false;
+    chat_text = "";
+
+#if BUILD_PC
+        glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    Utilities::Input::set_cursor_center();
+#endif
+}
+
+auto Player::delete_chat(std::any d) -> void {
+    auto p = std::any_cast<Player*>(d);
+
+    if (p->in_chat) {
+        if (chat_text.size() > 0) {
+            chat_text.erase(chat_text.end() - 1);
+        }
+    }
+}
 
 Player::Player()
     : pos(0.f, 64.0f, 0.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
@@ -47,6 +114,11 @@ Player::Player()
     font_texture = Rendering::TextureManager::get().load_texture(
         "./assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, false);
+
+    player_ptr = this;
+    in_chat = false;
+    client_ref = nullptr;
+    chat_text = "";
 
     item_box = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
@@ -88,6 +160,11 @@ Player::Player()
     in_cursor_y = 0;
 
     chat = create_scopeptr<Chat>();
+
+
+#if BUILD_PC
+    glfwSetCharCallback(Stardust_Celeste::Rendering::window, character_callback);
+#endif
 }
 
 const auto playerSpeed = 4.3f;
@@ -206,7 +283,7 @@ bool hasDir = false;
 
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling) && !p->in_chat) {
 
         if (!hasDir) {
             p->vel.x = -sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
@@ -218,7 +295,7 @@ auto Player::move_forward(std::any d) -> void {
 
 auto Player::move_backward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling) && !p->in_chat) {
 
         if (!hasDir) {
             p->vel.x = sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
@@ -230,7 +307,7 @@ auto Player::move_backward(std::any d) -> void {
 
 auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling) && !p->in_chat) {
 
         if (!hasDir) {
             p->vel.x = -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
@@ -249,7 +326,7 @@ auto Player::respawn(std::any d) -> void {
 
 auto Player::move_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling)) {
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling) && !p->in_chat) {
 
         if (!hasDir) {
             p->vel.x = sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
@@ -263,7 +340,7 @@ auto Player::move_right(std::any d) -> void {
 
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory) {
+    if (!p->in_inventory && !p->in_chat) {
         if (!p->jumping && p->jump_icd < 0.0f && !p->is_underwater &&
             !p->is_falling) {
             p->vel.y = 8.4f;
@@ -283,7 +360,7 @@ auto Player::move_up(std::any d) -> void {
 
 auto Player::press_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (p->in_inventory) {
+    if (p->in_inventory && !p->in_chat) {
         p->in_cursor_y -= 1;
         if (p->in_cursor_y <= -1)
             p->in_cursor_y = 4;
@@ -297,7 +374,7 @@ auto Player::press_up(std::any d) -> void {
 
 auto Player::press_down(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (p->in_inventory) {
+    if (p->in_inventory && !p->in_chat) {
         p->in_cursor_y += 1;
         if (p->in_cursor_y >= 5)
             p->in_cursor_y = 0;
@@ -309,7 +386,7 @@ auto Player::press_down(std::any d) -> void {
 
 auto Player::press_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (p->in_inventory) {
+    if (p->in_inventory && !p->in_chat) {
         p->in_cursor_x -= 1;
 
         if (p->in_cursor_x <= -1)
@@ -324,7 +401,7 @@ auto Player::press_left(std::any d) -> void {
 
 auto Player::press_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (p->in_inventory) {
+    if (p->in_inventory && !p->in_chat) {
         p->in_cursor_x += 1;
 
         if (p->in_cursor_x >= 9 || (p->in_cursor_y == 4 && p->in_cursor_x >= 6))
@@ -357,19 +434,21 @@ auto Player::dec_selector(std::any d) -> void {
 
 auto Player::toggle_inv(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    p->in_inventory = !p->in_inventory;
+    if (!p->in_chat) {
+        p->in_inventory = !p->in_inventory;
 
 #if BUILD_PC
-    if (p->in_inventory)
-        glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    else
-        glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        if (p->in_inventory)
+            glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        else
+            glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    Utilities::Input::set_cursor_center();
+        Utilities::Input::set_cursor_center();
 #else
-    p->vcursor_x = 240;
-    p->vcursor_y = 136;
+        p->vcursor_x = 240;
+        p->vcursor_y = 136;
 #endif
+    }
 }
 
 auto Player::move_down(std::any d) -> void {
@@ -400,7 +479,7 @@ auto Player::rotate(float dt, float sense) -> void {
     cX *= 0.3f;
     cY *= 0.3f;
 #endif
-    if (!in_inventory) {
+    if (!in_inventory && !in_chat) {
         rot.y += cX * rotSpeed * dt * sense;
         rot.x += cY * rotSpeed * dt * sense;
 
@@ -741,6 +820,12 @@ auto Player::draw() -> void {
                              CC_TEXT_ALIGN_CENTER, 0, -i - 5,
                              CC_TEXT_BG_DYNAMIC);
         i--;
+    }
+
+    if (in_chat) {
+        playerHUD->draw_text(chat_text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
+            CC_TEXT_ALIGN_CENTER, 0, -11,
+            CC_TEXT_BG_DYNAMIC);
     }
 
     playerHUD->end2D();
