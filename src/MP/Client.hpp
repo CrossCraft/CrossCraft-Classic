@@ -1,43 +1,59 @@
 #pragma once
-#include "Utility.hpp"
 #include "ProtocolTypes.hpp"
+#include "Rendering/Rendering.hpp"
+#include "Utility.hpp"
+#include <map>
 
 #define DEFAULT_PORT 25565
 
 namespace CrossCraft {
-    class World;
+class World;
 }
 
-namespace CrossCraft::MP
-{
+namespace CrossCraft::MP {
 
-    using namespace Stardust_Celeste;
+using namespace Stardust_Celeste;
 
-    class Client
-    {
-    public:
-        Client(World* wrld, std::string ip, u16 port = DEFAULT_PORT);
-        ~Client();
+struct PlayerInfo {
+    short X;
+    short Y;
+    short Z;
+    uint8_t Yaw;
+    uint8_t Pitch;
+};
 
-        void update(double dt);
-        void draw();
+class Client {
+  public:
+    Client(World *wrld, std::string ip, u16 port = DEFAULT_PORT);
+    ~Client();
 
-        void send();
-        void receive();
+    void update(double dt);
+    void draw();
 
-        std::vector<RefPtr<Network::ByteBuffer>> packetsOut;
+    void send();
+    void receive();
 
-        auto set_block(short x, short y, short z, uint8_t mode, uint8_t block) -> void;
+    std::vector<RefPtr<Network::ByteBuffer>> packetsOut;
 
-        float update_timer;
-        World* wrld;
-        bool is_ready;
-    private:
-        ScopePtr<Network::ByteBuffer> ringbuffer;
-        int my_socket;
-        std::vector<RefPtr<Network::ByteBuffer>> packetsIn;
-        bool connected;
+    auto set_block(short x, short y, short z, uint8_t mode, uint8_t block)
+        -> void;
 
-        void process_packet(RefPtr<Network::ByteBuffer> packet);
-    };
-}
+    float update_timer;
+    World *wrld;
+    bool is_ready;
+
+  private:
+    ScopePtr<Network::ByteBuffer> ringbuffer;
+    int my_socket;
+    std::vector<RefPtr<Network::ByteBuffer>> packetsIn;
+    bool connected;
+
+    std::map<uint8_t, PlayerInfo> player_rep;
+
+    void process_packet(RefPtr<Network::ByteBuffer> packet);
+    Rendering::Mesh mesh;
+
+    std::vector<Rendering::Vertex> mesh_data;
+    std::vector<u16> mesh_indices;
+};
+} // namespace CrossCraft::MP
