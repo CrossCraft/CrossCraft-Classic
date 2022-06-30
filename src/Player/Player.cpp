@@ -738,7 +738,7 @@ auto Player::draw() -> void {
             break;
 
         playerHUD->draw_text(p.text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-                             CC_TEXT_ALIGN_CENTER, 0, -i - 2,
+                             CC_TEXT_ALIGN_CENTER, 0, -i - 5,
                              CC_TEXT_BG_DYNAMIC);
         i--;
     }

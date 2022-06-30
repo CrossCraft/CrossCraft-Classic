@@ -58,6 +58,30 @@ auto UserInterface::end2D() -> void {
     textHelper->draw();
 }
 
+auto get_color(char c) -> uint8_t {
+    switch (c) {
+    case '0': return CC_TEXT_COLOR_BLACK;
+    case '1': return CC_TEXT_COLOR_DARK_BLUE;
+    case '2': return CC_TEXT_COLOR_DARK_GREEN;
+    case '3': return CC_TEXT_COLOR_DARK_AQUA;
+    case '4': return CC_TEXT_COLOR_DARK_RED;
+    case '5': return CC_TEXT_COLOR_DARK_PURPLE;
+    case '6': return CC_TEXT_COLOR_GOLD;
+    case '7': return CC_TEXT_COLOR_GRAY;
+    case '8': return CC_TEXT_COLOR_DARK_GRAY;
+    case '9': return CC_TEXT_COLOR_BLUE;
+    case 'a': return CC_TEXT_COLOR_GREEN;
+    case 'b': return CC_TEXT_COLOR_AQUA;
+    case 'c': return CC_TEXT_COLOR_RED;
+    case 'd': return CC_TEXT_COLOR_LIGHT_PURPLE;
+    case 'e': return CC_TEXT_COLOR_YELLOW;
+    case 'g': return CC_TEXT_COLOR_BE_MTX_GOLD;
+    default:
+    case 'f':
+        return CC_TEXT_COLOR_WHITE;
+    }
+}
+
 auto UserInterface::draw_text(std::string text, unsigned char color,
                               unsigned char x_align, unsigned char y_align,
                               short x_line, short y_line, short bg_mode)
@@ -88,7 +112,38 @@ auto UserInterface::draw_text(std::string text, unsigned char color,
     if (y_line != 0)
         y_position += (10 * y_line);
 
-    textHelper->draw_text(text, {x_position, y_position}, color,
+    bool color_change = false;
+    int position = 0;
+    for (int i = 0; i < text.length(); i++) {
+        auto c = text[i];
+
+        if (c == '&') {
+            auto i2 = i + 1;
+            if (i2 < text.length()) {
+                auto c2 = text[i2];
+
+                if ((c2 >= 48 && c2 < 58) || (c2 >= 'a' && c2 < 'h')) {
+                    if (color_change) {
+                        auto sstr = text.substr(0, i);
+                        textHelper->draw_text(sstr, { x_position + position, y_position }, color,
+                            255, false);
+
+                        position += textHelper->get_width(sstr);
+
+                        text = text.substr(i);
+                        i = 0;
+                    }
+
+                    color_change = true;
+
+                    color = get_color(c2);
+                    text.erase(i, 2);
+                }
+            }
+        }
+    }
+
+    textHelper->draw_text(text, {x_position + position, y_position}, color,
                           255, false);
 }
 
