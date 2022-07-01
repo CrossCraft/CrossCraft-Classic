@@ -746,7 +746,6 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
 }
 
 void Player::update(float dt, World *wrld) {
-    SC_APP_INFO("A");
     chat->update(dt);
     hasDir = false;
     rotate(dt, wrld->cfg.sense);
@@ -827,8 +826,6 @@ void Player::update(float dt, World *wrld) {
     cam.pos.y += view_bob;
     cam.rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
     cam.update();
-
-    SC_APP_INFO("A");
 }
 
 auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {

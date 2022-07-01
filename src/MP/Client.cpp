@@ -379,6 +379,8 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
                     auto idx_destiny = (x * 256 * 64) + (z * 64) + y;
 
                     wrld->worldData[idx_destiny] = outBuffer[idx_source];
+                    if (wrld->worldData[idx_destiny] == Block::Still_Water)
+                        wrld->worldData[idx_destiny] = Block::Water;
                 }
 
         delete[] outBuffer;
