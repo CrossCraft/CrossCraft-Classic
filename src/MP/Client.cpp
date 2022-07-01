@@ -511,9 +511,15 @@ void Client::draw() {
 
     for (auto &[id, pinfo] : player_rep) {
         Rendering::RenderContext::get().matrix_clear();
-        Rendering::RenderContext::get().matrix_translate(
-            {(float)pinfo.X / 32.0f - 0.3f, (float)pinfo.Y / 32.0f - 1.59675f,
-             (float)pinfo.Z / 32.0f - 0.3f});
+        glm::vec3 entitypos = {(float)pinfo.X / 32.0f - 0.3f,
+                               (float)pinfo.Y / 32.0f - 1.59675f,
+                               (float)pinfo.Z / 32.0f - 0.3f};
+
+        if ((entitypos - wrld->player->pos).length() >= 40.0f) {
+            continue;
+        }
+
+        Rendering::RenderContext::get().matrix_translate(entitypos);
 
         Rendering::RenderContext::get().matrix_scale({0.6, 1.8, 0.6});
 
