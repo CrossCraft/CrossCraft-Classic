@@ -188,34 +188,31 @@ auto World::draw_selection() -> void {
         ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
         ctx->matrix_rotate({0, 0, 0});
         ctx->matrix_scale({1.01f, 1.01f, 1.01f});
-        ctx->matrix_translate({ -0.005f, -0.005f, -0.005f });
+        ctx->matrix_translate({-0.005f, -0.005f, -0.005f});
 
         blockMesh.draw_wireframe();
 
         ctx->matrix_clear();
         ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
-        ctx->matrix_rotate({ 90, 0, 0 });
-        ctx->matrix_scale({ 1.01f, 1.01f, 1.01f });
-        ctx->matrix_translate({ -0.005f, -0.005f, -0.005f - 1.0f });
-
-
-        blockMesh.draw_wireframe();
-
-        ctx->matrix_clear();
-        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
-        ctx->matrix_rotate({ 0, 90, 0 });
-        ctx->matrix_scale({ 1.01f, 1.01f, 1.01f });
-        ctx->matrix_translate({ -0.005f - 1.0f, -0.005f, -0.005f });
-
+        ctx->matrix_rotate({90, 0, 0});
+        ctx->matrix_scale({1.01f, 1.01f, 1.01f});
+        ctx->matrix_translate({-0.005f, -0.005f, -0.005f - 1.0f});
 
         blockMesh.draw_wireframe();
 
         ctx->matrix_clear();
         ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
-        ctx->matrix_rotate({ 0, 0, 90 });
-        ctx->matrix_scale({ 1.01f, 1.01f, 1.01f });
-        ctx->matrix_translate({ -0.005f, -0.005f - 1.0f, -0.005f });
+        ctx->matrix_rotate({0, 90, 0});
+        ctx->matrix_scale({1.01f, 1.01f, 1.01f});
+        ctx->matrix_translate({-0.005f - 1.0f, -0.005f, -0.005f});
 
+        blockMesh.draw_wireframe();
+
+        ctx->matrix_clear();
+        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
+        ctx->matrix_rotate({0, 0, 90});
+        ctx->matrix_scale({1.01f, 1.01f, 1.01f});
+        ctx->matrix_translate({-0.005f, -0.005f - 1.0f, -0.005f});
 
         blockMesh.draw_wireframe();
 
@@ -289,7 +286,7 @@ void World::update(double dt) {
         if (tick_counter > 0.5f) {
             tick_counter = 0;
 
-            for (auto& [key, value] : chunks) {
+            for (auto &[key, value] : chunks) {
                 // Random tick
                 value->rtick_update(this);
 
@@ -297,7 +294,7 @@ void World::update(double dt) {
                 value->chunk_update(this);
             }
 
-            for (auto& [key, value] : chunks) {
+            for (auto &[key, value] : chunks) {
                 value->post_update(this);
             }
         }
@@ -383,7 +380,24 @@ void World::draw() {
 
     // Draw opaque
     for (auto const &[key, val] : chunks) {
-        val->draw();
+
+        glm::vec2 front = {0.0f, 1.0f};
+        front = glm::rotate(front, player->cam.rot.y);
+
+        glm::vec2 relative_chunk_pos =
+            glm::vec2(val->get_chunk_pos().x * 16.0f,
+                      val->get_chunk_pos().y * 16.0f) -
+            glm::vec2(player->pos.x, player->pos.z);
+
+        float dot =
+            front.x * relative_chunk_pos.x + front.y * relative_chunk_pos.y;
+
+        float x = dot / (front.length() * relative_chunk_pos.length());
+
+        float angle = (x >= -1 && x <= 1) ? abs(acosf(x)) : 0.0f;
+
+        if (angle < DEGTORAD(100.0f) || relative_chunk_pos.length() < 32.0f)
+            val->draw();
     }
 
 #if !BUILD_PC
@@ -392,7 +406,6 @@ void World::draw() {
 #endif
 
     draw_selection();
-
 
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
@@ -484,8 +497,8 @@ auto World::update_lighting(int x, int z) -> void {
     }
 }
 
-
-auto World::set_block(short x, short y, short z, uint8_t mode, uint8_t block) -> void {
+auto World::set_block(short x, short y, short z, uint8_t mode, uint8_t block)
+    -> void {
     client->set_block(x, y, z, mode, block);
 }
 

@@ -20,7 +20,6 @@
 #include <Rendering/Camera.hpp>
 #include <any>
 #include <glm.hpp>
-
 using namespace Stardust_Celeste;
 
 namespace CrossCraft {
@@ -116,6 +115,8 @@ class Player {
     ScopePtr<Chat> chat;
     MP::Client *client_ref;
 
+    Rendering::Camera cam;
+
   private:
     auto rotate(float dt, float sense) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;
@@ -138,7 +139,6 @@ class Player {
     int in_cursor_x;
     int in_cursor_y;
 
-    Rendering::Camera cam;
     ScopePtr<Graphics::G2D::Sprite> item_box;
     ScopePtr<Graphics::G2D::Sprite> selector;
     ScopePtr<Graphics::G2D::Sprite> crosshair;
