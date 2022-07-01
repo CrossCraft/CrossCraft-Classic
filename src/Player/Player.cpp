@@ -1,14 +1,22 @@
 #include "Player.hpp"
 #include "../BlockConst.hpp"
 #include "../Chunk/ChunkUtil.hpp"
+#include "../MP/OutPackets.hpp"
 #include <Platform/Platform.hpp>
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
 #include <gtx/projection.hpp>
-#include "../MP/OutPackets.hpp"
 
 #if PSP
+#include <malloc.h>
 #include <pspctrl.h>
+#include <pspkernel.h>
+#include <psputility.h>
+#include <string.h>
+
+namespace Stardust_Celeste::Rendering {
+extern char list[0x100000] __attribute__((aligned(64)));
+}
 #endif
 
 #define BUILD_PC (BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX)
@@ -25,12 +33,10 @@ extern GLFWwindow *window;
 namespace CrossCraft {
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
-
 std::string chat_text;
-Player* player_ptr;
+Player *player_ptr;
 #if BUILD_PC
-void character_callback(GLFWwindow* window, unsigned int codepoint)
-{
+void character_callback(GLFWwindow *window, unsigned int codepoint) {
     if (player_ptr != nullptr) {
         if (player_ptr->in_chat) {
             chat_text.push_back((char)codepoint);
@@ -39,9 +45,8 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 }
 #endif
 
-
 auto Player::enter_chat(std::any d) -> void {
-    auto p = std::any_cast<Player*>(d);
+    auto p = std::any_cast<Player *>(d);
 
     if (!p->in_inventory) {
         if (p->in_chat) {
@@ -52,37 +57,42 @@ auto Player::enter_chat(std::any d) -> void {
 
 #if BUILD_PC
         if (p->in_chat)
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
+                             GLFW_CURSOR_NORMAL);
         else
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
+                             GLFW_CURSOR_DISABLED);
 
         Utilities::Input::set_cursor_center();
 #endif
     }
 }
 auto Player::submit_chat(std::any d) -> void {
-    auto p = std::any_cast<Player*>(d);
+    auto p = std::any_cast<Player *>(d);
 
     if (p->client_ref != nullptr) {
         auto ptr = create_refptr<MP::Outgoing::Message>();
         ptr->PacketID = MP::Outgoing::eMessage;
         memset(ptr->Message.contents, 0x20, STRING_LENGTH);
-        memcpy((char*)ptr->Message.contents, chat_text.c_str(), chat_text.size() < STRING_LENGTH ? chat_text.size() : STRING_LENGTH);
+        memcpy((char *)ptr->Message.contents, chat_text.c_str(),
+               chat_text.size() < STRING_LENGTH ? chat_text.size()
+                                                : STRING_LENGTH);
 
-        p->client_ref->packetsOut.push_back(MP::Outgoing::createOutgoingPacket(ptr.get()));
+        p->client_ref->packetsOut.push_back(
+            MP::Outgoing::createOutgoingPacket(ptr.get()));
     }
 
     p->in_chat = false;
     chat_text = "";
 
 #if BUILD_PC
-        glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     Utilities::Input::set_cursor_center();
 #endif
 }
 
 auto Player::delete_chat(std::any d) -> void {
-    auto p = std::any_cast<Player*>(d);
+    auto p = std::any_cast<Player *>(d);
 
     if (p->in_chat) {
         if (chat_text.size() > 0) {
@@ -161,9 +171,9 @@ Player::Player()
 
     chat = create_scopeptr<Chat>();
 
-
 #if BUILD_PC
-    glfwSetCharCallback(Stardust_Celeste::Rendering::window, character_callback);
+    glfwSetCharCallback(Stardust_Celeste::Rendering::window,
+                        character_callback);
 #endif
 }
 
@@ -283,7 +293,8 @@ bool hasDir = false;
 
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling) && !p->in_chat) {
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
+        !p->in_chat) {
 
         if (!hasDir) {
             p->vel.x = -sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
@@ -295,7 +306,8 @@ auto Player::move_forward(std::any d) -> void {
 
 auto Player::move_backward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling) && !p->in_chat) {
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
+        !p->in_chat) {
 
         if (!hasDir) {
             p->vel.x = sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
@@ -307,7 +319,8 @@ auto Player::move_backward(std::any d) -> void {
 
 auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling) && !p->in_chat) {
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
+        !p->in_chat) {
 
         if (!hasDir) {
             p->vel.x = -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
@@ -326,7 +339,8 @@ auto Player::respawn(std::any d) -> void {
 
 auto Player::move_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling) && !p->in_chat) {
+    if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
+        !p->in_chat) {
 
         if (!hasDir) {
             p->vel.x = sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
@@ -439,9 +453,11 @@ auto Player::toggle_inv(std::any d) -> void {
 
 #if BUILD_PC
         if (p->in_inventory)
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
+                             GLFW_CURSOR_NORMAL);
         else
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
+                             GLFW_CURSOR_DISABLED);
 
         Utilities::Input::set_cursor_center();
 #else
@@ -513,6 +529,125 @@ auto Player::rotate(float dt, float sense) -> void {
         else if (vcursor_y > 272)
             vcursor_y = 272;
     }
+}
+#if BUILD_PLAT == BUILD_PSP
+
+auto ShowOSK(unsigned short *descritpion, unsigned short *outtext,
+             int maxtextinput) -> int {
+    // osk params
+    SceUtilityOskData oskData;
+    SceUtilityOskParams oskParams;
+    // init osk data
+    memset(&oskData, 0, sizeof(SceUtilityOskData));
+    oskData.language =
+        PSP_UTILITY_OSK_LANGUAGE_DEFAULT; // Use system default for text input
+    oskData.lines = 1;
+    oskData.unk_24 = 1;
+    oskData.inputtype = PSP_UTILITY_OSK_INPUTTYPE_ALL; // Allow all input types
+    oskData.desc = descritpion;
+    // oskData.intext = intext[i];
+    oskData.outtextlength = maxtextinput;
+    oskData.outtextlimit = 32; // Limit input to 32 characters
+    oskData.outtext = outtext;
+
+    // init osk dialog
+    memset(&oskParams, 0, sizeof(SceUtilityOskParams));
+    oskParams.base.size = sizeof(oskParams);
+    sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE,
+                                &oskParams.base.language);
+    sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_UNKNOWN,
+                                &oskParams.base.buttonSwap);
+    oskParams.base.graphicsThread = 17;
+    oskParams.base.accessThread = 19;
+    oskParams.base.fontThread = 18;
+    oskParams.base.soundThread = 16;
+    oskParams.datacount = 1;
+    oskParams.data = &oskData;
+
+    sceUtilityOskInitStart(&oskParams);
+
+    bool done = true;
+
+    while (done) {
+        sceGuStart(GU_DIRECT, Stardust_Celeste::Rendering::list);
+        sceGuClear(GU_COLOR_BUFFER_BIT);
+        sceGuFinish();
+        sceGuSync(0, 0);
+
+        sceGuClear(GU_COLOR_BUFFER_BIT);
+
+        switch (sceUtilityOskGetStatus()) {
+        case PSP_UTILITY_DIALOG_INIT:
+            break;
+
+        case PSP_UTILITY_DIALOG_VISIBLE:
+            sceUtilityOskUpdate(1);
+            break;
+
+        case PSP_UTILITY_DIALOG_QUIT:
+            sceUtilityOskShutdownStart();
+            break;
+
+        case PSP_UTILITY_DIALOG_FINISHED:
+            break;
+
+        case PSP_UTILITY_DIALOG_NONE:
+            done = false;
+
+        default:
+            break;
+        }
+
+        sceDisplayWaitVblankStart();
+        sceGuSwapBuffers();
+    }
+
+    if (oskData.result == PSP_UTILITY_OSK_RESULT_CANCELLED)
+        return -1;
+
+    return 0;
+}
+#endif
+
+auto Player::psp_chat(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+
+#if PSP
+    if (p->client_ref != nullptr) {
+
+        unsigned short test2[64];
+        memset(test2, 0, 64 * sizeof(short));
+        std::string message = "";
+
+        unsigned short desc[5] = {'C', 'h', 'a', 't', '\0'};
+
+        if (ShowOSK(desc, test2, 64) != -1) {
+            for (int j = 0; test2[j]; j++) {
+                unsigned c = test2[j];
+
+                if (32 <= c && c <= 127) // print ascii only
+                    message += c;
+            }
+        } else {
+            return;
+        }
+        sceKernelDcacheWritebackInvalidateAll();
+
+        auto ptr = create_refptr<MP::Outgoing::Message>();
+        ptr->PacketID = MP::Outgoing::eMessage;
+        memset(ptr->Message.contents, 0x20, STRING_LENGTH);
+        memcpy(ptr->Message.contents, message.c_str(),
+               chat_text.length() < STRING_LENGTH ? message.length()
+                                                  : STRING_LENGTH);
+
+        p->client_ref->packetsOut.push_back(
+            MP::Outgoing::createOutgoingPacket(ptr.get()));
+
+        SC_APP_INFO("Message Sent: {}", message);
+    }
+
+    p->in_chat = false;
+#endif
 }
 
 const float GRAVITY_ACCELERATION = 28.0f;
@@ -611,6 +746,7 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
 }
 
 void Player::update(float dt, World *wrld) {
+    SC_APP_INFO("A");
     chat->update(dt);
     hasDir = false;
     rotate(dt, wrld->cfg.sense);
@@ -691,6 +827,8 @@ void Player::update(float dt, World *wrld) {
     cam.pos.y += view_bob;
     cam.rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
     cam.update();
+
+    SC_APP_INFO("A");
 }
 
 auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {
@@ -824,8 +962,7 @@ auto Player::draw() -> void {
 
     if (in_chat) {
         playerHUD->draw_text(chat_text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-            CC_TEXT_ALIGN_CENTER, 0, -11,
-            CC_TEXT_BG_DYNAMIC);
+                             CC_TEXT_ALIGN_CENTER, 0, -11, CC_TEXT_BG_DYNAMIC);
     }
 
     playerHUD->end2D();

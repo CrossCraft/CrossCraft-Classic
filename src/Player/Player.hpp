@@ -9,6 +9,7 @@
  *
  */
 #pragma once
+#include "../MP/Client.hpp"
 #include "../UI/TextHelper.hpp"
 #include "../UI/UserInterface.hpp"
 #include "../World/World.hpp"
@@ -18,7 +19,6 @@
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
 #include <any>
-#include "../MP/Client.hpp"
 #include <glm.hpp>
 
 using namespace Stardust_Celeste;
@@ -98,6 +98,7 @@ class Player {
     static auto enter_chat(std::any p) -> void;
     static auto submit_chat(std::any p) -> void;
     static auto delete_chat(std::any p) -> void;
+    static auto psp_chat(std::any p) -> void;
 
     int32_t selectorIDX;
     uint8_t itemSelections[9];
@@ -113,7 +114,7 @@ class Player {
     glm::vec3 pos;
     glm::vec2 rot;
     ScopePtr<Chat> chat;
-    MP::Client* client_ref;
+    MP::Client *client_ref;
 
   private:
     auto rotate(float dt, float sense) -> void;

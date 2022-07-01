@@ -366,6 +366,10 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
 
         int expected = ntohl(*((uint32_t *)(&outBuffer[0])));
 
+        auto data2 = reinterpret_cast<Incoming::LevelFinalize *>(data.get());
+        SC_APP_INFO("World Size {} {} {}", data2->XSize, data2->YSize,
+                    data2->ZSize);
+
         SC_APP_INFO("Decompressed {} bytes. Expected {}", len, expected);
 
         for (auto x = 0; x < 256; x++)
@@ -392,17 +396,15 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
     }
 
     case Incoming::eMessage: {
-        auto data2 = reinterpret_cast<Incoming::Message*>(data.get());
+        auto data2 = reinterpret_cast<Incoming::Message *>(data.get());
         wrld->player->chat->add_message(
-            std::string((char*)data2->Message.contents));
+            std::string((char *)data2->Message.contents));
         SC_APP_INFO("[Chat]: {}", data2->Message.contents);
         break;
     }
 
-
-
     case Incoming::eDespawnPlayer: {
-        auto data2 = reinterpret_cast<Incoming::DespawnPlayer*>(data.get());
+        auto data2 = reinterpret_cast<Incoming::DespawnPlayer *>(data.get());
         auto id = data2->PlayerID;
 
         if (player_rep.find(id) != player_rep.end())

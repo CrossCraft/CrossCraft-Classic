@@ -23,6 +23,8 @@ target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlib)
 
 if(WIN32)
     target_link_libraries(CrossCraft-Classic ws2_32.lib)
+else()
+    target_compile_options(CrossCraft-Classic PRIVATE -g)
 endif()
 
 # target_compile_options(CrossCraft-Classic PRIVATE -fsanitize=address)
