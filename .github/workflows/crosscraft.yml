@@ -35,7 +35,7 @@ jobs:
           name: CrossCraft-Linux
           path: |
             CrossCraft-Classic
-            assets/
+            texturepacks/
             LICENSE
             README.md
             config.cfg
