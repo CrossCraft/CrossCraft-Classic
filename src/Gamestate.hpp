@@ -13,6 +13,7 @@
 #include "MP/Client.hpp"
 #include <Core/Application.hpp>
 #include <Utilities/Input.hpp>
+#include "TexturePackManager.hpp"
 
 using namespace Stardust_Celeste;
 
@@ -47,6 +48,7 @@ namespace CrossCraft
     Utilities::Controller *psp_controller;
     Utilities::Controller *key_controller;
     Utilities::Controller *mouse_controller;
+    TexturePackManager tpm;
     Config config;
   };
 

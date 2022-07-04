@@ -6,6 +6,7 @@
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
 #include <gtx/projection.hpp>
+#include "../TexturePackManager.hpp"
 
 #if PSP
 #include <malloc.h>
@@ -112,17 +113,17 @@ Player::Player()
                          37, 38, 39, 40, 12, 13, 19, 21, 22, 23, 24,
                          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
                          36, 14, 15, 16, 42, 41, 47, 46, 49} {
-    gui_texture = Rendering::TextureManager::get().load_texture(
-        "./assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+    gui_texture = TexturePackManager::get().load_texture(
+        "assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
-    water_texture = Rendering::TextureManager::get().load_texture(
-        "./assets/water.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+    water_texture = TexturePackManager::get().load_texture(
+        "assets/water.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
-    overlay_texture = Rendering::TextureManager::get().load_texture(
-        "./assets/overlay.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+    overlay_texture = TexturePackManager::get().load_texture(
+        "assets/overlay.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
-    font_texture = Rendering::TextureManager::get().load_texture(
-        "./assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+    font_texture = TexturePackManager::get().load_texture(
+        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, false);
 
     player_ptr = this;

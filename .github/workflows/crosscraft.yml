@@ -61,7 +61,7 @@ jobs:
           name: CrossCraft-Mac
           path: |
             CrossCraft-Classic
-            assets/
+            texturepacks/
             LICENSE
             README.md
             config.cfg
@@ -87,7 +87,7 @@ jobs:
           path: |
             CrossCraft-Classic.exe
             zlib.dll
-            assets\
+            texturepacks\
             LICENSE
             README.md
             config.cfg
@@ -122,7 +122,7 @@ jobs:
           path: |
             EBOOT.PBP
             CrossCraft-Classic.prx
-            assets/
+            texturepacks/
             LICENSE
             README.md
             config.cfg

@@ -1,10 +1,11 @@
 #include "TextHelper.hpp"
+#include "../TexturePackManager.hpp"
 
 namespace CrossCraft {
 
 TextHelper::TextHelper() {
-    font_texture = Rendering::TextureManager::get().load_texture(
-        "./assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+    font_texture = TexturePackManager::get().load_texture(
+        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, false);
 
     fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(

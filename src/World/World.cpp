@@ -6,6 +6,7 @@
 #include <Utilities/Input.hpp>
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
+#include "../TexturePackManager.hpp"
 #include <zlib.h>
 
 #if PSP
@@ -56,8 +57,8 @@ World::World(std::shared_ptr<Player> p) {
     pchunk_pos = {-1, -1};
     hmap = nullptr;
 
-    terrain_atlas = Rendering::TextureManager::get().load_texture(
-        "./assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+    terrain_atlas = TexturePackManager::get().load_texture(
+        "assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         true, false);
     p->terrain_atlas = terrain_atlas;
 

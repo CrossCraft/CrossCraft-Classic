@@ -16,8 +16,12 @@ add_subdirectory(ext/zlib ZLib)
 
 file(GLOB_RECURSE SRC_FILES src/*.cpp)
 file(GLOB_RECURSE INC_FILES include/*.hpp)
+set(MINIZIP_SRC ext/zlib/contrib/minizip/ioapi.c ext/zlib/contrib/minizip/mztools.c ext/zlib/contrib/minizip/unzip.c ext/zlib/contrib/minizip/zip.c)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(MINIZIP_SRC ext/zlib/contrib/minizip/iowin32.c ext/zlib/contrib/minizip/ioapi.c ext/zlib/contrib/minizip/mztools.c ext/zlib/contrib/minizip/unzip.c ext/zlib/contrib/minizip/zip.c)
+endif()
 
-add_executable(CrossCraft-Classic ${SRC_FILES} ${INC_FILES})
+add_executable(CrossCraft-Classic ${MINIZIP_SRC} ${SRC_FILES} ${INC_FILES})
 target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp ext/zlib/)
 target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlib)
 
