@@ -76,7 +76,17 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    auto getIdx(int x, int y, int z) -> uint32_t;
+    auto getIdx(int x, int y, int z)->uint32_t const;
+
+    /**
+     * @brief Get a World Light Index
+     *
+     * @param x Position
+     * @param y Position
+     * @param z Position
+     * @return uint32_t block_t* worldData
+     */
+    auto getIdxl(int x, int y, int z)->uint32_t const;
 
     block_t *worldData;
     uint16_t *lightData;
@@ -122,6 +132,8 @@ class World {
         -> void;
 
     MP::Client *client;
+
+    glm::vec3 world_size;
 
   private:
     /**

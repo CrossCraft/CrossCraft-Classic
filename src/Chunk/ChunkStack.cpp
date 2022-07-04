@@ -26,8 +26,8 @@ auto water_can_flow(glm::ivec3 ivec, World *wrld) -> bool {
     for (auto i = ivec.x - 2; i <= ivec.x + 2; i++) {
         for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
             for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
-                auto idx = (i * 256 * 64) + (k * 64) + j;
-                if (idx >= 0 && idx < (256 * 64 * 256) &&
+                auto idx = wrld->getIdx(i, j, k);
+                if (idx >= 0 && 
                     wrld->worldData[idx] == Block::Sponge)
                     return false;
             }
@@ -39,7 +39,7 @@ auto water_can_flow(glm::ivec3 ivec, World *wrld) -> bool {
 
 auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
     if (is_valid(chk)) {
-        auto idx = (chk.x * 256 * 64) + (chk.z * 64) + chk.y;
+        auto idx = wrld->getIdx(chk.x, chk.y, chk.z);
 
         auto blk = wrld->worldData[idx];
         if (blk == Block::Air) {
@@ -65,7 +65,7 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
                 uint16_t y = chk.z / 16;
                 uint32_t id = x << 16 | (y & 0x00FF);
 
-                auto idx = (chk.x * 256 * 64) + (chk.z * 64) + chk.y + 1;
+                auto idx = wrld->getIdx(chk.x, chk.y + 1, chk.z);
                 wrld->worldData[idx] = 0;
                 wrld->update_lighting(chk.x, chk.z);
 
@@ -80,9 +80,9 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
                 uint16_t y = chk.z / 16;
                 uint32_t id = x << 16 | (y & 0x00FF);
 
-                auto idx = (chk.x * 256 * 64) + (chk.z * 64) + chk.y + 1;
+                auto idx = wrld->getIdx(chk.x, chk.y + 1, chk.z);
                 wrld->worldData[idx] = 0;
-                idx = (chk.x * 256 * 64) + (chk.z * 64) + chk.y;
+                idx = wrld->getIdx(chk.x, chk.y, chk.z);
 
                 wrld->worldData[idx] = blkr;
                 wrld->update_lighting(chk.x, chk.z);
@@ -117,7 +117,7 @@ void ChunkStack::chunk_update(World *wrld) {
     posUpdate.clear();
 
     for (auto &pos : newV) {
-        auto idx = (pos.x * 256 * 64) + (pos.z * 64) + pos.y;
+        auto idx = wrld->getIdx(pos.x, pos.y, pos.z);
         auto blk = wrld->worldData[idx];
 
         if (blk == Block::Water) {

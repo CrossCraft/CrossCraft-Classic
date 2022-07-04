@@ -73,7 +73,7 @@ auto DigAction::dig(std::any d) -> void {
         if (!validate_ivec3(ivec))
             continue;
 
-        u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+        u32 idx = w->getIdx(ivec.x, ivec.y, ivec.z);
         auto blk = w->worldData[idx];
 
         if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water ||

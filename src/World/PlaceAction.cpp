@@ -25,7 +25,7 @@ auto PlaceAction::place(std::any d) -> void {
     if (!validate_ivec3(pos_ivec))
         return;
 
-    auto pidx = (pos_ivec.x * 256 * 64) + (pos_ivec.z * 64) + pos_ivec.y;
+    auto pidx = w->getIdx(pos_ivec.x, pos_ivec.y, pos_ivec.z);
     if (w->worldData[pidx] != 0 && w->worldData[pidx] != 8)
         return;
 
@@ -57,7 +57,7 @@ auto PlaceAction::place(std::any d) -> void {
         if (!validate_ivec3(ivec) || ivec == posivec)
             continue;
 
-        u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+        u32 idx = w->getIdx(ivec.x, ivec.y, ivec.z);
         auto blk = w->worldData[idx];
 
         if (blk == Block::Air || blk == Block::Water || blk == Block::Lava)
@@ -109,9 +109,9 @@ auto PlaceAction::place(std::any d) -> void {
                              static_cast<s32>(pos.z));
 
         ivec = copy_ivec;
-        idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
+        idx = w->getIdx(ivec.x, ivec.y, ivec.z);
 
-        auto idx2 = (ivec.x * 256 * 64) + (ivec.z * 64) + (ivec.y - 1);
+        auto idx2 = w->getIdx(ivec.x, ivec.y - 1, ivec.z);
         blk = w->player->itemSelections[w->player->selectorIDX];
 
         auto blk2 = w->worldData[idx2];

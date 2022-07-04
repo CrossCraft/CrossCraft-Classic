@@ -44,19 +44,19 @@ void ChunkMesh::rtick(World *wrld) {
     y += cY * 16;
     z += cZ * 16;
 
-    auto idx = (x * 256 * 64) + (z * 64) + y;
+    auto idx = wrld->getIdx(x, y, z);
 
     y += 1;
     if (y >= 64)
         return;
 
-    auto idx2 = (x * 256 * 64) + (z * 64) + y;
+    auto idx2 = wrld->getIdx(x, y, z);
     auto blk2 = Block::Air;
-    if (idx2 >= 0 && idx2 < (256 * 64 * 256))
+    if (idx2 >= 0)
         blk2 = wrld->worldData[idx2];
 
     auto blk = Block::Air;
-    if (idx >= 0 && idx2 < (256 * 64 * 256))
+    if (idx >= 0)
         blk = wrld->worldData[idx];
 
     auto blk2_is_valid_grass =
@@ -96,8 +96,6 @@ void ChunkMesh::rtick(World *wrld) {
     }
 
     if (blk == Block::Mushroom1 || blk == Block::Mushroom2) {
-        int idxl = ((x)*256 * 4) + ((z * 16) * 4) + cY;
-
         if (!is_dark) {
             wrld->worldData[idx] = Block::Air;
             needsRegen = true;
@@ -115,8 +113,7 @@ void ChunkMesh::generate(const World *wrld) {
         for (int z = 0; z < 16; z++) {
             for (int y = 0; y < 16; y++) {
 
-                int idx = ((x + cX * 16) * 256 * 64) + ((z + cZ * 16) * 64) +
-                          (y + cY * 16);
+                int idx = ((World*)wrld)->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
 
                 // Get block
                 block_t blk = Block::Air;

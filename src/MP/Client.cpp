@@ -46,7 +46,7 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     memset(ptr->Username.contents, 0x20, STRING_LENGTH);
     strcpy((char *)ptr->Username.contents, wrld->cfg.username.c_str());
     memset(ptr->VerificationKey.contents, 0x20, STRING_LENGTH);
-    ptr->Unused = 0x01;
+    ptr->Unused = 0x00;
 
     packetsOut.push_back(Outgoing::createOutgoingPacket(ptr.get()));
     send();
@@ -370,13 +370,15 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         SC_APP_INFO("World Size {} {} {}", data2->XSize, data2->YSize,
                     data2->ZSize);
 
+        wrld->world_size = { data2->XSize, data2->YSize, data2->ZSize };
+
         SC_APP_INFO("Decompressed {} bytes. Expected {}", len, expected);
 
         for (auto x = 0; x < 256; x++)
             for (auto y = 0; y < 64; y++)
                 for (auto z = 0; z < 256; z++) {
-                    auto idx_source = (y * 256 * 256) + (z * 256) + x + 4;
-                    auto idx_destiny = (x * 256 * 64) + (z * 64) + y;
+                    auto idx_source = (y * data2->XSize * data2->ZSize) + (z * data2->XSize) + x + 4;
+                    auto idx_destiny = wrld->getIdx(x, y, z);
 
                     wrld->worldData[idx_destiny] = outBuffer[idx_source];
                     if (wrld->worldData[idx_destiny] == Block::Still_Water)
@@ -386,8 +388,8 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         delete[] outBuffer;
 
         // Update Lighting
-        for (int x = 0; x < 256; x++) {
-            for (int z = 0; z < 256; z++) {
+        for (int x = 0; x < wrld->world_size.x; x++) {
+            for (int z = 0; z < wrld->world_size.z; z++) {
                 wrld->update_lighting(x, z);
             }
         }

@@ -54,9 +54,7 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
           (posCheck.z == -1 && chunkMesh->cZ == 0) ||
           (posCheck.z == 16 && chunkMesh->cZ == 15))) {
 
-        int idxl = ((posCheck.x + chunkMesh->cX * 16) * 256 * 4) +
-                   ((posCheck.z + chunkMesh->cZ * 16) * 4) +
-                   (posCheck.y + chunkMesh->cY * 16) / 16;
+        int idxl = ((World*)wrld)->getIdxl(posCheck.x + chunkMesh->cX * 16, posCheck.y + chunkMesh->cY * 16, posCheck.z + chunkMesh->cZ * 16);
 
         auto lv = lightVal;
 
@@ -71,9 +69,8 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
         }
 
         // Calculate block index to peek
-        int idx = ((posCheck.x + chunkMesh->cX * 16) * 256 * 64) +
-                  ((posCheck.z + chunkMesh->cZ * 16) * 64) +
-                  (posCheck.y + chunkMesh->cY * 16);
+        int idx = ((World*)wrld)->getIdx(posCheck.x + chunkMesh->cX * 16, posCheck.y + chunkMesh->cY * 16, posCheck.z + chunkMesh->cZ * 16);
+
         // Add face to mesh
         if (idx >= 0 && idx < (256 * 64 * 256) &&
             (wrld->worldData[idx] == Block::Air ||

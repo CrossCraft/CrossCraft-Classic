@@ -55,6 +55,7 @@ World::World(std::shared_ptr<Player> p) {
     tick_counter = 0;
     player = p;
     pchunk_pos = {-1, -1};
+    world_size = { 256, 64, 256 };
     hmap = nullptr;
 
     terrain_atlas = TexturePackManager::get().load_texture(
@@ -69,9 +70,9 @@ World::World(std::shared_ptr<Player> p) {
 
     // Zero the array
     worldData =
-        reinterpret_cast<block_t *>(calloc(256 * 64 * 256, sizeof(block_t)));
+        reinterpret_cast<block_t *>(calloc((uint64_t)world_size.x * (uint64_t)world_size.y * (uint64_t)world_size.z, sizeof(block_t)));
     lightData =
-        reinterpret_cast<uint16_t *>(calloc(256 * 4 * 256, sizeof(uint16_t)));
+        reinterpret_cast<uint16_t *>(calloc((uint64_t)world_size.x * ((uint64_t)world_size.y / 16) * (uint64_t)world_size.z, sizeof(uint16_t)));
 
     chunks.clear();
 
@@ -170,8 +171,8 @@ auto World::draw_selection() -> void {
                                static_cast<s32>(cast_pos.y),
                                static_cast<s32>(cast_pos.z));
 
-        u32 idx = (ivec.x * 256 * 64) + (ivec.z * 64) + ivec.y;
-        if (idx < 0 || idx >= (256 * 64 * 256))
+        u32 idx = getIdx(ivec.x, ivec.y, ivec.z);
+        if (idx < 0)
             return;
 
         auto blk = worldData[idx];
@@ -342,7 +343,7 @@ void World::update(double dt) {
 
         // Generate remaining
         for (auto &ipos : to_generate) {
-            if (ipos.x >= 0 && ipos.x < 16 && ipos.y >= 0 && ipos.y < 16) {
+            if (ipos.x >= 0 && ipos.x < (world_size.x / 16) && ipos.y >= 0 && ipos.y < (world_size.z / 16)) {
                 ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
                 stack->generate(this);
 
@@ -363,10 +364,16 @@ void World::update(double dt) {
     }
 }
 
-auto World::getIdx(int x, int y, int z) -> uint32_t {
-    if (x < 0 || x >= 256 || y >= 64 || y < 0 || z < 0 || z >= 256)
+auto World::getIdx(int x, int y, int z) -> uint32_t const {
+    if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 || z >= world_size.z)
         return 0;
-    return (x * 256 * 64) + (z * 64) + y;
+    return (x * world_size.z * world_size.y) + (z * world_size.y) + y;
+}
+
+auto World::getIdxl(int x, int y, int z) -> uint32_t const {
+    if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 || z >= world_size.z)
+        return 0;
+    return (x * world_size.z * (world_size.y / 16)) + (z * (world_size.y/16)) + y / 16;
 }
 
 void World::draw() {
@@ -481,18 +488,18 @@ auto World::update_lighting(int x, int z) -> void {
 
     // Retrace
     for (int y = 63; y >= 0; y--) {
-        auto idx = (x * 256 * 64) + (z * 64) + y;
+        auto idx = getIdx(x, y, z);
         auto blk = worldData[idx];
         if (blk == Block::Air || blk == Block::Flower1 ||
             blk == Block::Flower2 || blk == Block::Mushroom1 ||
             blk == Block::Mushroom2 || blk == Block::Sapling ||
             blk == Block::Glass || blk == Block::Leaves) {
-            auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
+            auto idx2 = getIdxl(x, y, z);
             lightData[idx2] |= 1 << (y % 16);
             continue;
         }
 
-        auto idx2 = (x * 256 * 4) + (z * 4) + y / 16;
+        auto idx2 = getIdxl(x, y, z);
         lightData[idx2] |= 1 << (y % 16);
         break;
     }
