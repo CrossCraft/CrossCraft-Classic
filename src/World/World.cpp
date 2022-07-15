@@ -1,4 +1,5 @@
 #include "World.hpp"
+#include "../TexturePackManager.hpp"
 #include "Generation/NoiseUtil.hpp"
 #include "Generation/WorldGenUtil.hpp"
 #include <Platform/Platform.hpp>
@@ -6,7 +7,6 @@
 #include <Utilities/Input.hpp>
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
-#include "../TexturePackManager.hpp"
 #include <zlib.h>
 
 #if PSP
@@ -55,7 +55,7 @@ World::World(std::shared_ptr<Player> p) {
     tick_counter = 0;
     player = p;
     pchunk_pos = {-1, -1};
-    world_size = { 256, 64, 256 };
+    world_size = {256, 64, 256};
     hmap = nullptr;
 
     terrain_atlas = TexturePackManager::get().load_texture(
@@ -69,10 +69,14 @@ World::World(std::shared_ptr<Player> p) {
     psystem = create_scopeptr<ParticleSystem>(terrain_atlas);
 
     // Zero the array
-    worldData =
-        reinterpret_cast<block_t *>(calloc((uint64_t)world_size.x * (uint64_t)world_size.y * (uint64_t)world_size.z, sizeof(block_t)));
-    lightData =
-        reinterpret_cast<uint16_t *>(calloc((uint64_t)world_size.x * ((uint64_t)world_size.y / 16) * (uint64_t)world_size.z, sizeof(uint16_t)));
+    worldData = reinterpret_cast<block_t *>(
+        calloc((uint64_t)world_size.x * (uint64_t)world_size.y *
+                   (uint64_t)world_size.z,
+               sizeof(block_t)));
+    lightData = reinterpret_cast<uint16_t *>(
+        calloc((uint64_t)world_size.x * ((uint64_t)world_size.y / 16) *
+                   (uint64_t)world_size.z,
+               sizeof(uint16_t)));
 
     chunks.clear();
 
@@ -135,15 +139,17 @@ auto World::load_world() -> bool {
 
 auto World::save(std::any p) -> void {
     auto wrld = std::any_cast<World *>(p);
-    SC_APP_DEBUG("SAVING!");
+    if (wrld->client == nullptr) {
+        SC_APP_DEBUG("SAVING!");
 
-    gzFile save_file = gzopen("save.ccc", "wb");
-    if (save_file != nullptr) {
-        const int save_version = 1;
-        gzwrite(save_file, &save_version, 1 * sizeof(int));
-        gzwrite(save_file, wrld->worldData, 256 * 64 * 256);
+        gzFile save_file = gzopen("save.ccc", "wb");
+        if (save_file != nullptr) {
+            const int save_version = 1;
+            gzwrite(save_file, &save_version, 1 * sizeof(int));
+            gzwrite(save_file, wrld->worldData, 256 * 64 * 256);
 
-        gzclose(save_file);
+            gzclose(save_file);
+        }
     }
 }
 
@@ -284,7 +290,7 @@ void World::update(double dt) {
 
     break_icd -= dt;
     place_icd -= dt;
-    if (!cfg.client) {
+    if (client == nullptr) {
         if (tick_counter > 0.5f) {
             tick_counter = 0;
 
@@ -343,7 +349,8 @@ void World::update(double dt) {
 
         // Generate remaining
         for (auto &ipos : to_generate) {
-            if (ipos.x >= 0 && ipos.x < (world_size.x / 16) && ipos.y >= 0 && ipos.y < (world_size.z / 16)) {
+            if (ipos.x >= 0 && ipos.x < (world_size.x / 16) && ipos.y >= 0 &&
+                ipos.y < (world_size.z / 16)) {
                 ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
                 stack->generate(this);
 
@@ -365,15 +372,18 @@ void World::update(double dt) {
 }
 
 auto World::getIdx(int x, int y, int z) -> uint32_t const {
-    if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 || z >= world_size.z)
+    if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
+        z >= world_size.z)
         return 0;
     return (x * world_size.z * world_size.y) + (z * world_size.y) + y;
 }
 
 auto World::getIdxl(int x, int y, int z) -> uint32_t const {
-    if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 || z >= world_size.z)
+    if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
+        z >= world_size.z)
         return 0;
-    return (x * world_size.z * (world_size.y / 16)) + (z * (world_size.y/16)) + y / 16;
+    return (x * world_size.z * (world_size.y / 16)) +
+           (z * (world_size.y / 16)) + y / 16;
 }
 
 void World::draw() {

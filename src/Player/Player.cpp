@@ -2,11 +2,11 @@
 #include "../BlockConst.hpp"
 #include "../Chunk/ChunkUtil.hpp"
 #include "../MP/OutPackets.hpp"
+#include "../TexturePackManager.hpp"
 #include <Platform/Platform.hpp>
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
 #include <gtx/projection.hpp>
-#include "../TexturePackManager.hpp"
 
 #if PSP
 #include <malloc.h>
@@ -71,7 +71,7 @@ auto Player::enter_chat(std::any d) -> void {
 auto Player::submit_chat(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
 
-    if (p->client_ref != nullptr) {
+    if (p->client_ref != nullptr && chat_text.length() > 0) {
         auto ptr = create_refptr<MP::Outgoing::Message>();
         ptr->PacketID = MP::Outgoing::eMessage;
         memset(ptr->Message.contents, 0x20, STRING_LENGTH);
@@ -117,8 +117,8 @@ Player::Player()
         "assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
     water_texture = TexturePackManager::get().load_texture(
-        "assets/water.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-        false, true);
+        "assets/water.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST, false,
+        true);
     overlay_texture = TexturePackManager::get().load_texture(
         "assets/overlay.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);

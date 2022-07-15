@@ -133,7 +133,7 @@ auto PlaceAction::place(std::any d) -> void {
 
         // Drain water in a surrounding 5x5x5 area if a sponge was placed.
 
-        if (!w->cfg.client) {
+        if (w->client == nullptr) {
             if (bk == Block::Sponge) {
                 for (auto i = ivec.x - 2; i <= ivec.x + 2; i++) {
                     for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
@@ -142,7 +142,7 @@ auto PlaceAction::place(std::any d) -> void {
 
                             // If it's water or flowing water, replace with air.
                             if (idx >= 0 && idx < (256 * 64 * 256) &&
-                                w->worldData[idx] == Block::Water ||
+                                    w->worldData[idx] == Block::Water ||
                                 w->worldData[idx] == Block::Still_Water) {
                                 w->worldData[idx] = Block::Air;
 
@@ -154,9 +154,9 @@ auto PlaceAction::place(std::any d) -> void {
             }
         }
 
-
-        if (w->cfg.client) {
-            w->set_block(ivec.x, ivec.y, ivec.z, 1, w->player->itemSelections[w->player->selectorIDX]);
+        if (w->client != nullptr) {
+            w->set_block(ivec.x, ivec.y, ivec.z, 1,
+                         w->player->itemSelections[w->player->selectorIDX]);
         }
 
         uint16_t x = ivec.x / 16;

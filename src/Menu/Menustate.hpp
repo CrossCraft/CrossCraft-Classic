@@ -18,7 +18,8 @@ class MenuState : public Core::ApplicationState {
   public:
     MenuState()
         : key_controller(nullptr), psp_controller(nullptr),
-          mouse_controller(nullptr){};
+          mouse_controller(nullptr), shouldQuit(false), startMP(false),
+          startSP(false){};
     ~MenuState();
 
     void on_start();
@@ -30,6 +31,10 @@ class MenuState : public Core::ApplicationState {
     void on_draw(Core::Application *app, double dt);
 
     static void quit(std::any d);
+
+    static void trigger(std::any m);
+    static void up(std::any m);
+    static void down(std::any m);
 
   private:
     Utilities::Controller *psp_controller;
@@ -53,6 +58,11 @@ class MenuState : public Core::ApplicationState {
 
     float scaleFactor;
     float scaleTimer;
+
+    int selIdx = 0;
+    bool shouldQuit;
+    bool startMP;
+    bool startSP;
 };
 
 } // namespace CrossCraft

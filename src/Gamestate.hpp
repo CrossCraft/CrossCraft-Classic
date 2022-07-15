@@ -9,27 +9,25 @@
  *
  */
 #include "Config.hpp"
-#include "World/World.hpp"
 #include "MP/Client.hpp"
+#include "TexturePackManager.hpp"
+#include "World/World.hpp"
 #include <Core/Application.hpp>
 #include <Utilities/Input.hpp>
-#include "TexturePackManager.hpp"
 
 using namespace Stardust_Celeste;
 
-namespace CrossCraft
-{
+namespace CrossCraft {
 
-  /**
+/**
  * @brief Game State Class
  *
  */
-  class GameState : public Core::ApplicationState
-  {
+class GameState : public Core::ApplicationState {
   public:
-    GameState()
+    GameState(bool forceMP = false)
         : config(), key_controller(nullptr), psp_controller(nullptr),
-          mouse_controller(nullptr){};
+          mouse_controller(nullptr), forced_mp(forceMP){};
     ~GameState();
 
     void on_start();
@@ -49,6 +47,7 @@ namespace CrossCraft
     Utilities::Controller *key_controller;
     Utilities::Controller *mouse_controller;
     Config config;
-  };
+    bool forced_mp;
+};
 
 } // namespace CrossCraft

@@ -1,4 +1,5 @@
 #include "Menustate.hpp"
+#include "../Gamestate.hpp"
 #include <Utilities/Controllers/KeyboardController.hpp>
 #include <Utilities/Controllers/MouseController.hpp>
 #include <Utilities/Controllers/PSPController.hpp>
@@ -6,6 +7,17 @@
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
+
+#define BUILD_PC (BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX)
+
+#if BUILD_PC
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
+namespace Stardust_Celeste::Rendering {
+extern GLFWwindow *window;
+}
+#endif
 
 namespace CrossCraft {
 
@@ -56,6 +68,13 @@ void MenuState::on_start() {
 
     unsel_sprite->set_layer(1);
 
+    sel_sprite = create_scopeptr<Graphics::G2D::Sprite>(
+        gui_tex, Rendering::Rectangle{{140, 144}, {200, 20}},
+        Rendering::Rectangle{{0, (256.0f - 106.0f) / 256.0f},
+                             {200.0f / 256.0f, 20.0f / 256.0f}});
+
+    sel_sprite->set_layer(1);
+
     font_texture = TexturePackManager::get().load_texture(
         "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, false);
@@ -88,8 +107,43 @@ void MenuState::quit(std::any d) {
 }
 
 void MenuState::on_update(Core::Application *app, double dt) {
+    if (shouldQuit) {
+        app->exit();
+    }
+    if (startSP) {
+        app->set_state(create_refptr<GameState>());
+        return;
+    }
+    if (startMP) {
+        app->set_state(create_refptr<GameState>(true));
+        return;
+    }
+    Utilities::Input::update();
+
     scaleTimer += dt;
     scaleFactor = 1.0f - (sinf(scaleTimer) * 0.3f);
+
+#if BUILD_PC
+    selIdx = -1;
+    float cX = Input::get_axis("Mouse", "X") * 480.0f;
+    float cY = (1.0f - Input::get_axis("Mouse", "Y")) * 272.0f;
+
+    if (cX >= 140.0f && cX <= 340.0f) {
+        if (cY >= 144 && cY <= 164) {
+            selIdx = 0;
+        }
+        if (cY >= 116 && cY <= 136) {
+            selIdx = 1;
+        }
+        if (cY >= 88 && cY <= 108) {
+            selIdx = 2;
+        }
+        if (cY >= 60 && cY <= 80) {
+            selIdx = 3;
+        }
+    }
+
+#endif
 }
 
 const auto white = Rendering::Color{255, 255, 255, 255};
@@ -108,7 +162,10 @@ void MenuState::on_draw(Core::Application *app, double dt) {
 
     for (int i = 0; i < 4; i++) {
         Rendering::RenderContext::get().matrix_translate({0, -i * 28, 0});
-        unsel_sprite->draw();
+        if (selIdx == i)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
         Rendering::RenderContext::get().matrix_clear();
     }
 
@@ -159,12 +216,42 @@ void MenuState::on_draw(Core::Application *app, double dt) {
     Rendering::RenderContext::get().matrix_clear();
 }
 
+void MenuState::trigger(std::any m) {
+    auto mstate = std::any_cast<MenuState *>(m);
+
+    if (mstate->selIdx == 0) {
+        mstate->startSP = true;
+    }
+    if (mstate->selIdx == 1) {
+        mstate->startMP = true;
+    }
+    if (mstate->selIdx == 2) {
+    }
+    if (mstate->selIdx == 3) {
+        mstate->shouldQuit = true;
+    }
+}
+
+void MenuState::up(std::any m) {}
+void MenuState::down(std::any m) {}
+
 /* Ugly Key-Binding Function */
 
 void MenuState::bind_controls() {
+
+    psp_controller->add_command({(int)Input::PSPButtons::Cross, KeyFlag::Press},
+                                {MenuState::trigger, this});
+    psp_controller->add_command({(int)Input::PSPButtons::Up, KeyFlag::Press},
+                                {MenuState::up, this});
+    psp_controller->add_command({(int)Input::PSPButtons::Down, KeyFlag::Press},
+                                {MenuState::down, this});
+
+    mouse_controller->add_command(
+        {(int)Input::MouseButtons::Left, KeyFlag::Press},
+        {MenuState::trigger, this});
+
     Input::add_controller(psp_controller);
     Input::add_controller(key_controller);
     Input::add_controller(mouse_controller);
 }
-
 } // namespace CrossCraft
