@@ -48,7 +48,6 @@ namespace CrossCraft
     Utilities::Controller *psp_controller;
     Utilities::Controller *key_controller;
     Utilities::Controller *mouse_controller;
-    TexturePackManager tpm;
     Config config;
   };
 
