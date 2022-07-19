@@ -79,8 +79,8 @@ void MenuState::on_start() {
     sel_sprite->set_layer(1);
 
     font_texture = TexturePackManager::get().load_texture(
-        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-        false, false);
+        "assets/default.png", SC_TEX_FILTER_LINEAR, SC_TEX_FILTER_LINEAR, false,
+        false);
 
     fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
         font_texture, glm::vec2(16, 16));
@@ -212,6 +212,10 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         Rendering::RenderContext::get().matrix_clear();
     }
 
+#if PSP
+    sceGuTexOffset(-2.875f / 128.0f, -1.0f / 128.0f);
+#endif
+
     fontRenderer->draw();
 
     Rendering::RenderContext::get().matrix_rotate({0, 0, 30.0f});
@@ -220,6 +224,10 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         {scaleFactor, scaleFactor, 1.0f});
     splashRenderer->draw();
     Rendering::RenderContext::get().matrix_clear();
+
+#if PSP
+    sceGuTexOffset(0, 0);
+#endif
 }
 
 void MenuState::trigger(std::any m) {
