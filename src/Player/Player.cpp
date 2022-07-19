@@ -132,7 +132,7 @@ Player::Player()
         gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
         Rendering::Rectangle{{0, (256.0f - 22.0f) / 256.0f},
                              {182.0f / 256.0f, 22.0f / 256.0f}});
-    item_box->set_position({ 149, 1 });
+    item_box->set_position({149, 1});
     item_box->set_layer(-1);
 
     selector = create_scopeptr<Graphics::G2D::Sprite>(
@@ -146,12 +146,12 @@ Player::Player()
         Rendering::Rectangle{
             {(256.0f - 16.0f) / 256.0f, (256.0f - 16.0f) / 256.0f},
             {16.0f / 256.0f, 16.0f / 256.0f}});
-    crosshair->set_position({ 240 - 8, 136 - 8 });
+    crosshair->set_position({240 - 8, 136 - 8});
     crosshair->set_layer(-1);
 
     water = create_scopeptr<Graphics::G2D::Sprite>(
         water_texture, Rendering::Rectangle{{0, 0}, {480, 272}});
-    water->set_position({ 0, 0 });
+    water->set_position({0, 0});
     water->set_layer(1);
 
     playerHUD = create_scopeptr<UserInterface>();
@@ -176,6 +176,10 @@ Player::Player()
     in_cursor_y = 0;
 
     chat = create_scopeptr<Chat>();
+
+    fps_count = 0;
+    fps_timer = 0.0f;
+    fps_display = 0;
 
 #if BUILD_PC
     glfwSetCharCallback(Stardust_Celeste::Rendering::window,
@@ -434,7 +438,7 @@ auto Player::press_right(std::any d) -> void {
 auto Player::change_selector(std::any d) -> void {
     auto s = std::any_cast<SelData>(d);
     s.player->selectorIDX = s.selIDX;
-    s.player->selector->set_position({ 148 + 20 * s.player->selectorIDX, 0 });
+    s.player->selector->set_position({148 + 20 * s.player->selectorIDX, 0});
 }
 
 auto Player::inc_selector(std::any d) -> void {
@@ -444,7 +448,7 @@ auto Player::inc_selector(std::any d) -> void {
     if (p->selectorIDX > 8)
         p->selectorIDX = 0;
 
-    p->selector->set_position({ 148 + 20 * p->selectorIDX, 0 });
+    p->selector->set_position({148 + 20 * p->selectorIDX, 0});
 }
 
 auto Player::dec_selector(std::any d) -> void {
@@ -454,7 +458,7 @@ auto Player::dec_selector(std::any d) -> void {
     if (p->selectorIDX < 0)
         p->selectorIDX = 8;
 
-    p->selector->set_position({ 148 + 20 * p->selectorIDX, 0 });
+    p->selector->set_position({148 + 20 * p->selectorIDX, 0});
 }
 
 auto Player::toggle_inv(std::any d) -> void {
@@ -757,6 +761,14 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
 }
 
 void Player::update(float dt, World *wrld) {
+    fps_timer += dt;
+    fps_count++;
+    if (fps_timer > 1.0f) {
+        fps_timer = 0.0f;
+        fps_display = fps_count;
+        fps_count = 0;
+    }
+
     chat->update(dt);
     hasDir = false;
     rotate(dt, wrld->cfg.sense);
@@ -946,6 +958,10 @@ auto Player::draw() -> void {
             std::to_string(static_cast<int>(pos.z)),
         CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT, CC_TEXT_ALIGN_TOP, 0, 0,
         CC_TEXT_BG_DYNAMIC);
+
+    playerHUD->draw_text("FPS: " + std::to_string(fps_display),
+                         CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
+                         CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_DYNAMIC);
 
     int i = 5;
     for (int x = chat->data.size() - 1; x >= 0; x--) {

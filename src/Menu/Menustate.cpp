@@ -79,8 +79,8 @@ void MenuState::on_start() {
     sel_sprite->set_layer(1);
 
     font_texture = TexturePackManager::get().load_texture(
-        "assets/default.png", SC_TEX_FILTER_LINEAR, SC_TEX_FILTER_LINEAR, false,
-        false);
+        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, false);
 
     fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
         font_texture, glm::vec2(16, 16));
@@ -167,7 +167,7 @@ void MenuState::on_update(Core::Application *app, double dt) {
     Utilities::Input::update();
 
     scaleTimer += dt;
-    scaleFactor = 1.0f - (sinf(scaleTimer) * 0.3f);
+    scaleFactor = 1.0f - (sinf(scaleTimer * 3.14159f) * 0.3f);
 
 #if BUILD_PC
     selIdx = -1;

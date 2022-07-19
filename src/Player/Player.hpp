@@ -159,6 +159,10 @@ class Player {
     Rendering::Mesh blockMesh[50];
 
     ScopePtr<UserInterface> playerHUD;
+
+    float fps_timer;
+    int fps_count;
+    int fps_display;
 };
 
 struct SelData {
