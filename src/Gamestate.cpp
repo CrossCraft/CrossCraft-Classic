@@ -32,6 +32,9 @@ void GameState::on_start() {
     world->cfg = Config::loadConfig();
 
     if (forced_mp) {
+#if PSP
+        Network::NetworkDriver::get().initGUI();
+#endif
         client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip);
         world->client = client.get();
         world->player->client_ref = client.get();

@@ -23,8 +23,8 @@ namespace CrossCraft {
 
 using namespace Stardust_Celeste::Utilities;
 
-const auto white = Rendering::Color{ 255, 255, 255, 255 };
-const auto shadow = Rendering::Color{ 63, 63, 63, 255 };
+const auto white = Rendering::Color{255, 255, 255, 255};
+const auto shadow = Rendering::Color{63, 63, 63, 255};
 
 MenuState::~MenuState() { on_cleanup(); }
 
@@ -96,45 +96,48 @@ void MenuState::on_start() {
     scaleFactor = 1.3f;
     scaleTimer = 0.0f;
 
-
-
     fontRenderer->clear();
 
     fontRenderer->add_text(
         "Singleplayer",
-        { 240 - fontRenderer->calculate_size("Singleplayer") / 2, 150 }, white,
+        {240 - fontRenderer->calculate_size("Singleplayer") / 2, 150}, white,
         2);
     fontRenderer->add_text(
         "Multiplayer",
-        { 240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28 },
+        {240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28},
         white, 2);
     fontRenderer->add_text(
         "Texture Packs",
-        { 240 - fontRenderer->calculate_size("Texture Packs") / 2, 150 - 28 * 2 },
+        {240 - fontRenderer->calculate_size("Texture Packs") / 2, 150 - 28 * 2},
         white, 2);
     fontRenderer->add_text(
         "Quit Game",
-        { 240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3 },
+        {240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3},
         white, 2);
 
     fontRenderer->add_text(
         "Singleplayer",
-        { 241 - fontRenderer->calculate_size("Singleplayer") / 2, 149 }, shadow,
+        {241 - fontRenderer->calculate_size("Singleplayer") / 2, 149}, shadow,
         2);
     fontRenderer->add_text(
         "Multiplayer",
-        { 241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28 },
+        {241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28},
         shadow, 2);
     fontRenderer->add_text(
         "Texture Packs",
-        { 241 - fontRenderer->calculate_size("Texture Packs") / 2, 149 - 28 * 2 },
+        {241 - fontRenderer->calculate_size("Texture Packs") / 2, 149 - 28 * 2},
         shadow, 2);
     fontRenderer->add_text(
         "Quit Game",
-        { 241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3 },
+        {241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3},
         shadow, 2);
 
     fontRenderer->rebuild();
+
+#if PSP
+    sceKernelDcacheWritebackInvalidateAll();
+    selIdx = 0;
+#endif
 }
 
 void MenuState::on_cleanup() {
@@ -235,8 +238,18 @@ void MenuState::trigger(std::any m) {
     }
 }
 
-void MenuState::up(std::any m) {}
-void MenuState::down(std::any m) {}
+void MenuState::up(std::any m) {
+    auto mstate = std::any_cast<MenuState *>(m);
+    mstate->selIdx--;
+    if (mstate->selIdx < 0)
+        mstate->selIdx = 0;
+}
+void MenuState::down(std::any m) {
+    auto mstate = std::any_cast<MenuState *>(m);
+    mstate->selIdx++;
+    if (mstate->selIdx > 3)
+        mstate->selIdx = 3;
+}
 
 /* Ugly Key-Binding Function */
 
