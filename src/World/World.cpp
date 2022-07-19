@@ -57,6 +57,7 @@ World::World(std::shared_ptr<Player> p) {
     pchunk_pos = {-1, -1};
     world_size = {256, 64, 256};
     hmap = nullptr;
+    client = nullptr;
 
     terrain_atlas = TexturePackManager::get().load_texture(
         "assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
@@ -247,7 +248,7 @@ World::~World() {
 #if PSP
 const auto RENDER_DISTANCE_DIAMETER = 4.0f;
 #else
-const auto RENDER_DISTANCE_DIAMETER = 16.f;
+const auto RENDER_DISTANCE_DIAMETER = 12.f;
 #endif
 
 auto World::get_needed_chunks() -> std::vector<glm::ivec2> {

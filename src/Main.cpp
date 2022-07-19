@@ -2,6 +2,12 @@
 #include "Menu/Menustate.hpp"
 #include <Stardust-Celeste.hpp>
 
+#ifdef _WIN32
+#include <windows.h>
+extern "C" __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
+#endif
+
 using namespace Stardust_Celeste;
 
 /**
@@ -43,6 +49,8 @@ Core::Application *CreateNewSCApp() {
     config.headless = false;
     config.networking = true;
     config.render_settings.title = "CrossCraft-Classic";
+    config.render_settings.width = 854;
+    config.render_settings.height = 480;
 
     Core::PlatformLayer::get().initialize(config);
 

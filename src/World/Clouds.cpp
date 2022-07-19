@@ -85,12 +85,14 @@ void Clouds::generate() {
 }
 
 void Clouds::update(double dt) {
-    scroll += dt / 1024.f;
-    generate();
+    scroll += dt;
+
+    if (scroll > 256)
+        scroll = 0.0f;
 }
 
 void Clouds::draw() {
-    Rendering::RenderContext::get().matrix_translate({0, 80, 0});
+    Rendering::RenderContext::get().matrix_translate({scroll, 80, 0});
 
     Rendering::TextureManager::get().bind_texture(texture);
     mesh.bind();

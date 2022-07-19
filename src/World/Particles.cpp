@@ -9,7 +9,7 @@ ParticleSystem::~ParticleSystem() {
 }
 
 auto rand_pos() -> float { return ((rand() % 16) - 8) * (1.0f / 16.0f); }
-
+float timer = 0.0f;
 auto bind_texture(Particle &particle, uint32_t type) -> void {
     particle.uv = getTexCoord(type, 0xFFCCCCCC);
 
@@ -53,6 +53,8 @@ void ParticleSystem::initialize(uint32_t type, glm::vec3 pos) {
 
         particles.push_back(particle);
     }
+
+    timer = 0.0f;
 }
 
 void ParticleSystem::generate() {
@@ -130,29 +132,36 @@ void ParticleSystem::generate() {
 }
 
 void ParticleSystem::update(double dt) {
-    for (auto &p : particles) {
-        p.velocity.y -= 16.0f * (float)dt;
-        p.position += p.velocity * (float)dt;
-    }
 
-    generate();
+    timer += dt;
+
+    if (timer < 1.0f) {
+        for (auto& p : particles) {
+            p.velocity.y -= 16.0f * (float)dt;
+            p.position += p.velocity * (float)dt;
+        }
+
+        generate();
+    }
 }
 void ParticleSystem::draw() {
-    Rendering::TextureManager::get().bind_texture(texture);
+    if (timer < 1.0f) {
+        Rendering::TextureManager::get().bind_texture(texture);
 #if BUILD_PC
-    glDisable(GL_CULL_FACE);
+        glDisable(GL_CULL_FACE);
 #else
-    sceGuDisable(GU_CULL_FACE);
+        sceGuDisable(GU_CULL_FACE);
 #endif
 
-    mesh.bind();
-    mesh.draw();
+        mesh.bind();
+        mesh.draw();
 
 #if BUILD_PC
-    glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
 #else
-    sceGuEnable(GU_CULL_FACE);
+        sceGuEnable(GU_CULL_FACE);
 #endif
+    }
 }
 
 } // namespace CrossCraft

@@ -23,6 +23,9 @@ namespace CrossCraft {
 
 using namespace Stardust_Celeste::Utilities;
 
+const auto white = Rendering::Color{ 255, 255, 255, 255 };
+const auto shadow = Rendering::Color{ 63, 63, 63, 255 };
+
 MenuState::~MenuState() { on_cleanup(); }
 
 void MenuState::on_start() {
@@ -92,6 +95,46 @@ void MenuState::on_start() {
     splashRenderer->rebuild();
     scaleFactor = 1.3f;
     scaleTimer = 0.0f;
+
+
+
+    fontRenderer->clear();
+
+    fontRenderer->add_text(
+        "Singleplayer",
+        { 240 - fontRenderer->calculate_size("Singleplayer") / 2, 150 }, white,
+        2);
+    fontRenderer->add_text(
+        "Multiplayer",
+        { 240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28 },
+        white, 2);
+    fontRenderer->add_text(
+        "Texture Packs",
+        { 240 - fontRenderer->calculate_size("Texture Packs") / 2, 150 - 28 * 2 },
+        white, 2);
+    fontRenderer->add_text(
+        "Quit Game",
+        { 240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3 },
+        white, 2);
+
+    fontRenderer->add_text(
+        "Singleplayer",
+        { 241 - fontRenderer->calculate_size("Singleplayer") / 2, 149 }, shadow,
+        2);
+    fontRenderer->add_text(
+        "Multiplayer",
+        { 241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28 },
+        shadow, 2);
+    fontRenderer->add_text(
+        "Texture Packs",
+        { 241 - fontRenderer->calculate_size("Texture Packs") / 2, 149 - 28 * 2 },
+        shadow, 2);
+    fontRenderer->add_text(
+        "Quit Game",
+        { 241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3 },
+        shadow, 2);
+
+    fontRenderer->rebuild();
 }
 
 void MenuState::on_cleanup() {
@@ -146,9 +189,6 @@ void MenuState::on_update(Core::Application *app, double dt) {
 #endif
 }
 
-const auto white = Rendering::Color{255, 255, 255, 255};
-const auto shadow = Rendering::Color{63, 63, 63, 255};
-
 void MenuState::on_draw(Core::Application *app, double dt) {
     for (int x = 0; x < 16; x++)
         for (int y = 0; y < 9; y++) {
@@ -169,43 +209,6 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         Rendering::RenderContext::get().matrix_clear();
     }
 
-    fontRenderer->clear();
-
-    fontRenderer->add_text(
-        "Singleplayer",
-        {240 - fontRenderer->calculate_size("Singleplayer") / 2, 150}, white,
-        2);
-    fontRenderer->add_text(
-        "Multiplayer",
-        {240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28},
-        white, 2);
-    fontRenderer->add_text(
-        "Texture Packs",
-        {240 - fontRenderer->calculate_size("Texture Packs") / 2, 150 - 28 * 2},
-        white, 2);
-    fontRenderer->add_text(
-        "Quit Game",
-        {240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3},
-        white, 2);
-
-    fontRenderer->add_text(
-        "Singleplayer",
-        {241 - fontRenderer->calculate_size("Singleplayer") / 2, 149}, shadow,
-        2);
-    fontRenderer->add_text(
-        "Multiplayer",
-        {241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28},
-        shadow, 2);
-    fontRenderer->add_text(
-        "Texture Packs",
-        {241 - fontRenderer->calculate_size("Texture Packs") / 2, 149 - 28 * 2},
-        shadow, 2);
-    fontRenderer->add_text(
-        "Quit Game",
-        {241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3},
-        shadow, 2);
-
-    fontRenderer->rebuild();
     fontRenderer->draw();
 
     Rendering::RenderContext::get().matrix_rotate({0, 0, 30.0f});
