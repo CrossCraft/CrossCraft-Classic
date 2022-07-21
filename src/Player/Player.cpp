@@ -813,13 +813,15 @@ void Player::update(float dt, World *wrld) {
 
     test_collide(testpos, wrld, dt);
 
+    auto vel2 = vel;
     if (is_underwater || is_head_water || water_cutoff) {
         vel.x *= 0.5f;
         vel.z *= 0.5f;
-        vel.y *= 0.9f;
+        vel.y *= 0.7f;
     }
 
     pos += vel * dt;
+    vel = vel2;
 
     auto diff = (pos.y - 1.80f) - static_cast<float>((int)(pos.y - 1.80f));
     if ((diff > 0.875f) && on_ground) {
