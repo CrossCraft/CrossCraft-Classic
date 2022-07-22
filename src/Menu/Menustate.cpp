@@ -144,6 +144,7 @@ void MenuState::on_cleanup() {
     delete psp_controller;
     delete key_controller;
     delete mouse_controller;
+    Input::clear_controller();
 }
 
 void MenuState::quit(std::any d) {
@@ -273,6 +274,11 @@ void MenuState::bind_controls() {
     mouse_controller->add_command(
         {(int)Input::MouseButtons::Left, KeyFlag::Press},
         {MenuState::trigger, this});
+
+    Rendering::TextureManager::get().delete_texture(gui_tex);
+    Rendering::TextureManager::get().delete_texture(font_texture);
+    Rendering::TextureManager::get().delete_texture(bg_texture);
+    Rendering::TextureManager::get().delete_texture(logo_texture);
 
     Input::add_controller(psp_controller);
     Input::add_controller(key_controller);

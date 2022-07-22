@@ -5,7 +5,8 @@
 #ifdef _WIN32
 #include <windows.h>
 extern "C" __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
+extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance =
+    0x00000001;
 #endif
 
 using namespace Stardust_Celeste;
@@ -22,7 +23,7 @@ class GameApplication : public Core::Application {
     void on_start() override {
 
         // Create new Game State
-        state = create_refptr<CrossCraft::MenuState>();
+        auto state = create_refptr<CrossCraft::MenuState>();
         // Set to our state
         this->set_state(state);
 
@@ -32,9 +33,6 @@ class GameApplication : public Core::Application {
 
         Rendering::RenderContext::get().set_color(clearcol);
     }
-
-  private:
-    RefPtr<CrossCraft::MenuState> state;
 };
 
 /**
