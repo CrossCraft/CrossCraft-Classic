@@ -472,7 +472,8 @@ auto World::update_surroundings(int x, int z) -> void {
 
     if (xMod && nX >= 0 && nX < 16) {
         uint32_t idxx = nX << 16 | (cY & 0x00FF);
-        chunks[idxx]->generate(this);
+        if (chunks.find(idxx) != chunks.end())
+            chunks[idxx]->generate(this);
     }
 
     bool zMod = true;
@@ -487,7 +488,8 @@ auto World::update_surroundings(int x, int z) -> void {
 
     if (zMod && nY >= 0 && nY < 16) {
         uint32_t idzz = 0 | cX << 16 | (nY & 0x00FF);
-        chunks[idzz]->generate(this);
+        if (chunks.find(idzz) != chunks.end())
+            chunks[idzz]->generate(this);
     }
 }
 
