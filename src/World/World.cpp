@@ -396,6 +396,8 @@ void World::draw() {
 #if !BUILD_PC
     sceGuDisable(GU_BLEND);
     sceGuDisable(GU_ALPHA_TEST);
+    sceGuEnable(GU_FOG);
+    sceGuFog(12.0f, 32.0f, 0x00FFCCCC);
 #endif
 
     // Draw opaque
@@ -446,6 +448,10 @@ void World::draw() {
         if (val->border)
             val->draw_transparent();
     }
+
+#if !BUILD_PC
+    sceGuDisable(GU_FOG);
+#endif
 
     clouds->draw();
     psystem->draw();

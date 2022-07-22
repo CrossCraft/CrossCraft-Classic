@@ -946,7 +946,7 @@ auto Player::draw() -> void {
 
     playerHUD->draw_text("FPS: " + std::to_string(fps_display),
                          CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
-                         CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_DYNAMIC);
+                         CC_TEXT_ALIGN_TOP, 0, 0, false);
 
     int i = 5;
     for (int x = chat->data.size() - 1; x >= 0; x--) {

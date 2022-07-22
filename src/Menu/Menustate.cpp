@@ -58,7 +58,7 @@ void MenuState::on_start() {
     logo_sprite = create_scopeptr<Graphics::G2D::Sprite>(
         logo_texture, Rendering::Rectangle{{-16, 272 - 72}, {512, 64}});
 
-    logo_sprite->set_layer(1);
+    logo_sprite->set_layer(-1);
 
     gui_tex = TexturePackManager::get().load_texture(
         "assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
@@ -69,14 +69,14 @@ void MenuState::on_start() {
         Rendering::Rectangle{{0, (256.0f - 86.0f) / 256.0f},
                              {200.0f / 256.0f, 20.0f / 256.0f}});
 
-    unsel_sprite->set_layer(1);
+    unsel_sprite->set_layer(-1);
 
     sel_sprite = create_scopeptr<Graphics::G2D::Sprite>(
         gui_tex, Rendering::Rectangle{{140, 144}, {200, 20}},
         Rendering::Rectangle{{0, (256.0f - 106.0f) / 256.0f},
                              {200.0f / 256.0f, 20.0f / 256.0f}});
 
-    sel_sprite->set_layer(1);
+    sel_sprite->set_layer(-1);
 
     font_texture = TexturePackManager::get().load_texture(
         "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
@@ -87,52 +87,8 @@ void MenuState::on_start() {
     splashRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
         font_texture, glm::vec2(16, 16));
 
-    splashRenderer->clear();
-    splashRenderer->add_text("Classic!", {0, 0},
-                             Rendering::Color{255, 255, 85, 255}, 2);
-    splashRenderer->add_text("Classic!", {1, -1},
-                             Rendering::Color{63, 63, 21, 255}, 2);
-    splashRenderer->rebuild();
     scaleFactor = 1.3f;
     scaleTimer = 0.0f;
-
-    fontRenderer->clear();
-
-    fontRenderer->add_text(
-        "Singleplayer",
-        {240 - fontRenderer->calculate_size("Singleplayer") / 2, 150}, white,
-        2);
-    fontRenderer->add_text(
-        "Multiplayer",
-        {240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28},
-        white, 2);
-    fontRenderer->add_text(
-        "Texture Packs",
-        {240 - fontRenderer->calculate_size("Texture Packs") / 2, 150 - 28 * 2},
-        white, 2);
-    fontRenderer->add_text(
-        "Quit Game",
-        {240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3},
-        white, 2);
-
-    fontRenderer->add_text(
-        "Singleplayer",
-        {241 - fontRenderer->calculate_size("Singleplayer") / 2, 149}, shadow,
-        2);
-    fontRenderer->add_text(
-        "Multiplayer",
-        {241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28},
-        shadow, 2);
-    fontRenderer->add_text(
-        "Texture Packs",
-        {241 - fontRenderer->calculate_size("Texture Packs") / 2, 149 - 28 * 2},
-        shadow, 2);
-    fontRenderer->add_text(
-        "Quit Game",
-        {241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3},
-        shadow, 2);
-
-    fontRenderer->rebuild();
 
 #if PSP
     sceKernelDcacheWritebackInvalidateAll();
@@ -194,6 +150,56 @@ void MenuState::on_update(Core::Application *app, double dt) {
 }
 
 void MenuState::on_draw(Core::Application *app, double dt) {
+
+    Rendering::RenderContext::get().set_mode_2D();
+    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 100, -100);
+
+    fontRenderer->clear();
+
+    fontRenderer->add_text(
+        "Singleplayer",
+        {241 - fontRenderer->calculate_size("Singleplayer") / 2, 149}, shadow,
+        -19);
+    fontRenderer->add_text(
+        "Multiplayer",
+        {241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28},
+        shadow, -19);
+    fontRenderer->add_text(
+        "Texture Packs",
+        {241 - fontRenderer->calculate_size("Texture Packs") / 2, 149 - 28 * 2},
+        shadow, -19);
+    fontRenderer->add_text(
+        "Quit Game",
+        {241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3},
+        shadow, -19);
+
+    fontRenderer->add_text(
+        "Singleplayer",
+        {240 - fontRenderer->calculate_size("Singleplayer") / 2, 150}, white,
+        -20);
+    fontRenderer->add_text(
+        "Multiplayer",
+        {240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28},
+        white, -20);
+    fontRenderer->add_text(
+        "Texture Packs",
+        {240 - fontRenderer->calculate_size("Texture Packs") / 2, 150 - 28 * 2},
+        white, -20);
+    fontRenderer->add_text(
+        "Quit Game",
+        {240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3},
+        white, -20);
+
+    fontRenderer->rebuild();
+
+    splashRenderer->add_text("Classic!", {1, -1},
+                             Rendering::Color{63, 63, 21, 255}, -10);
+
+    splashRenderer->add_text("Classic!", {0, 0},
+                             Rendering::Color{255, 255, 85, 255}, -10);
+    splashRenderer->rebuild();
+    splashRenderer->clear();
+
     for (int x = 0; x < 16; x++)
         for (int y = 0; y < 9; y++) {
             Rendering::RenderContext::get().matrix_translate(
@@ -213,10 +219,6 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         Rendering::RenderContext::get().matrix_clear();
     }
 
-#if PSP
-    sceGuTexOffset(-2.875f / 128.0f, -1.0f / 128.0f);
-#endif
-
     fontRenderer->draw();
 
     Rendering::RenderContext::get().matrix_rotate({0, 0, 30.0f});
@@ -227,7 +229,9 @@ void MenuState::on_draw(Core::Application *app, double dt) {
     Rendering::RenderContext::get().matrix_clear();
 
 #if PSP
-    sceGuTexOffset(0, 0);
+    sceKernelDcacheWritebackInvalidateAll();
+
+    sceGuDisable(GU_DEPTH_TEST);
 #endif
 }
 
