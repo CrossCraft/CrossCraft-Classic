@@ -71,6 +71,11 @@ auto TexturePackManager::extract_zip(std::string path) -> int {
 
     std::string dirname = path.substr(0, path.find(".zip")) + "/";
     std::filesystem::create_directory(dirname);
+    std::filesystem::permissions(dirname,
+                                 std::filesystem::perms::owner_all |
+                                     std::filesystem::perms::group_all |
+                                     std::filesystem::perms::others_all,
+                                 std::filesystem::perm_options::add);
 
     for (int i = 0; i < global_info.number_entry; i++) {
         unz_file_info file_info;
@@ -84,10 +89,22 @@ auto TexturePackManager::extract_zip(std::string path) -> int {
         const size_t filename_length = prefix_name.length();
         if (prefix_name[filename_length - 1] == '/') {
             std::filesystem::create_directory(prefix_name);
+            std::filesystem::permissions(prefix_name,
+                                         std::filesystem::perms::owner_all |
+                                             std::filesystem::perms::group_all |
+                                             std::filesystem::perms::others_all,
+                                         std::filesystem::perm_options::add);
+
             SC_APP_INFO("CREATING: {}", prefix_name);
         } else {
             unzOpenCurrentFile(zF);
             FILE *out = fopen(prefix_name.c_str(), "wb");
+
+            std::filesystem::permissions(prefix_name.c_str(),
+                                         std::filesystem::perms::owner_all |
+                                             std::filesystem::perms::group_all |
+                                             std::filesystem::perms::others_all,
+                                         std::filesystem::perm_options::add);
 
             int error = UNZ_OK;
             do {
