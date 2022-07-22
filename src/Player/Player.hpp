@@ -108,7 +108,8 @@ class Player {
 
     uint8_t inventorySelection[45];
 
-    float vcursor_x, vcursor_y;
+    int in_cursor_x;
+    int in_cursor_y;
 
     glm::vec3 pos;
     glm::vec2 rot;
@@ -135,9 +136,6 @@ class Player {
     float jump_icd;
     float view_bob, view_timer;
     float cube_bob;
-
-    int in_cursor_x;
-    int in_cursor_y;
 
     ScopePtr<Graphics::G2D::Sprite> item_box;
     ScopePtr<Graphics::G2D::Sprite> selector;

@@ -292,12 +292,12 @@ void World::update(double dt) {
     break_icd -= dt;
     place_icd -= dt;
     if (client == nullptr) {
-        if (tick_counter > 0.25f) {
+        if (tick_counter > 0.5f) {
             tick_counter = 0;
 
             for (auto &[key, value] : chunks) {
                 // Random tick
-                for (int i = 0; i < 15; i++)
+                for (int i = 0; i < 30; i++)
                     value->rtick_update(this);
 
                 // Chunk Updates

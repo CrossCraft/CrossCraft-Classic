@@ -170,8 +170,6 @@ Player::Player()
     on_ground = false;
     jumping = false;
 
-    vcursor_x = 240;
-    vcursor_y = 136;
     in_cursor_x = 0;
     in_cursor_y = 0;
 
@@ -475,9 +473,6 @@ auto Player::toggle_inv(std::any d) -> void {
                              GLFW_CURSOR_DISABLED);
 
         Utilities::Input::set_cursor_center();
-#else
-        p->vcursor_x = 240;
-        p->vcursor_y = 136;
 #endif
     }
 }
@@ -531,18 +526,6 @@ auto Player::rotate(float dt, float sense) -> void {
         }
 
         set_cursor_center();
-    } else {
-        vcursor_x += cX * 20.0f * 2.5f * dt / 0.3f * sense;
-        vcursor_y += -cY * 20.0f * 2.5f * dt / 0.3f * sense;
-
-        if (vcursor_x < 0)
-            vcursor_x = 0;
-        else if (vcursor_x > 480)
-            vcursor_x = 480;
-        if (vcursor_y < 0)
-            vcursor_y = 0;
-        else if (vcursor_y > 272)
-            vcursor_y = 272;
     }
 }
 #if BUILD_PLAT == BUILD_PSP

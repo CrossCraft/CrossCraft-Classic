@@ -22,11 +22,6 @@ auto DigAction::dig(std::any d) -> void {
         auto cX = (Input::get_axis("Mouse", "X") + 1.0f) / 2.0f;
         auto cY = (Input::get_axis("Mouse", "Y") + 1.0f) / 2.0f;
 
-#if PSP
-        cX = w->player->vcursor_x / 480.0f;
-        cY = 1.0f - (w->player->vcursor_y / 272.0f);
-#endif
-
         if (cX > 0.3125f && cX < 0.675f)
             cX = (cX - 0.3125f) / .04f;
         else
@@ -44,6 +39,10 @@ auto DigAction::dig(std::any d) -> void {
 
         if (idx > 41)
             return;
+
+#if PSP
+        idx = (w->player->in_cursor_x) + (w->player->in_cursor_y * 9);
+#endif
 
         w->player->itemSelections[w->player->selectorIDX] =
             w->player->inventorySelection[idx];
