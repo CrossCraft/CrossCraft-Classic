@@ -158,13 +158,4 @@ namespace CrossCraft
 
         return 0;
     }
-<<<<<<< HEAD
-} // namespace CrossCraft
-== == == =
-
-             unzClose(zF);
-
-return 0;
 }
-} // namespace CrossCraft
->>>>>>> cc32659f44d3bcd9aed6ca1e2b6781266e7db6a2
