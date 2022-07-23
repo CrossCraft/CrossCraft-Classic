@@ -397,6 +397,7 @@ void World::draw() {
     sceGuDisable(GU_BLEND);
     sceGuDisable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
+    sceGuEnable(GU_DEPTH_TEST);
     sceGuFog(12.0f, 32.0f, 0x00FFCCCC);
 #endif
 
