@@ -2,6 +2,7 @@
 #include <Rendering/Rendering.hpp>
 #include <contrib/minizip/unzip.h>
 #include <fstream>
+#include <algorithm>
 
 namespace CrossCraft {
 using namespace Stardust_Celeste;
