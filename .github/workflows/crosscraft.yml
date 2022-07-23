@@ -115,6 +115,8 @@ jobs:
           cd ..
           mv build/EBOOT.PBP EBOOT.PBP
           mv build/CrossCraft-Classic.prx CrossCraft-Classic.prx
+          mkdir ./texturepacks/default/
+          unzip ./texturepacks/default.zip -d ./texturepacks/default/
           chmod -R 666 ./texturepacks/
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
