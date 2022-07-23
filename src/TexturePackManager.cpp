@@ -48,7 +48,7 @@ namespace CrossCraft
         std::filesystem::path p(path);
 
 #if PSP
-        chmod(path.c_str(), S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH | S_IWOTH);
+        chmod(path.c_str(), FIO_S_IRUSR | FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IRGRP | FIO_S_IROTH | FIO_S_IWOTH);
 #endif
 
         for (const auto &entry : std::filesystem::directory_iterator(p))
@@ -59,7 +59,7 @@ namespace CrossCraft
                 // Add to list
                 path_names.push_back(entry.path().filename().string());
 #if PSP
-                chmod(entry.path().filename().string().c_str(), S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH | S_IWOTH);
+                chmod(entry.path().filename().string().c_str(), FIO_S_IRUSR | FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IRGRP | FIO_S_IROTH | FIO_S_IWOTH);
 #endif
             }
             else if (entry.is_regular_file())
@@ -71,7 +71,7 @@ namespace CrossCraft
                     SC_APP_INFO("EXTRACT");
 
 #if PSP
-                    chmod((path + filename).c_str(), S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH | S_IWOTH);
+                    chmod((path + filename).c_str(), FIO_S_IRUSR | FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IRGRP | FIO_S_IROTH | FIO_S_IWOTH);
 #endif
                     extract_zip(path + filename);
                     path_names.push_back(entry.path().filename().string().substr(
@@ -101,7 +101,7 @@ namespace CrossCraft
         std::filesystem::create_directory(dirname);
 
 #if PSP
-        chmod(dirname.c_str(), S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH | S_IWOTH);
+        chmod(dirname.c_str(), FIO_S_IRUSR | FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IRGRP | FIO_S_IROTH | FIO_S_IWOTH);
 #endif
 
         for (int i = 0; i < global_info.number_entry; i++)
@@ -120,7 +120,7 @@ namespace CrossCraft
                 std::filesystem::create_directory(prefix_name);
 
 #if PSP
-                chmod(prefix_name.c_str(), S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH | S_IWOTH);
+                chmod(prefix_name.c_str(), FIO_S_IRUSR | FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IRGRP | FIO_S_IROTH | FIO_S_IWOTH);
 #endif
 
                 SC_APP_INFO("CREATING: {}", prefix_name);
@@ -131,7 +131,7 @@ namespace CrossCraft
                 FILE *out = fopen(prefix_name.c_str(), "wb");
 
 #if PSP
-                chmod(prefix_name.c_str(), S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH | S_IWOTH);
+                chmod(prefix_name.c_str(), FIO_S_IRUSR | FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IRGRP | FIO_S_IROTH | FIO_S_IWOTH);
 #endif
 
                 int error = UNZ_OK;
@@ -160,11 +160,11 @@ namespace CrossCraft
     }
 <<<<<<< HEAD
 } // namespace CrossCraft
-=======
+== == == =
 
-    unzClose(zF);
+             unzClose(zF);
 
-    return 0;
+return 0;
 }
 } // namespace CrossCraft
 >>>>>>> cc32659f44d3bcd9aed6ca1e2b6781266e7db6a2
