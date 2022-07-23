@@ -39,6 +39,12 @@ auto TexturePackManager::add_layer(std::string name) -> void {
 auto TexturePackManager::scan_folder(std::string path) -> void {
     std::filesystem::path p(path);
 
+    std::filesystem::permissions(path,
+        std::filesystem::perms::owner_all |
+        std::filesystem::perms::group_all |
+        std::filesystem::perms::others_all,
+        std::filesystem::perm_options::add);
+
     for (const auto &entry : std::filesystem::directory_iterator(p)) {
 
         if (entry.is_directory()) {
@@ -55,6 +61,9 @@ auto TexturePackManager::scan_folder(std::string path) -> void {
             }
         }
     }
+
+    std::sort(path_names.begin(), path_names.end());
+    path_names.erase(std::unique(path_names.begin(), path_names.end()), path_names.end());
 
     SC_APP_INFO("TEXTURE PACK INFO: ");
     for (auto &str : path_names)

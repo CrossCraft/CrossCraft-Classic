@@ -31,6 +31,8 @@ MenuState::~MenuState() { on_cleanup(); }
 void MenuState::on_start() {
     TexturePackManager::get().scan_folder("./texturepacks/");
 
+    textureMenu = false;
+
     // Make new controllers
     psp_controller = new Input::PSPController();
     key_controller = new Input::KeyboardController();
@@ -72,11 +74,17 @@ void MenuState::on_start() {
     unsel_sprite->set_layer(-1);
 
     sel_sprite = create_scopeptr<Graphics::G2D::Sprite>(
-        gui_tex, Rendering::Rectangle{{140, 144}, {200, 20}},
-        Rendering::Rectangle{{0, (256.0f - 106.0f) / 256.0f},
-                             {200.0f / 256.0f, 20.0f / 256.0f}});
-
+        gui_tex, Rendering::Rectangle{ {140, 144}, {200, 20} },
+        Rendering::Rectangle{ {0, (256.0f - 106.0f) / 256.0f},
+                             {200.0f / 256.0f, 20.0f / 256.0f} });
     sel_sprite->set_layer(-1);
+
+
+    dis_sprite = create_scopeptr<Graphics::G2D::Sprite>(
+        gui_tex, Rendering::Rectangle{ {140, 194}, {200, 20} },
+        Rendering::Rectangle{ {0, (256.0f - 66.0f) / 256.0f},
+                             {200.0f / 256.0f, 20.0f / 256.0f} });
+    dis_sprite->set_layer(-1);
 
     font_texture = TexturePackManager::get().load_texture(
         "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
@@ -131,18 +139,48 @@ void MenuState::on_update(Core::Application *app, double dt) {
     float cX = Input::get_axis("Mouse", "X") * 480.0f;
     float cY = (1.0f - Input::get_axis("Mouse", "Y")) * 272.0f;
 
-    if (cX >= 140.0f && cX <= 340.0f) {
-        if (cY >= 144 && cY <= 164) {
-            selIdx = 0;
+    if (!textureMenu) {
+        if (cX >= 140.0f && cX <= 340.0f) {
+            if (cY >= 144 && cY <= 164) {
+                selIdx = 0;
+            }
+            if (cY >= 116 && cY <= 136) {
+                selIdx = 1;
+            }
+            if (cY >= 88 && cY <= 108) {
+                selIdx = 2;
+            }
+            if (cY >= 60 && cY <= 80) {
+                selIdx = 3;
+            }
         }
-        if (cY >= 116 && cY <= 136) {
-            selIdx = 1;
-        }
-        if (cY >= 88 && cY <= 108) {
-            selIdx = 2;
-        }
-        if (cY >= 60 && cY <= 80) {
-            selIdx = 3;
+    }
+    else {
+        if (cX >= 140.0f && cX <= 340.0f) {
+            if (cY >= 16 && cY <= 36) {
+                selIdx = 0;
+            }
+            else {
+                cY -= 24;
+                if (cY >= 174 && cY < 194) {
+                    selIdx = 1;
+                }
+                else if (cY >= 150 && cY < 170) {
+                    selIdx = 2;
+                }
+                else if (cY >= 126 && cY < 146) {
+                    selIdx = 3;
+                }
+                else if (cY >= 102 && cY < 122) {
+                    selIdx = 4;
+                }
+                else if (cY >= 78 && cY < 98) {
+                    selIdx = 5;
+                }
+                else if (cY >= 54 && cY < 74) {
+                    selIdx = 6;
+                }
+            }
         }
     }
 
@@ -154,83 +192,153 @@ void MenuState::on_draw(Core::Application *app, double dt) {
     Rendering::RenderContext::get().set_mode_2D();
     Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 100, -100);
 
-    fontRenderer->clear();
-
-    fontRenderer->add_text(
-        "Singleplayer",
-        {241 - fontRenderer->calculate_size("Singleplayer") / 2, 149}, shadow,
-        -19);
-    fontRenderer->add_text(
-        "Multiplayer",
-        {241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28},
-        shadow, -19);
-    fontRenderer->add_text(
-        "Texture Packs",
-        {241 - fontRenderer->calculate_size("Texture Packs") / 2, 149 - 28 * 2},
-        shadow, -19);
-    fontRenderer->add_text(
-        "Quit Game",
-        {241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3},
-        shadow, -19);
-
-    fontRenderer->add_text(
-        "Singleplayer",
-        {240 - fontRenderer->calculate_size("Singleplayer") / 2, 150}, white,
-        -20);
-    fontRenderer->add_text(
-        "Multiplayer",
-        {240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28},
-        white, -20);
-    fontRenderer->add_text(
-        "Texture Packs",
-        {240 - fontRenderer->calculate_size("Texture Packs") / 2, 150 - 28 * 2},
-        white, -20);
-    fontRenderer->add_text(
-        "Quit Game",
-        {240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3},
-        white, -20);
-
-    fontRenderer->rebuild();
-
-    splashRenderer->add_text("Classic!", {1, -1},
-                             Rendering::Color{63, 63, 21, 255}, -10);
-
-    splashRenderer->add_text("Classic!", {0, 0},
-                             Rendering::Color{255, 255, 85, 255}, -10);
-    splashRenderer->rebuild();
-    splashRenderer->clear();
 
     for (int x = 0; x < 16; x++)
         for (int y = 0; y < 9; y++) {
             Rendering::RenderContext::get().matrix_translate(
-                {x * 32, y * 32, 0});
+                { x * 32, y * 32, 0 });
             bg_tile->draw();
             Rendering::RenderContext::get().matrix_clear();
         }
 
-    logo_sprite->draw();
+    fontRenderer->clear();
+    splashRenderer->clear();
+    if (!textureMenu) {
+        fontRenderer->add_text(
+            "Singleplayer",
+            { 241 - fontRenderer->calculate_size("Singleplayer") / 2, 149 }, shadow,
+            -19);
+        fontRenderer->add_text(
+            "Multiplayer",
+            { 241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28 },
+            shadow, -19);
+        fontRenderer->add_text(
+            "Texture Packs",
+            { 241 - fontRenderer->calculate_size("Texture Packs") / 2, 149 - 28 * 2 },
+            shadow, -19);
+        fontRenderer->add_text(
+            "Quit Game",
+            { 241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3 },
+            shadow, -19);
 
-    for (int i = 0; i < 4; i++) {
-        Rendering::RenderContext::get().matrix_translate({0, -i * 28, 0});
-        if (selIdx == i)
+        fontRenderer->add_text(
+            "Singleplayer",
+            { 240 - fontRenderer->calculate_size("Singleplayer") / 2, 150 }, white,
+            -20);
+        fontRenderer->add_text(
+            "Multiplayer",
+            { 240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28 },
+            white, -20);
+        fontRenderer->add_text(
+            "Texture Packs",
+            { 240 - fontRenderer->calculate_size("Texture Packs") / 2, 150 - 28 * 2 },
+            white, -20);
+        fontRenderer->add_text(
+            "Quit Game",
+            { 240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3 },
+            white, -20);
+
+        splashRenderer->add_text("Classic!", { 1, -1 },
+            Rendering::Color{ 63, 63, 21, 255 }, -10);
+
+        splashRenderer->add_text("Classic!", { 0, 0 },
+            Rendering::Color{ 255, 255, 85, 255 }, -11);
+
+        logo_sprite->draw();
+
+        for (int i = 0; i < 4; i++) {
+            Rendering::RenderContext::get().matrix_translate({ 0, -i * 28, 0 });
+            if (selIdx == i)
+                sel_sprite->draw();
+            else
+                unsel_sprite->draw();
+            Rendering::RenderContext::get().matrix_clear();
+        }
+
+    }
+    else {
+        Rendering::RenderContext::get().matrix_translate({ 0, -128, 0 });
+        if (selIdx == 0)
             sel_sprite->draw();
         else
             unsel_sprite->draw();
         Rendering::RenderContext::get().matrix_clear();
+
+
+        fontRenderer->add_text(
+            "Texture Packs:",
+            { 241 - fontRenderer->calculate_size("Texture Packs:") / 2, 240 }, shadow,
+            -19);
+
+        fontRenderer->add_text(
+            "Texture Packs:",
+            { 240 - fontRenderer->calculate_size("Texture Packs:") / 2, 240 }, white,
+            -20);
+
+        for (int i = 0; i < 6; i++) {
+
+            if (TexturePackManager::get().path_names.size() > i) {
+                auto name = TexturePackManager::get().path_names[i];
+
+
+                Rendering::RenderContext::get().matrix_translate({ 0, -i * 24 + 50, 0 });
+
+                auto vec = TexturePackManager::get().layers;
+                if (std::find(vec.begin(), vec.end(), name) != vec.end()) {
+                    Rendering::RenderContext::get().matrix_translate({ 0, -50, 0 });
+                    dis_sprite->draw();
+                }
+                else {
+                    if (selIdx == i + 1) {
+                        sel_sprite->draw();
+                    }
+                    else {
+                        unsel_sprite->draw();
+                    }
+                }
+
+                Rendering::RenderContext::get().matrix_clear();
+
+                fontRenderer->add_text(
+                    name,
+                    { 241 - fontRenderer->calculate_size(name) / 2, 200 - i * 24 }, shadow,
+                    -19);
+
+                fontRenderer->add_text(
+                    name,
+                    { 240 - fontRenderer->calculate_size(name) / 2, 200 - i * 24 }, white,
+                    -20);
+            }
+        }
+
+
+        fontRenderer->add_text(
+            "Back",
+            { 241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14 }, shadow,
+            -19);
+
+        fontRenderer->add_text(
+            "Back",
+            { 240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14 }, white,
+            -20);
     }
+    fontRenderer->rebuild();
+    splashRenderer->rebuild();
 
     fontRenderer->draw();
 
-    Rendering::RenderContext::get().matrix_rotate({0, 0, 30.0f});
-    Rendering::RenderContext::get().matrix_translate({400, 16, 0});
-    Rendering::RenderContext::get().matrix_scale(
-        {scaleFactor, scaleFactor, 1.0f});
-    splashRenderer->draw();
-    Rendering::RenderContext::get().matrix_clear();
+    if (!textureMenu) {
+        Rendering::RenderContext::get().matrix_rotate({ 0, 0, 30.0f });
+        Rendering::RenderContext::get().matrix_translate({ 400, 16, 0 });
+        Rendering::RenderContext::get().matrix_scale(
+            { scaleFactor, scaleFactor, 1.0f });
+        splashRenderer->draw();
+        Rendering::RenderContext::get().matrix_clear();
+    }
+
 
 #if PSP
     sceKernelDcacheWritebackInvalidateAll();
-
     sceGuDisable(GU_DEPTH_TEST);
 #endif
 }
@@ -238,16 +346,36 @@ void MenuState::on_draw(Core::Application *app, double dt) {
 void MenuState::trigger(std::any m) {
     auto mstate = std::any_cast<MenuState *>(m);
 
-    if (mstate->selIdx == 0) {
-        mstate->startSP = true;
+    if (!mstate->textureMenu) {
+        if (mstate->selIdx == 0) {
+            mstate->startSP = true;
+        }
+        if (mstate->selIdx == 1) {
+            mstate->startMP = true;
+        }
+        if (mstate->selIdx == 2) {
+            mstate->textureMenu = true;
+            mstate->selIdx = 0;
+        }
+        if (mstate->selIdx == 3) {
+            mstate->shouldQuit = true;
+        }
     }
-    if (mstate->selIdx == 1) {
-        mstate->startMP = true;
-    }
-    if (mstate->selIdx == 2) {
-    }
-    if (mstate->selIdx == 3) {
-        mstate->shouldQuit = true;
+    else {
+        if (mstate->selIdx == 0) {
+            mstate->textureMenu = false;
+        }
+        else {
+            auto name = TexturePackManager::get().path_names[mstate->selIdx - 1];
+            auto& vec = TexturePackManager::get().layers;
+            if (std::find(vec.begin(), vec.end(), name) == vec.end()) {
+                vec.push_back(name);
+            }
+            else {
+                if (name != "default")
+                    vec.erase(std::find(vec.begin(), vec.end(), name));
+            }
+        }
     }
 }
 

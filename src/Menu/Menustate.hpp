@@ -51,6 +51,7 @@ class MenuState : public Core::ApplicationState {
 
     ScopePtr<Graphics::G2D::Sprite> unsel_sprite;
     ScopePtr<Graphics::G2D::Sprite> sel_sprite;
+    ScopePtr<Graphics::G2D::Sprite> dis_sprite;
 
     uint32_t font_texture;
     ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
@@ -63,6 +64,8 @@ class MenuState : public Core::ApplicationState {
     bool shouldQuit;
     bool startMP;
     bool startSP;
+
+    bool textureMenu;
 };
 
 } // namespace CrossCraft

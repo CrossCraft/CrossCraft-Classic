@@ -24,11 +24,10 @@ namespace CrossCraft
             return txm;
         }
 
-    private:
-        auto extract_zip(std::string path) -> int;
-
         std::vector<std::string> path_names;
         std::vector<std::string> layers;
+    private:
+        auto extract_zip(std::string path) -> int;
     };
 
 }
