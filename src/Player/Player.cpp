@@ -892,10 +892,9 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     ctx->matrix_scale({0.40f, 0.40f, 0.40f});
 
     // DISABLE CULL
-#if BUILD_PC
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA
     glDisable(GL_CULL_FACE);
     glClear(GL_DEPTH_BUFFER_BIT);
-#elif BUILD_PLAT == BUILD_VITA
 #else
     sceGuDisable(GU_CULL_FACE);
     sceGuClear(GU_DEPTH_BUFFER_BIT);
@@ -906,9 +905,8 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     blockMesh[type].draw();
 
     // ENABLE CULL
-#if BUILD_PC
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA
     glEnable(GL_CULL_FACE);
-#elif BUILD_PLAT == BUILD_VITA
 #else
     sceGuEnable(GU_CULL_FACE);
 #endif

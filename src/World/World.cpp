@@ -250,7 +250,7 @@ World::~World() {
 #if PSP
 const auto RENDER_DISTANCE_DIAMETER = 4.0f;
 #elif BUILD_PLAT == BUILD_VITA
-const auto RENDER_DISTANCE_DIAMETER = 4.0f;
+const auto RENDER_DISTANCE_DIAMETER = 5.0f;
 #else
 const auto RENDER_DISTANCE_DIAMETER = 12.f;
 #endif
@@ -407,6 +407,7 @@ void World::draw() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_FOG);
     glDisable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);
     glDisable(GL_BLEND);
     glFogi(GL_FOG_MODE, GL_LINEAR);
     glFogf(GL_FOG_START, 12.0f);
