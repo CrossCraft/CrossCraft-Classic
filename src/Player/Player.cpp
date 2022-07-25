@@ -980,16 +980,16 @@ auto Player::draw() -> void {
 
     playerHUD->end2D();
 
-    // for (int i = 0; i < 9; i++)
-    //     drawBlk(itemSelections[i], i, 0, 9.0f);
-    // if (in_inventory) {
-    //     for (int i = 0; i < 42; i++) {
-    //         if (i == selectedBlock)
-    //             drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 13.0f);
-    //         else
-    //             drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 9.0f);
-    //     }
-    // }
+    for (int i = 0; i < 9; i++)
+        drawBlk(itemSelections[i], i, 0, 9.0f);
+    if (in_inventory) {
+        for (int i = 0; i < 42; i++) {
+            if (i == selectedBlock)
+                drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 13.0f);
+            else
+                drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 9.0f);
+        }
+    }
 }
 
 } // namespace CrossCraft

@@ -250,7 +250,7 @@ World::~World() {
 #if PSP
 const auto RENDER_DISTANCE_DIAMETER = 4.0f;
 #elif BUILD_PLAT == BUILD_VITA
-const auto RENDER_DISTANCE_DIAMETER = 6.0f;
+const auto RENDER_DISTANCE_DIAMETER = 4.0f;
 #else
 const auto RENDER_DISTANCE_DIAMETER = 12.f;
 #endif

@@ -368,8 +368,10 @@ void MenuState::trigger(std::any m) {
             mstate->startMP = true;
         }
         if (mstate->selIdx == 2) {
+#ifndef PSP
             mstate->textureMenu = true;
             mstate->selIdx = 0;
+#endif
         }
         if (mstate->selIdx == 3) {
             mstate->shouldQuit = true;
@@ -399,9 +401,23 @@ void MenuState::up(std::any m) {
 }
 void MenuState::down(std::any m) {
     auto mstate = std::any_cast<MenuState *>(m);
-    mstate->selIdx++;
-    if (mstate->selIdx > 3)
-        mstate->selIdx = 3;
+
+    if (!mstate->textureMenu) {
+        mstate->selIdx++;
+        if (mstate->selIdx > 3)
+            mstate->selIdx = 3;
+    } else {
+
+        mstate->selIdx++;
+        int total_idx = TexturePackManager::get().path_names.size();
+        if (total_idx > 6)
+            total_idx = 6;
+
+        total_idx + 1;
+
+        if (mstate->selIdx > total_idx)
+            mstate->selIdx = 0;
+    }
 }
 
 /* Ugly Key-Binding Function */
