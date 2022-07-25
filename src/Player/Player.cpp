@@ -487,13 +487,18 @@ auto Player::rotate(float dt, float sense) -> void {
     const auto rotSpeed = 500.0f;
     float cX, cY;
 
-#ifndef PSP
-    cX = get_axis("Mouse", "X");
-    cY = get_axis("Mouse", "Y");
+#if BUILD_PLAT == BUILD_VITA
+    cX = get_axis("Vita", "LX");
+    cY = get_axis("Vita", "LY");
 
-    cX *= 3.0f;
-    cY *= 3.0f;
-#else
+    if (cX <= 0.4f && cX >= -0.4f)
+        cX = 0.0f;
+    if (cY <= 0.4f && cY >= -0.4f)
+        cY = 0.0f;
+
+    cX *= 0.3f;
+    cY *= 0.3f;
+#elif BUILD_PLAT == BUILD_PSP
     cX = get_axis("PSP", "X");
     cY = get_axis("PSP", "Y");
 
@@ -504,6 +509,12 @@ auto Player::rotate(float dt, float sense) -> void {
 
     cX *= 0.3f;
     cY *= 0.3f;
+#else
+    cX = get_axis("Mouse", "X");
+    cY = get_axis("Mouse", "Y");
+
+    cX *= 3.0f;
+    cY *= 3.0f;
 #endif
     if (!in_inventory && !in_chat) {
         rot.y += cX * rotSpeed * dt * sense;
@@ -848,7 +859,7 @@ auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {
     Rendering::RenderContext::get().matrix_scale({scale, scale, scale});
 
 // DISABLE CULL
-#if BUILD_PC
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA
     glDisable(GL_CULL_FACE);
 #else
     sceGuDisable(GU_CULL_FACE);
@@ -859,7 +870,7 @@ auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {
     blockMesh[type].draw();
 
 // ENABLE CULL
-#if BUILD_PC
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA
     glEnable(GL_CULL_FACE);
 #else
     sceGuEnable(GU_CULL_FACE);
@@ -884,6 +895,7 @@ auto Player::drawBlkHand(uint8_t type) -> void {
 #if BUILD_PC
     glDisable(GL_CULL_FACE);
     glClear(GL_DEPTH_BUFFER_BIT);
+#elif BUILD_PLAT == BUILD_VITA
 #else
     sceGuDisable(GU_CULL_FACE);
     sceGuClear(GU_DEPTH_BUFFER_BIT);
@@ -896,6 +908,7 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     // ENABLE CULL
 #if BUILD_PC
     glEnable(GL_CULL_FACE);
+#elif BUILD_PLAT == BUILD_VITA
 #else
     sceGuEnable(GU_CULL_FACE);
 #endif
@@ -967,17 +980,16 @@ auto Player::draw() -> void {
 
     playerHUD->end2D();
 
-    for (int i = 0; i < 9; i++)
-        drawBlk(itemSelections[i], i, 0, 9.0f);
-
-    if (in_inventory) {
-        for (int i = 0; i < 42; i++) {
-            if (i == selectedBlock)
-                drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 13.0f);
-            else
-                drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 9.0f);
-        }
-    }
+    // for (int i = 0; i < 9; i++)
+    //     drawBlk(itemSelections[i], i, 0, 9.0f);
+    // if (in_inventory) {
+    //     for (int i = 0; i < 42; i++) {
+    //         if (i == selectedBlock)
+    //             drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 13.0f);
+    //         else
+    //             drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 9.0f);
+    //     }
+    // }
 }
 
 } // namespace CrossCraft

@@ -44,6 +44,7 @@ class GameState : public Core::ApplicationState {
     ScopePtr<MP::Client> client;
     ScopePtr<World> world;
     Utilities::Controller *psp_controller;
+    Utilities::Controller *vita_controller;
     Utilities::Controller *key_controller;
     Utilities::Controller *mouse_controller;
     Config config;

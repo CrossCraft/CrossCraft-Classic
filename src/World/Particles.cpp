@@ -136,7 +136,7 @@ void ParticleSystem::update(double dt) {
     timer += dt;
 
     if (timer < 1.0f) {
-        for (auto& p : particles) {
+        for (auto &p : particles) {
             p.velocity.y -= 16.0f * (float)dt;
             p.position += p.velocity * (float)dt;
         }
@@ -147,7 +147,7 @@ void ParticleSystem::update(double dt) {
 void ParticleSystem::draw() {
     if (timer < 1.0f) {
         Rendering::TextureManager::get().bind_texture(texture);
-#if BUILD_PC
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA
         glDisable(GL_CULL_FACE);
 #else
         sceGuDisable(GU_CULL_FACE);
@@ -156,7 +156,7 @@ void ParticleSystem::draw() {
         mesh.bind();
         mesh.draw();
 
-#if BUILD_PC
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA
         glEnable(GL_CULL_FACE);
 #else
         sceGuEnable(GU_CULL_FACE);

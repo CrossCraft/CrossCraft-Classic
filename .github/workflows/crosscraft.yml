@@ -129,3 +129,46 @@ jobs:
             LICENSE
             README.md
             config.cfg
+
+  Vita:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Install dependencies
+        run: |
+          export VITASDK=/usr/local/vitasdk
+          export PATH=$VITASDK/bin:$PATH
+          git clone https://github.com/vitasdk/vdpm
+          cd vdpm
+          ./bootstrap-vitasdk.sh
+          ./install-all.sh
+          cd ..
+          git clone https://github.com/Rinnegatamante/vitaGL.git
+          cd vitaGL
+          make install
+          cd ..
+
+    
+      - name: Checkout
+        uses: actions/checkout@v2
+    
+      - name: Build
+        run: |
+          export VITASDK=/usr/local/vitasdk
+          export PATH=$VITASDK/bin:$PATH
+          git submodule update --init --recursive --remote
+          mkdir -p build
+          cd build
+          cmake -DVITA=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake ..
+          make
+          cd ..
+          mv build/CrossCraft-Classic.vpk CrossCraft-Classic.vpk
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: CrossCraft-Vita
+          path: |
+            CrossCraft-Classic.vpk
+            LICENSE
+            README.md
+

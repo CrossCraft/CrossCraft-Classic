@@ -20,7 +20,14 @@ auto TextHelper::draw() -> void {
     sceKernelDcacheWritebackInvalidateAll();
 #endif // PSP
 
+#if BUILD_PLAT == BUILD_VITA
+    glDisable(GL_DEPTH_TEST);
+#endif
     fontRenderer->draw();
+
+#if BUILD_PLAT == BUILD_VITA
+    glEnable(GL_DEPTH_TEST);
+#endif
 }
 
 auto TextHelper::get_width(std::string text) -> float {
@@ -111,8 +118,8 @@ auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col,
                                                   {112, 12}, {0, 0, 0, 128}, 2);
     }
 
-    fontRenderer->add_text(text, {pos.x, pos.y}, front, 0.0f);
     fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, 1.0f);
+    fontRenderer->add_text(text, {pos.x, pos.y}, front, 0.0f);
 }
 
 } // namespace CrossCraft

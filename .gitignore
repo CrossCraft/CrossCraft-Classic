@@ -356,3 +356,4 @@ MigrationBackup/
 *.o
 build
 build-psp
+build-vita

@@ -17,6 +17,8 @@
 
 #if PSP
 #include <pspkernel.h>
+#elif BUILD_PLAT == BUILD_VITA
+#include <vitaGL.h>
 #else
 #include <glad/glad.hpp>
 #endif
@@ -247,6 +249,8 @@ World::~World() {
 
 #if PSP
 const auto RENDER_DISTANCE_DIAMETER = 4.0f;
+#elif BUILD_PLAT == BUILD_VITA
+const auto RENDER_DISTANCE_DIAMETER = 6.0f;
 #else
 const auto RENDER_DISTANCE_DIAMETER = 12.f;
 #endif
@@ -393,12 +397,22 @@ void World::draw() {
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
-#if !BUILD_PC
+#if BUILD_PLAT == BUILD_PSP
     sceGuDisable(GU_BLEND);
     sceGuDisable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
     sceGuEnable(GU_DEPTH_TEST);
     sceGuFog(12.0f, 32.0f, 0x00FFCCCC);
+#elif BUILD_PLAT == BUILD_VITA
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_FOG);
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+    glFogi(GL_FOG_MODE, GL_LINEAR);
+    glFogf(GL_FOG_START, 12.0f);
+    glFogf(GL_FOG_END, 48.0f);
+    const float FOG_COLOR[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    glFogfv(GL_FOG_COLOR, FOG_COLOR);
 #endif
 
     // Draw opaque
@@ -423,9 +437,12 @@ void World::draw() {
             val->draw();
     }
 
-#if !BUILD_PC
+#if BUILD_PLAT == BUILD_PSP
     sceGuEnable(GU_BLEND);
     sceGuEnable(GU_ALPHA_TEST);
+#elif BUILD_PLAT == BUILD_VITA
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_BLEND);
 #endif
 
     draw_selection();
@@ -450,8 +467,10 @@ void World::draw() {
             val->draw_transparent();
     }
 
-#if !BUILD_PC
+#if BUILD_PLAT == BUILD_PSP
     sceGuDisable(GU_FOG);
+#elif BUILD_PLAT == BUILD_VITA
+    glDisable(GL_FOG);
 #endif
 
     clouds->draw();
