@@ -116,7 +116,11 @@ World::World(std::shared_ptr<Player> p) {
 auto World::spawn() -> void { player->spawn(this); }
 
 auto World::load_world() -> bool {
+#if BUILD_PLAT != BUILD_VITA
     gzFile save_file = gzopen("save.ccc", "rb");
+#else
+    gzFile save_file = gzopen("ux0:/data/CrossCraft-Classic/save.ccc", "rb");
+#endif
     gzrewind(save_file);
 
     int version = 0;
@@ -144,8 +148,12 @@ auto World::save(std::any p) -> void {
     auto wrld = std::any_cast<World *>(p);
     if (wrld->client == nullptr) {
         SC_APP_DEBUG("SAVING!");
-
+#if BUILD_PLAT != BUILD_VITA
         gzFile save_file = gzopen("save.ccc", "wb");
+#else
+        gzFile save_file =
+            gzopen("ux0:/data/CrossCraft-Classic/save.ccc", "wb");
+#endif
         if (save_file != nullptr) {
             const int save_version = 1;
             gzwrite(save_file, &save_version, 1 * sizeof(int));

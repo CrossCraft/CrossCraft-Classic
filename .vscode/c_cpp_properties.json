@@ -16,18 +16,44 @@
             "cppStandard": "c++17"
         },
         {
-            "name": "Linux",
+            "name": "Vita",
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/ext/Stardust-Celeste/ext/glm/glm/"
             ],
             "defines": [
-                "BUILD_PLAT=1"
+                "BUILD_PLAT=3"
             ],
-            "compilerPath": "/usr/bin/clang",
+            "compilerPath": "/usr/local/vitasdk/bin/arm-vita-eabi-gcc",
             "cStandard": "c17",
             "intelliSenseMode": "linux-clang-x64",
-            "cppStandard": "c++17"
+            "cppStandard": "c++17",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**",
+                    "${workspaceFolder}/ext/Stardust-Celeste/ext/glm/glm/"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
         }
     ],
     "version": 4

@@ -40,7 +40,7 @@ auto DigAction::dig(std::any d) -> void {
         if (idx > 41)
             return;
 
-#if PSP
+#if PSP || BUILD_PLAT == BUILD_VITA
         idx = (w->player->in_cursor_x) + (w->player->in_cursor_y * 9);
 #endif
 

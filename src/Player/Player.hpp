@@ -151,10 +151,14 @@ class Player {
 
     // Block Drawing
 
+#if BUILD_PLAT != BUILD_VITA
     uint16_t idx_counter[50];
     std::vector<Rendering::Vertex> m_verts[50];
     std::vector<uint16_t> m_index[50];
     Rendering::Mesh blockMesh[50];
+#else
+    ScopePtr<Graphics::G2D::Sprite> blockRep[50];
+#endif
 
     ScopePtr<UserInterface> playerHUD;
 

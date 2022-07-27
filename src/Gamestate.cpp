@@ -35,13 +35,20 @@ void GameState::on_start() {
     if (forced_mp) {
 #if PSP
         Network::NetworkDriver::get().initGUI();
+#elif BUILD_PLAT == BUILD_VITA
+        Network::NetworkDriver::get().init();
 #endif
+        SC_APP_INFO("{}", world->cfg.username);
+        SC_APP_INFO("{}", world->cfg.ip);
         client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip);
         world->client = client.get();
         world->player->client_ref = client.get();
     } else {
-
+#if BUILD_PLAT != BUILD_VITA
         FILE *fptr = fopen("save.ccc", "r");
+#else
+        FILE *fptr = fopen("ux0:/data/CrossCraft-Classic/save.ccc", "r");
+#endif
         if (fptr) {
             if (!world->load_world())
                 if (world->cfg.compat)

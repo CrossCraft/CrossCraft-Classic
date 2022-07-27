@@ -220,6 +220,7 @@ auto Player::add_face_to_mesh(std::array<float, 12> data,
                               std::array<float, 8> uv, uint32_t lightVal,
                               glm::vec3 mypos, uint8_t type)
     -> void { // Create color
+#if BUILD_PLAT != BUILD_VITA
     Rendering::Color c;
     c.color = lightVal;
 
@@ -243,9 +244,11 @@ auto Player::add_face_to_mesh(std::array<float, 12> data,
     m_index[type].push_back(idx_counter[type] + 3);
     m_index[type].push_back(idx_counter[type] + 0);
     idx_counter[type] += 4;
+#endif
 }
 
 auto Player::setup_model(uint8_t type) -> void {
+#if BUILD_PLAT != BUILD_VITA
     idx_counter[type] = 0;
     m_verts[type].clear();
     m_verts[type].shrink_to_fit();
@@ -288,6 +291,13 @@ auto Player::setup_model(uint8_t type) -> void {
 
     blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
                              m_index[type].data(), idx_counter[type]);
+#else
+    auto uvs = getTexCoord(type, LIGHT_SIDE_X);
+    blockRep[type] = create_scopeptr<Graphics::G2D::Sprite>(
+        terrain_atlas, Rendering::Rectangle{{-1.5f, -4.0f}, {16, 16}},
+        Rendering::Rectangle{{uvs[2], uvs[3]}, {-1.0f / 16.0f, -1.0f / 16.0f}});
+    blockRep[type]->set_layer(-5);
+#endif
 }
 
 auto Player::move_reset(std::any d) -> void {
@@ -851,27 +861,45 @@ auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {
     Rendering::RenderContext::get().matrix_view(glm::mat4(1));
     Rendering::RenderContext::get().matrix_translate(
         {153.5f + x * 20, 8 + y * 24, -20});
+
+#if BUILD_PLAT != BUILD_VITA
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40)
         Rendering::RenderContext::get().matrix_rotate({0.0f, 45.0f, 0});
     else
         Rendering::RenderContext::get().matrix_rotate({30.0f, 45.0f, 0});
 
     Rendering::RenderContext::get().matrix_scale({scale, scale, scale});
+#else
+    Rendering::RenderContext::get().matrix_scale(
+        {scale / 9.0f, scale / 9.0f, scale / 9.0f});
+#endif
 
 // DISABLE CULL
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
+#if BUILD_PC
     glDisable(GL_CULL_FACE);
+#elif BUILD_PLAT == BUILD_VITA
+    glDisable(GL_DEPTH_TEST);
 #else
     sceGuDisable(GU_CULL_FACE);
 #endif
 
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
+#if BUILD_PLAT != BUILD_VITA
     blockMesh[type].draw();
 
+#else
+    // if (type == Block::Cobblestone && blockRep[type] != nullptr)
+    //     SC_APP_INFO("CBL");
+    blockRep[type]->texture = terrain_atlas;
+    blockRep[type]->draw();
+#endif
+
 // ENABLE CULL
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
+#if BUILD_PC
     glEnable(GL_CULL_FACE);
+#elif BUILD_PLAT == BUILD_VITA
+    glEnable(GL_DEPTH_TEST);
 #else
     sceGuEnable(GU_CULL_FACE);
 #endif
@@ -902,7 +930,9 @@ auto Player::drawBlkHand(uint8_t type) -> void {
 
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
+#if BUILD_PLAT != BUILD_VITA
     blockMesh[type].draw();
+#endif
 
     // ENABLE CULL
 #if BUILD_PC || BUILD_PLAT == BUILD_VITA
@@ -983,7 +1013,13 @@ auto Player::draw() -> void {
     if (in_inventory) {
         for (int i = 0; i < 42; i++) {
             if (i == selectedBlock)
-                drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 13.0f);
+                drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
+#if BUILD_PLAT != BUILD_VITA
+                        13.0f
+#else
+                        11.0f
+#endif
+                );
             else
                 drawBlk(inventorySelection[i], i % 9, 7 - i / 9, 9.0f);
         }

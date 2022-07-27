@@ -25,6 +25,11 @@ Client::Client(World *wrld, std::string ip, u16 port) {
 #ifdef _WIN32
     unsigned long mode = (false) ? 0 : 1;
     ioctlsocket(my_socket, FIONBIO, &mode);
+#elif BUILD_PLAT == BUILD_VITA
+    int flag = 1;
+    sceNetSetsockopt(my_socket, SCE_NET_IPPROTO_TCP, SCE_NET_TCP_NODELAY,
+                     (char *)&flag, sizeof(int));
+    fcntl(my_socket, F_SETFL, SCE_O_NBLOCK);
 #else
     int flags = fcntl(my_socket, F_GETFL, 0);
 
@@ -370,14 +375,15 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         SC_APP_INFO("World Size {} {} {}", data2->XSize, data2->YSize,
                     data2->ZSize);
 
-        wrld->world_size = { data2->XSize, data2->YSize, data2->ZSize };
+        wrld->world_size = {data2->XSize, data2->YSize, data2->ZSize};
 
         SC_APP_INFO("Decompressed {} bytes. Expected {}", len, expected);
 
         for (auto x = 0; x < 256; x++)
             for (auto y = 0; y < 64; y++)
                 for (auto z = 0; z < 256; z++) {
-                    auto idx_source = (y * data2->XSize * data2->ZSize) + (z * data2->XSize) + x + 4;
+                    auto idx_source = (y * data2->XSize * data2->ZSize) +
+                                      (z * data2->XSize) + x + 4;
                     auto idx_destiny = wrld->getIdx(x, y, z);
 
                     wrld->worldData[idx_destiny] = outBuffer[idx_source];
@@ -632,8 +638,12 @@ auto get_len(Byte type) -> int {
 void Client::receive() {
     Byte newByte;
     int res =
+#if BUILD_PLAT != BUILD_VITA
         ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1, MSG_PEEK);
-
+#else
+        ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1,
+               SCE_NET_MSG_PEEK);
+#endif
     if (res <= 0)
         return;
 
