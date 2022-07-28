@@ -383,7 +383,7 @@ namespace CrossCraft
 #if PSP
         sceKernelDcacheWritebackInvalidateAll();
         sceGuDisable(GU_DEPTH_TEST);
-#elif BUILD_PLAT == BUILD_VITA
+#else
         glDisable(GL_DEPTH_TEST);
 #endif
     }

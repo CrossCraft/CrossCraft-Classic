@@ -8,6 +8,7 @@
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
 #include <zlib.h>
+#include <gtc/matrix_transform.hpp>
 
 #if PSP
 #include <pspctrl.h>
@@ -422,29 +423,47 @@ void World::draw() {
     glFogf(GL_FOG_END, 48.0f);
     const float FOG_COLOR[4] = {1.0f, 1.0f, 1.0f, 1.0f};
     glFogfv(GL_FOG_COLOR, FOG_COLOR);
+#else
+    glEnable(GL_DEPTH_TEST);
 #endif
 
-    // Draw opaque
-    for (auto const &[key, val] : chunks) {
+    std::map<float, ChunkStack*> chunk_sorted;
+    chunk_sorted.clear();
 
-        glm::vec2 front = {0.0f, 1.0f};
-        front = glm::rotate(front, player->cam.rot.y);
+    for (auto const& [key, val] : chunks) {
+        glm::vec2 relative_chunk_pos = glm::vec2(val->get_chunk_pos().x * 16.0f, val->get_chunk_pos().y * 16.0f);
+        auto diff = glm::vec2(player->pos.x, player->pos.z) - relative_chunk_pos;
+        auto len = fabsf(sqrtf(diff.x * diff.x + diff.y * diff.y));
 
-        glm::vec2 relative_chunk_pos =
-            glm::vec2(val->get_chunk_pos().x * 16.0f,
-                      val->get_chunk_pos().y * 16.0f) -
-            glm::vec2(player->pos.x, player->pos.z);
 
-        float dot =
-            front.x * relative_chunk_pos.x + front.y * relative_chunk_pos.y;
+        relative_chunk_pos += glm::vec2(8.0f, 8.0f);
 
-        float x = dot / (front.length() * relative_chunk_pos.length());
+        glm::vec4 centerpos = glm::vec4(relative_chunk_pos.x, 32.0f, relative_chunk_pos.y, 1.0f);
 
-        float angle = (x >= -1 && x <= 1) ? abs(acosf(x)) : 0.0f;
+        glm::mat4 viewmat(1.f);
 
-        if (angle < DEGTORAD(100.0f) || relative_chunk_pos.length() < 32.0f)
-            val->draw();
+        viewmat = glm::rotate(viewmat, DEGTORAD(player->rot.x), { 1, 0, 0 });
+        viewmat = glm::rotate(viewmat, DEGTORAD(player->rot.y), { 0, 1, 0 });
+        viewmat = glm::translate(viewmat, -player->pos);
+
+        glm::mat4 projmat(1.f);
+        projmat = glm::perspective(DEGTORAD(70.0f), 16.0f / 9.0f, 0.1f, RENDER_DISTANCE_DIAMETER * 8.0f);
+
+        glm::vec4 res = projmat * viewmat * centerpos;
+
+
+        if(res.w >= 0 || len < 33.0f)
+            chunk_sorted.emplace(len, val);
     }
+
+    // Draw opaque
+    for (auto const &[key, val] : chunk_sorted) {
+        val->draw();
+    }
+
+    std::map<float, ChunkStack*, std::greater<float>> chunk_reverse_sorted;
+    chunk_reverse_sorted.insert(chunk_sorted.begin(), chunk_sorted.end());
+    chunk_sorted.clear();
 
 #if BUILD_PLAT == BUILD_PSP
     sceGuEnable(GU_BLEND);
@@ -460,20 +479,12 @@ void World::draw() {
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
     // Draw flora
-    for (auto const &[key, val] : chunks) {
+    for (auto const &[key, val] : chunk_reverse_sorted) {
         val->draw_flora();
     }
-
     // Draw transparent
-    for (auto const &[key, val] : chunks) {
-        if (!val->border)
-            val->draw_transparent();
-    }
-
-    // Draw transparent
-    for (auto const &[key, val] : chunks) {
-        if (val->border)
-            val->draw_transparent();
+    for (auto const &[key, val] : chunk_reverse_sorted) {
+        val->draw_transparent();
     }
 
 #if BUILD_PLAT == BUILD_PSP
