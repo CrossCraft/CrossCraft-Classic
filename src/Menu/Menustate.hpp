@@ -8,13 +8,15 @@
 
 using namespace Stardust_Celeste;
 
-namespace CrossCraft {
-using namespace Stardust_Celeste;
-/**
+namespace CrossCraft
+{
+  using namespace Stardust_Celeste;
+  /**
  * @brief Game State Class
  *
  */
-class MenuState : public Core::ApplicationState {
+  class MenuState : public Core::ApplicationState
+  {
   public:
     MenuState()
         : key_controller(nullptr), psp_controller(nullptr),
@@ -67,6 +69,6 @@ class MenuState : public Core::ApplicationState {
     bool startSP;
 
     bool textureMenu;
-};
+  };
 
 } // namespace CrossCraft

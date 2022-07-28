@@ -1,6 +1,5 @@
-#include "Gamestate.hpp"
-#include "Menu/Menustate.hpp"
 #include <Stardust-Celeste.hpp>
+#include "Menu/Menustate.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -12,15 +11,17 @@ extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance =
 using namespace Stardust_Celeste;
 
 /**
- * @brief Class to run the game state
- *
+ * @brief Game Application
+ * 
  */
-class GameApplication : public Core::Application {
-  public:
+class GameApplication : public Core::Application
+{
+public:
     /**
      * @brief On Start override
      */
-    void on_start() override {
+    void on_start() override
+    {
 
         // Create new Game State
         auto state = create_refptr<CrossCraft::MenuState>();
@@ -40,7 +41,8 @@ class GameApplication : public Core::Application {
  *
  * @return Core::Application*
  */
-Core::Application *CreateNewSCApp() {
+Core::Application *CreateNewSCApp()
+{
 
     // Configure the engine
     Core::AppConfig config;

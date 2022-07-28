@@ -1,69 +1,78 @@
 #pragma once
-#include <Platform/Platform.hpp>
+#include "Utils.hpp"
 #include <fstream>
 #include <sstream>
 #include <string>
 
-namespace CrossCraft {
+namespace CrossCraft
+{
 
-struct Config {
-    float sense = 1.50f;
-    bool compat = true;
-    std::string ip = "192.168.184.130";
-    std::string username = "CCC-Client";
+    struct Config
+    {
+        float sense;
+        bool compat;
+        std::string ip;
+        std::string username;
 
-    inline static auto loadConfig() -> Config {
-        Config config;
-        config.sense = 1.0f;
+        inline static auto loadConfig() -> Config
+        {
+            Config config;
+            config.sense = 1.0f;
 
-#if BUILD_PLAT != BUILD_VITA
-        std::ifstream file("config.cfg");
-#else
-        std::ifstream file("ux0:/data/CrossCraft-Classic/config.cfg");
-#endif
-        if (file.is_open()) {
-            std::string line;
+            std::ifstream file(PLATFORM_FILE_PREFIX + "config.cfg");
 
-            while (std::getline(file, line, ':')) {
+            if (file.is_open())
+            {
+                std::string line;
 
-                if (line == "sense") {
-                    std::getline(file, line);
-                    std::stringstream str(line);
+                while (std::getline(file, line, ':'))
+                {
 
-                    str >> config.sense;
-                } else if (line == "compat") {
-                    std::getline(file, line);
-                    std::stringstream str(line);
+                    if (line == "sense")
+                    {
+                        std::getline(file, line);
+                        std::stringstream str(line);
 
-                    str >> config.compat;
-                } else if (line == "ip") {
-                    std::getline(file, line);
-                    std::stringstream str(line);
+                        str >> config.sense;
+                    }
+                    else if (line == "compat")
+                    {
+                        std::getline(file, line);
+                        std::stringstream str(line);
 
-                    str >> config.ip;
-                } else if (line == "username") {
-                    std::getline(file, line);
-                    std::stringstream str(line);
+                        str >> config.compat;
+                    }
+                    else if (line == "ip")
+                    {
+                        SC_APP_INFO("IP {}", line);
+                        std::getline(file, line);
+                        std::stringstream str(line);
 
-                    str >> config.username;
+                        str >> config.ip;
+                    }
+                    else if (line == "username")
+                    {
+                        SC_APP_INFO("USER {}", line);
+                        std::getline(file, line);
+                        std::stringstream str(line);
+
+                        str >> config.username;
+                    }
                 }
             }
-        } else {
-#if BUILD_PLAT != BUILD_VITA
-            std::ofstream file2("config.cfg");
-#else
-            std::ofstream file2("ux0:/data/CrossCraft-Classic/config.cfg");
-#endif
-            file2 << "sense:1.50" << std::endl;
-            file2 << "compat:0" << std::endl;
-            file2 << "client:0" << std::endl;
-            file2 << "ip:127.0.0.1" << std::endl;
-            file2 << "username:CCC-Client" << std::endl;
-            file2.close();
-        }
+            else
+            {
+                std::ofstream file2(PLATFORM_FILE_PREFIX + "config.cfg");
 
-        return config;
-    }
-};
+                file2 << "sense:1.50" << std::endl;
+                file2 << "compat:0" << std::endl;
+                file2 << "ip:127.0.0.1" << std::endl;
+                file2 << "username:CCC-Client" << std::endl;
+                file2.close();
+            }
+
+            return config;
+        }
+    };
 
 } // namespace CrossCraft
