@@ -199,13 +199,13 @@ const std::array<float, 12> xFace4{
 };
 
 constexpr uint32_t LIGHT_TOP = 0xFFFFFFFF;
-constexpr uint32_t LIGHT_SIDE_X = 0xFFDDDDDD;
-constexpr uint32_t LIGHT_SIDE_Z = 0xFFBBBBBB;
-constexpr uint32_t LIGHT_BOT = 0xFF999999;
+constexpr uint32_t LIGHT_SIDE_X = 0xFF999999;
+constexpr uint32_t LIGHT_SIDE_Z = 0xFFCCCCCC;
+constexpr uint32_t LIGHT_BOT = 0xFF7F7F7F;
 
-constexpr uint32_t LIGHT_TOP_DARK = 0xFF888888;
+constexpr uint32_t LIGHT_TOP_DARK = 0xFF999999;
 constexpr uint32_t LIGHT_SIDE_DARK = 0xFF777777;
-constexpr uint32_t LIGHT_BOT_DARK = 0xFF696969;
+constexpr uint32_t LIGHT_BOT_DARK = 0xFF4C4C4C;
 
 namespace Block
 {
