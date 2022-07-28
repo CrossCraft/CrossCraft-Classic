@@ -1,0 +1,11 @@
+Minecraft's Sound Attributions page (https://www.minecraft.net/en-us/attribution/sound) is messy,
+and incomplete! Help contribute to this one and properly credit everyone involved in creating all
+of the freesound.org-sourced CC licensed media by making a PR!
+
+dig/glass*.wav -    https://freesound.org/people/cmusounddesign/sounds/71947/   cmusounddesign - (CC BY 3.0)
+                    https://freesound.org/people/datasoundsample/sounds/41348/  datasoundsample - (CC BY 3.0)
+
+dig/grass*.wav -    https://freesound.org/people/Snoman/sounds/9904/            Snoman - (CC BY 3.0)
+                    https://freesound.org/people/Snoman/sounds/9905/            Snoman - (CC BY 3.0)
+                    https://freesound.org/people/Snoman/sounds/9907/            Snoman - (CC BY 3.0)
+                    https://freesound.org/people/Snoman/sounds/9906/            Snoman - (CC BY 3.0)
