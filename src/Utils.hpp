@@ -12,6 +12,7 @@
 
 namespace CrossCraft
 {
+    using namespace Stardust_Celeste;
     inline void netInit()
     {
 #if PSP

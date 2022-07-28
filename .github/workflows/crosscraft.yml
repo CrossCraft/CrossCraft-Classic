@@ -106,7 +106,7 @@ jobs:
       
       - name: Build
         run: |
-          git config --global --add safe.directory /__w/CrossCraft-Classic/CrossCraft-Classic
+          git config --global --add safe.directory /__w/CrossCraft-SurvivalTest/CrossCraft-SurvivalTest
           git submodule update --init --recursive --remote
           mkdir -p build
           cd build
