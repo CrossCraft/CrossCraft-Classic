@@ -16,11 +16,9 @@ CrossCraft's goal is to be platform-independent and work across all PC platforms
 
 ## Version Compatibility
 
-CrossCraft Classic is meant to replicate the functionality of Minecraft Classic v0.30. It contains all the blocks from that version and is meant to represent the creative mode of the game. CrossCraft does not support saves yet, though that is a work-in-progress. 
+CrossCraft Classic is meant to replicate the functionality of Minecraft Classic v0.30. It contains all the blocks from that version and is meant to represent the creative mode of the game. CrossCraft supports saves and multiplayer!
 
-Currently, CrossCraft Classic does not support multiplayer, though there is a work-in-progress effort to make a CrossCraft Classic Server and add client functionality into CrossCraft Classic.
-
-Classic's survival mode will be made into a separate project called CrossCraft Survival Test.
+Classic's survival mode will be made into a separate project called [CrossCraft Survival Test](https://github.com/CrossCraft/CrossCraft-SurvivalTest).
 
 ## Download
 
