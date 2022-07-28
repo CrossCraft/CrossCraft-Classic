@@ -44,7 +44,6 @@ namespace CrossCraft
                     }
                     else if (line == "ip")
                     {
-                        SC_APP_INFO("IP {}", line);
                         std::getline(file, line);
                         std::stringstream str(line);
 
@@ -52,7 +51,6 @@ namespace CrossCraft
                     }
                     else if (line == "username")
                     {
-                        SC_APP_INFO("USER {}", line);
                         std::getline(file, line);
                         std::stringstream str(line);
 

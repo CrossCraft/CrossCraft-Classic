@@ -1,7 +1,13 @@
 #include "World.hpp"
 
-namespace CrossCraft {
-struct DigAction {
-    static auto dig(std::any d) -> void;
-};
+namespace CrossCraft
+{
+    class DigAction
+    {
+    public:
+        static auto dig(std::any d) -> void;
+
+    private:
+        static auto doInventory(World *w) -> void;
+    };
 } // namespace CrossCraft
