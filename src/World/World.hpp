@@ -24,6 +24,11 @@
 #include <vector>
 namespace CrossCraft {
 
+struct ChunkMeta {
+    bool is_empty;
+    bool is_full;
+};
+
 inline auto validate_ivec3(glm::ivec3 ivec) -> bool {
     return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
            ivec.z >= 0 && ivec.z < 256;
@@ -76,7 +81,7 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    auto getIdx(int x, int y, int z)->uint32_t const;
+    auto getIdx(int x, int y, int z) -> uint32_t const;
 
     /**
      * @brief Get a World Light Index
@@ -86,7 +91,7 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    auto getIdxl(int x, int y, int z)->uint32_t const;
+    auto getIdxl(int x, int y, int z) -> uint32_t const;
 
     block_t *worldData;
     uint16_t *lightData;
@@ -110,6 +115,8 @@ class World {
      */
     auto update_lighting(int x, int z) -> void;
 
+    auto generate_meta() -> void;
+
     /**
      * @brief Updates nearby block states
      *
@@ -127,6 +134,7 @@ class World {
     static auto save(std::any p) -> void;
 
     std::map<int, ChunkStack *> chunks;
+    ChunkMeta *chunksMeta;
 
     auto set_block(short x, short y, short z, uint8_t mode, uint8_t block)
         -> void;

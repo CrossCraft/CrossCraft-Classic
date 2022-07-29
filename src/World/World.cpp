@@ -5,10 +5,10 @@
 #include <Platform/Platform.hpp>
 #include <Rendering/Rendering.hpp>
 #include <Utilities/Input.hpp>
+#include <gtc/matrix_transform.hpp>
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
 #include <zlib.h>
-#include <gtc/matrix_transform.hpp>
 
 #if PSP
 #include <pspctrl.h>
@@ -81,6 +81,10 @@ World::World(std::shared_ptr<Player> p) {
         calloc((uint64_t)world_size.x * ((uint64_t)world_size.y / 16) *
                    (uint64_t)world_size.z,
                sizeof(uint16_t)));
+    chunksMeta = reinterpret_cast<ChunkMeta *>(
+        calloc((uint64_t)world_size.x / 16 * (uint64_t)world_size.y / 16 *
+                   (uint64_t)world_size.z / 16,
+               sizeof(ChunkMeta)));
 
     chunks.clear();
 
@@ -166,6 +170,34 @@ auto World::save(std::any p) -> void {
 }
 
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
+
+auto World::generate_meta() -> void {
+    for (int x = 0; x < world_size.x / 16; x++)
+        for (int y = 0; y < world_size.y / 16; y++)
+            for (int z = 0; z < world_size.z / 16; z++) {
+                int idx = x * world_size.y / 16 * world_size.z / 16 +
+                          z * world_size.y / 16 + y;
+
+                auto &meta = chunksMeta[idx];
+
+                for (int local_x = 0; local_x < 16; local_x++)
+                    for (int local_z = 0; local_z < 16; local_z++)
+                        for (int local_y = 0; local_y < 16; local_y++) {
+                            auto cx = x * 16 + local_x;
+                            auto cy = y * 16 + local_y;
+                            auto cz = z * 16 + local_z;
+
+                            auto idx = getIdx(cx, cy, cz);
+
+                            auto blk = worldData[idx];
+
+                            if (blk != Block::Air)
+                                meta.is_empty = false;
+                            if (blk == Block::Air)
+                                meta.is_full = false;
+                        }
+            }
+}
 
 auto World::draw_selection() -> void {
     auto pos = player->get_pos();
@@ -427,32 +459,34 @@ void World::draw() {
     glEnable(GL_DEPTH_TEST);
 #endif
 
-    std::map<float, ChunkStack*> chunk_sorted;
+    std::map<float, ChunkStack *> chunk_sorted;
     chunk_sorted.clear();
 
-    for (auto const& [key, val] : chunks) {
-        glm::vec2 relative_chunk_pos = glm::vec2(val->get_chunk_pos().x * 16.0f, val->get_chunk_pos().y * 16.0f);
-        auto diff = glm::vec2(player->pos.x, player->pos.z) - relative_chunk_pos;
+    for (auto const &[key, val] : chunks) {
+        glm::vec2 relative_chunk_pos = glm::vec2(
+            val->get_chunk_pos().x * 16.0f, val->get_chunk_pos().y * 16.0f);
+        auto diff =
+            glm::vec2(player->pos.x, player->pos.z) - relative_chunk_pos;
         auto len = fabsf(sqrtf(diff.x * diff.x + diff.y * diff.y));
-
 
         relative_chunk_pos += glm::vec2(8.0f, 8.0f);
 
-        glm::vec4 centerpos = glm::vec4(relative_chunk_pos.x, 32.0f, relative_chunk_pos.y, 1.0f);
+        glm::vec4 centerpos =
+            glm::vec4(relative_chunk_pos.x, 32.0f, relative_chunk_pos.y, 1.0f);
 
         glm::mat4 viewmat(1.f);
 
-        viewmat = glm::rotate(viewmat, DEGTORAD(player->rot.x), { 1, 0, 0 });
-        viewmat = glm::rotate(viewmat, DEGTORAD(player->rot.y), { 0, 1, 0 });
+        viewmat = glm::rotate(viewmat, DEGTORAD(player->rot.x), {1, 0, 0});
+        viewmat = glm::rotate(viewmat, DEGTORAD(player->rot.y), {0, 1, 0});
         viewmat = glm::translate(viewmat, -player->pos);
 
         glm::mat4 projmat(1.f);
-        projmat = glm::perspective(DEGTORAD(70.0f), 16.0f / 9.0f, 0.1f, RENDER_DISTANCE_DIAMETER * 8.0f);
+        projmat = glm::perspective(DEGTORAD(70.0f), 16.0f / 9.0f, 0.1f,
+                                   RENDER_DISTANCE_DIAMETER * 8.0f);
 
         glm::vec4 res = projmat * viewmat * centerpos;
 
-
-        if(res.w >= 0 || len < 33.0f)
+        if (res.w >= 0 || len < 33.0f)
             chunk_sorted.emplace(len, val);
     }
 
@@ -461,7 +495,7 @@ void World::draw() {
         val->draw();
     }
 
-    std::map<float, ChunkStack*, std::greater<float>> chunk_reverse_sorted;
+    std::map<float, ChunkStack *, std::greater<float>> chunk_reverse_sorted;
     chunk_reverse_sorted.insert(chunk_sorted.begin(), chunk_sorted.end());
     chunk_sorted.clear();
 
