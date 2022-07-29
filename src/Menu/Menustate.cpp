@@ -56,14 +56,14 @@ namespace CrossCraft
 
         bg_tile = create_scopeptr<Graphics::G2D::Sprite>(
             bg_texture, Rendering::Rectangle{{0, 0}, {32, 32}},
-            Rendering::Color{127, 127, 127, 255});
+            Rendering::Color{80, 80, 80, 255});
 
         logo_texture = TexturePackManager::get().load_texture(
             "assets/menu/logo.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
             false, true);
 
         logo_sprite = create_scopeptr<Graphics::G2D::Sprite>(
-            logo_texture, Rendering::Rectangle{{-16, 272 - 72}, {512, 64}});
+            logo_texture, Rendering::Rectangle{{-16, 272 - 87}, {512, 64}});
 
         logo_sprite->set_layer(-1);
 
@@ -146,8 +146,8 @@ namespace CrossCraft
         }
         Utilities::Input::update();
 
-        scaleTimer += dt;
-        scaleFactor = 1.0f - (sinf(scaleTimer * 3.14159f) * 0.3f);
+        scaleTimer += dt*4.6;
+        scaleFactor = 1.75f - (sinf(scaleTimer * 3.14159f) * 0.03f);
 
 #if BUILD_PC
         selIdx = -1;
@@ -158,19 +158,19 @@ namespace CrossCraft
         {
             if (cX >= 140.0f && cX <= 340.0f)
             {
-                if (cY >= 144 && cY <= 164)
+                if (cY >= 127 && cY <= 147)
                 {
                     selIdx = 0;
                 }
-                if (cY >= 116 && cY <= 136)
+                if (cY >= 105 && cY <= 125)
                 {
                     selIdx = 1;
                 }
-                if (cY >= 88 && cY <= 108)
+                if (cY >= 80 && cY <= 100)
                 {
                     selIdx = 2;
                 }
-                if (cY >= 60 && cY <= 80)
+                if (cY >= 56 && cY <= 76)
                 {
                     selIdx = 3;
                 }
@@ -239,51 +239,69 @@ namespace CrossCraft
         {
             fontRenderer->add_text(
                 "Singleplayer",
-                {241 - fontRenderer->calculate_size("Singleplayer") / 2, 149},
+                {241 - fontRenderer->calculate_size("Singleplayer") / 2, 134},
                 shadow, -19);
             fontRenderer->add_text(
                 "Multiplayer",
-                {241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28},
+                {241 - fontRenderer->calculate_size("Multiplayer") / 2, 134 - 24},
                 shadow, -19);
             fontRenderer->add_text(
                 "Texture Packs",
                 {241 - fontRenderer->calculate_size("Texture Packs") / 2,
-                 149 - 28 * 2},
+                 134 - 24 * 2},
                 shadow, -19);
             fontRenderer->add_text(
                 "Quit Game",
-                {241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3},
+                {241 - fontRenderer->calculate_size("Quit Game") / 2, 134 - 24 * 3},
                 shadow, -19);
 
             fontRenderer->add_text(
                 "Singleplayer",
-                {240 - fontRenderer->calculate_size("Singleplayer") / 2, 150},
+                {240 - fontRenderer->calculate_size("Singleplayer") / 2, 135},
                 white, -20);
             fontRenderer->add_text(
                 "Multiplayer",
-                {240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28},
+                {240 - fontRenderer->calculate_size("Multiplayer") / 2, 135 - 24},
                 white, -20);
             fontRenderer->add_text(
                 "Texture Packs",
                 {240 - fontRenderer->calculate_size("Texture Packs") / 2,
-                 150 - 28 * 2},
+                 135 - 24 * 2},
                 white, -20);
             fontRenderer->add_text(
                 "Quit Game",
-                {240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3},
+                {240 - fontRenderer->calculate_size("Quit Game") / 2, 135 - 24 * 3},
                 white, -20);
 
+            fontRenderer->add_text("CrossCraft Classic 1.1 (0.30)",
+                                   {3, 272 - 11},
+                                    Rendering::Color{21, 21, 21, 255}, -19);
+            fontRenderer->add_text("CrossCraft Classic 1.1 (0.30)",
+                                    {2, 272 - 10},
+                                    Rendering::Color{85, 85, 85, 255}, -20);
+
+            fontRenderer->add_text("Copyleft CrossCraft Team. Made with <3!",
+                                   {478 - fontRenderer->calculate_size(
+                                    "Copyleft CrossCraft Team. Made with <3!"),
+                                   2}, Rendering::Color{63, 63, 63, 255}, -19);
+            fontRenderer->add_text("Copyleft CrossCraft Team. Made with <3!",
+                                   {477 - fontRenderer->calculate_size(
+                                    "Copyleft CrossCraft Team. Made with <3!"),
+                                   3}, Rendering::Color{255, 255, 255, 255}, -19);
+
+            // Splash text uses pure yellow instead of registered yellow for..
+            // some reason..
             splashRenderer->add_text("Classic!", {1, -1},
-                                     Rendering::Color{63, 63, 21, 255}, -10);
+                                     Rendering::Color{63, 63, 0, 255}, -10);
 
             splashRenderer->add_text("Classic!", {0, 0},
-                                     Rendering::Color{255, 255, 85, 255}, -11);
+                                     Rendering::Color{255, 255, 0, 255}, -11);
 
             logo_sprite->draw();
 
             for (int i = 0; i < 4; i++)
             {
-                Rendering::RenderContext::get().matrix_translate({0, -i * 28, 0});
+                Rendering::RenderContext::get().matrix_translate({0, (-i * 24) - 15, 0});
                 if (selIdx == i)
                     sel_sprite->draw();
                 else
@@ -372,10 +390,10 @@ namespace CrossCraft
 
         if (!textureMenu)
         {
-            Rendering::RenderContext::get().matrix_rotate({0, 0, 30.0f});
-            Rendering::RenderContext::get().matrix_translate({400, 16, 0});
+            Rendering::RenderContext::get().matrix_rotate({0, 0, 22.0f});
+            Rendering::RenderContext::get().matrix_translate({360, 50, 0});
             Rendering::RenderContext::get().matrix_scale(
-                {scaleFactor, scaleFactor, 1.0f});
+                {scaleFactor, scaleFactor, 1.75f});
             splashRenderer->draw();
             Rendering::RenderContext::get().matrix_clear();
         }
