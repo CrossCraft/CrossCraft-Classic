@@ -82,7 +82,9 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
             (wrld->worldData[idx] == Block::Air ||
              wrld->worldData[idx] == Block::Water ||
              wrld->worldData[idx] == Block::Still_Water ||
+#if PSP
              wrld->worldData[idx] == Block::Leaves ||
+#endif
              wrld->worldData[idx] == Block::Flower1 ||
              wrld->worldData[idx] == Block::Flower2 ||
              wrld->worldData[idx] == Block::Mushroom1 ||
