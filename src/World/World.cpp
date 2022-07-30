@@ -179,6 +179,8 @@ auto World::generate_meta() -> void {
                           z * world_size.y / 16 + y;
 
                 auto &meta = chunksMeta[idx];
+                meta.is_empty = true;
+                meta.is_full = true;
 
                 for (int local_x = 0; local_x < 16; local_x++)
                     for (int local_z = 0; local_z < 16; local_z++)
@@ -193,7 +195,13 @@ auto World::generate_meta() -> void {
 
                             if (blk != Block::Air)
                                 meta.is_empty = false;
-                            if (blk == Block::Air)
+                            if (blk == Block::Air || blk == Block::Water ||
+                                blk == Block::Sapling || blk == Block::Leaves ||
+                                blk == Block::Glass || blk == Block::Slab ||
+                                blk == Block::Flower1 ||
+                                blk == Block::Flower2 ||
+                                blk == Block::Mushroom1 ||
+                                blk == Block::Mushroom2)
                                 meta.is_full = false;
                         }
             }
@@ -300,8 +308,8 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
     auto rad = RENDER_DISTANCE_DIAMETER / 2.f;
 
     std::vector<glm::ivec2> needed_chunks;
-    for (auto x = -rad; x < rad; x++) {
-        for (auto y = -rad; y < rad; y++) {
+    for (auto x = (-rad - 1); x < (rad + 1); x++) {
+        for (auto y = (-rad - 1); y < (rad + 1); y++) {
             // Now bound check
             auto bx = x + pchunk_pos.x;
             auto by = y + pchunk_pos.y;
