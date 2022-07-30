@@ -13,7 +13,7 @@ GameState::~GameState() { on_cleanup(); }
 void GameState::on_start() {
     // Set Color
     Rendering::RenderContext::get().set_color(
-        Rendering::Color{0x97, 0xD5, 0xFF, 0xFF});
+        Rendering::Color{0x99, 0xCC, 0xFF, 0xFF});
 
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
