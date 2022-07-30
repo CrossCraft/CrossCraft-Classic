@@ -459,6 +459,7 @@ void World::draw() {
     sceGuFog(12.0f, 32.0f, 0x00FFCCCC);
 #else
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 #endif
 
     std::map<float, ChunkStack *> chunk_sorted;
