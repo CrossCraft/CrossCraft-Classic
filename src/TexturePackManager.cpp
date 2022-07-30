@@ -117,8 +117,11 @@ auto TexturePackManager::extract_zip(std::string path) -> int {
 
     unzClose(zF);
 
+#if !PSP
     std::filesystem::remove(path);
-
+#else
+    sceIoRemove(path.c_str());
+#endif
     return 0;
 }
 } // namespace CrossCraft
