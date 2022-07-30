@@ -245,7 +245,7 @@ auto World::draw_selection() -> void {
 
         auto ctx = &Rendering::RenderContext::get();
 
-#if PSP
+#if PSP || BUILD_PLAT == BUILD_VITA
         ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
         ctx->matrix_rotate({0, 0, 0});
         ctx->matrix_scale({1.01f, 1.01f, 1.01f});
