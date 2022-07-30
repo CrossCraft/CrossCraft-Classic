@@ -203,8 +203,10 @@ constexpr uint32_t LIGHT_SIDE_X = 0xFF999999;
 constexpr uint32_t LIGHT_SIDE_Z = 0xFFCCCCCC;
 constexpr uint32_t LIGHT_BOT = 0xFF7F7F7F;
 
+// When dark block color tint is multiplied by 0.6
 constexpr uint32_t LIGHT_TOP_DARK = 0xFF999999;
-constexpr uint32_t LIGHT_SIDE_DARK = 0xFF777777;
+constexpr uint32_t LIGHT_SIDE_X_DARK = 0xFF5C5C5C;
+constexpr uint32_t LIGHT_SIDE_Z_DARK = 0xFF7A7A7A;
 constexpr uint32_t LIGHT_BOT_DARK = 0xFF4C4C4C;
 
 namespace Block

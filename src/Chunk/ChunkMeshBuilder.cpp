@@ -63,12 +63,17 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
 
         if (idxl >= 0 &&
             !((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
-            if (lv == LIGHT_TOP)
-                lv = LIGHT_TOP_DARK;
-            else if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
-                lv = LIGHT_SIDE_DARK;
-            else
-                lv = LIGHT_BOT_DARK;
+            switch(lv) {
+                case LIGHT_TOP:
+                    lv = LIGHT_TOP_DARK; break;
+                case LIGHT_SIDE_X:
+                    lv = LIGHT_SIDE_X_DARK; break;
+                case LIGHT_SIDE_Z:
+                    lv = LIGHT_SIDE_Z_DARK; break;
+                case LIGHT_BOT:
+                    lv = LIGHT_BOT_DARK; break;
+                default: lv = LIGHT_BOT_DARK; break;
+            }
         }
 
         // Calculate block index to peek
@@ -127,12 +132,18 @@ void ChunkMeshBuilder::add_xface_to_mesh(ChunkMesh *chunkMesh,
 
     auto lv = lightVal;
     if (!((wrld->lightData[idxl] >> (int)pos.y) & 1)) {
-        if (lv == LIGHT_TOP)
-            lv = LIGHT_TOP_DARK;
-        else if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
-            lv = LIGHT_SIDE_DARK;
-        else
-            lv = LIGHT_BOT_DARK;
+        switch(lv) {
+            case LIGHT_TOP:
+                lv = LIGHT_TOP_DARK; break;
+            case LIGHT_SIDE_X:
+                lv = LIGHT_SIDE_X_DARK; break;
+            case LIGHT_SIDE_Z:
+                lv = LIGHT_SIDE_Z_DARK; break;
+            case LIGHT_BOT:
+                lv = LIGHT_BOT_DARK; break;
+            default: lv = LIGHT_BOT_DARK; break;
+        }
+
     }
 
     // Set data objects
