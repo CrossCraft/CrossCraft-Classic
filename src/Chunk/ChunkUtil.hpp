@@ -92,7 +92,8 @@ struct ChunkMeshCollection {
  * @param index Index of tile to get
  * @return std::array<float, 8>
  */
-inline auto getTexture(glm::vec2 sideCount, int index, bool rot = false) -> std::array<float, 8> {
+inline auto getTexture(glm::vec2 sideCount, int index, bool rot = false)
+    -> std::array<float, 8> {
     int row = index / (int)sideCount.x;
     int column = index % (int)sideCount.y;
 
@@ -103,10 +104,10 @@ inline auto getTexture(glm::vec2 sideCount, int index, bool rot = false) -> std:
     float h = y + sizeY;
     float w = x + sizeX;
 
-    if(rot)
-        return { x, y, x, h, w, h, w, y };
+    if (rot)
+        return {x, y, x, h, w, h, w, y};
     else
-        return { x, h, w, h, w, y, x, y };
+        return {x, h, w, h, w, y, x, y};
 }
 
 /*
@@ -233,9 +234,13 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
     case 43: // DSLAB
         return getTexture(vec, 5);
     case 44: { // HSLAB
-        if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z)
-            return getTexture(vec, 25);
-        else
+        if (lv == LIGHT_SIDE_X || lv == LIGHT_SIDE_Z) {
+            auto uv = getTexture(vec, 5);
+            //{0, 1, 2, 3, 4, 5, 6, 7}
+            //{x, h, w, h, w, y, x, y};
+            return {uv[0], uv[1] * 0.5f, uv[2], uv[3] * 0.5f,
+                    uv[4], uv[5],        uv[6], uv[7]};
+        } else
             return getTexture(vec, 6);
     }
     case 45: // Brick

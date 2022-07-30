@@ -27,8 +27,7 @@ auto water_can_flow(glm::ivec3 ivec, World *wrld) -> bool {
         for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
             for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
                 auto idx = wrld->getIdx(i, j, k);
-                if (idx >= 0 && 
-                    wrld->worldData[idx] == Block::Sponge)
+                if (idx >= 0 && wrld->worldData[idx] == Block::Sponge)
                     return false;
             }
         }
@@ -168,7 +167,15 @@ void ChunkStack::generate(World *wrld) {
     // Generate meshes
     for (int i = 0; i < 4; i++) {
         if (stack[i] != nullptr && wrld != nullptr) {
-            stack[i]->generate(wrld);
+            auto worldSize = wrld->world_size;
+
+            int metaIdx = cX * worldSize.z / 16 * worldSize.y / 16 +
+                          cZ * worldSize.y / 16 + i;
+
+            auto meta = wrld->chunksMeta[metaIdx];
+
+            if (!meta.is_empty)
+                stack[i]->generate(wrld);
         }
     }
 }

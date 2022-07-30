@@ -27,9 +27,8 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     ioctlsocket(my_socket, FIONBIO, &mode);
 #elif BUILD_PLAT == BUILD_VITA
     int flag = 1;
-    sceNetSetsockopt(my_socket, SCE_NET_IPPROTO_TCP, SCE_NET_TCP_NODELAY,
+    sceNetSetsockopt(my_socket, SCE_NET_SOL_SOCKET, SCE_NET_SO_NBIO,
                      (char *)&flag, sizeof(int));
-    fcntl(my_socket, F_SETFL, SCE_O_NBLOCK);
 #else
     int flags = fcntl(my_socket, F_GETFL, 0);
 
@@ -638,12 +637,7 @@ auto get_len(Byte type) -> int {
 void Client::receive() {
     Byte newByte;
     int res =
-#if BUILD_PLAT != BUILD_VITA
         ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1, MSG_PEEK);
-#else
-        ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1,
-               SCE_NET_MSG_PEEK);
-#endif
     if (res <= 0)
         return;
 

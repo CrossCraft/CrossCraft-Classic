@@ -108,12 +108,24 @@ void ChunkMesh::generate(const World *wrld) {
     // Reset + Allocate
     reset_allocate();
 
-    // Loop over the mesh
-    for (int x = 0; x < 16; x++) {
-        for (int z = 0; z < 16; z++) {
-            for (int y = 0; y < 16; y++) {
+    auto worldSize = wrld->world_size;
 
-                int idx = ((World*)wrld)->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
+    int metaIdx =
+        cX * worldSize.z / 16 * worldSize.y / 16 + cZ * worldSize.y / 16 + cY;
+
+    auto meta = wrld->chunksMeta[metaIdx];
+
+    if (meta.is_full) {
+        int x = 0;
+        int y = 0;
+        int z = 0;
+
+        // Bottom face
+        y = 0;
+        for (x = 0; x < 16; x++) {
+            for (z = 0; z < 16; z++) {
+                int idx = ((World *)wrld)
+                              ->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
 
                 // Get block
                 block_t blk = Block::Air;
@@ -121,33 +133,172 @@ void ChunkMesh::generate(const World *wrld) {
                 if (idx >= 0)
                     blk = wrld->worldData[idx];
 
-                // Skip air
-                if (blk == 0)
-                    continue;
-
-                if (blk == Block::Flower1 || blk == Block::Flower2 ||
-                    blk == Block::Mushroom1 || blk == Block::Mushroom2 ||
-                    blk == Block::Sapling) {
-                    ChunkMeshBuilder::add_xface_to_mesh(
-                        this, getTexCoord(blk, LIGHT_TOP), {x, y, z}, LIGHT_TOP,
-                        wrld);
-                    continue;
-                }
-
-                // Update surrounding positions
                 SurroundPos surround;
                 surround.update(x, y, z);
 
-                // Add 6 faces
+                ChunkMeshBuilder::try_add_face(this, wrld, bottomFace, blk,
+                                               {x, y, z}, surround.down,
+                                               LIGHT_BOT);
+            }
+        }
 
-                if (blk == Block::Slab) {
-                    ChunkMeshBuilder::add_slab_to_mesh(this, wrld, blk,
-                                                       {x, y, z}, surround);
-                    continue;
+        // Top face
+        y = 15;
+        for (x = 0; x < 16; x++) {
+            for (z = 0; z < 16; z++) {
+                int idx = ((World *)wrld)
+                              ->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
+
+                // Get block
+                block_t blk = Block::Air;
+
+                if (idx >= 0)
+                    blk = wrld->worldData[idx];
+
+                SurroundPos surround;
+                surround.update(x, y, z);
+
+                ChunkMeshBuilder::try_add_face(this, wrld, topFace, blk,
+                                               {x, y, z}, surround.up,
+                                               LIGHT_TOP);
+            }
+        }
+
+        // Left face
+        x = 0;
+        for (z = 0; z < 16; z++) {
+            for (y = 0; y < 16; y++) {
+                int idx = ((World *)wrld)
+                              ->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
+
+                // Get block
+                block_t blk = Block::Air;
+
+                if (idx >= 0)
+                    blk = wrld->worldData[idx];
+
+                SurroundPos surround;
+                surround.update(x, y, z);
+
+                ChunkMeshBuilder::try_add_face(this, wrld, leftFace, blk,
+                                               {x, y, z}, surround.left,
+                                               LIGHT_SIDE_X);
+            }
+        }
+
+        // Right face
+        x = 15;
+        for (z = 0; z < 16; z++) {
+            for (y = 0; y < 16; y++) {
+                int idx = ((World *)wrld)
+                              ->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
+
+                // Get block
+                block_t blk = Block::Air;
+
+                if (idx >= 0)
+                    blk = wrld->worldData[idx];
+
+                SurroundPos surround;
+                surround.update(x, y, z);
+
+                ChunkMeshBuilder::try_add_face(this, wrld, rightFace, blk,
+                                               {x, y, z}, surround.right,
+                                               LIGHT_SIDE_X);
+            }
+        }
+
+        // Back face
+        z = 0;
+        for (x = 0; x < 16; x++) {
+            for (y = 0; y < 16; y++) {
+
+                int idx = ((World *)wrld)
+                              ->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
+
+                // Get block
+                block_t blk = Block::Air;
+
+                if (idx >= 0)
+                    blk = wrld->worldData[idx];
+
+                SurroundPos surround;
+                surround.update(x, y, z);
+
+                ChunkMeshBuilder::try_add_face(this, wrld, backFace, blk,
+                                               {x, y, z}, surround.back,
+                                               LIGHT_SIDE_Z);
+            }
+        }
+
+        // Front face
+        z = 15;
+        for (x = 0; x < 16; x++) {
+            for (y = 0; y < 16; y++) {
+
+                int idx = ((World *)wrld)
+                              ->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
+
+                // Get block
+                block_t blk = Block::Air;
+
+                if (idx >= 0)
+                    blk = wrld->worldData[idx];
+
+                SurroundPos surround;
+                surround.update(x, y, z);
+
+                ChunkMeshBuilder::try_add_face(this, wrld, frontFace, blk,
+                                               {x, y, z}, surround.front,
+                                               LIGHT_SIDE_Z);
+            }
+        }
+
+    } else {
+
+        // Loop over the mesh
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = 0; y < 16; y++) {
+
+                    int idx =
+                        ((World *)wrld)
+                            ->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
+
+                    // Get block
+                    block_t blk = Block::Air;
+
+                    if (idx >= 0)
+                        blk = wrld->worldData[idx];
+
+                    // Skip air
+                    if (blk == 0)
+                        continue;
+
+                    if (blk == Block::Flower1 || blk == Block::Flower2 ||
+                        blk == Block::Mushroom1 || blk == Block::Mushroom2 ||
+                        blk == Block::Sapling) {
+                        ChunkMeshBuilder::add_xface_to_mesh(
+                            this, getTexCoord(blk, LIGHT_TOP), {x, y, z},
+                            LIGHT_TOP, wrld);
+                        continue;
+                    }
+
+                    // Update surrounding positions
+                    SurroundPos surround;
+                    surround.update(x, y, z);
+
+                    // Add 6 faces
+
+                    if (blk == Block::Slab) {
+                        ChunkMeshBuilder::add_slab_to_mesh(this, wrld, blk,
+                                                           {x, y, z}, surround);
+                        continue;
+                    }
+
+                    ChunkMeshBuilder::add_block_to_mesh(this, wrld, blk,
+                                                        {x, y, z}, surround);
                 }
-
-                ChunkMeshBuilder::add_block_to_mesh(this, wrld, blk, {x, y, z},
-                                                    surround);
             }
         }
     }

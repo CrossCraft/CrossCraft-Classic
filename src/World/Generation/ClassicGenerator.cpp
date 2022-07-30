@@ -157,6 +157,8 @@ auto ClassicGenerator::generate(World *wrld) -> void {
             wrld->update_lighting(x, z);
         }
     }
+
+    wrld->generate_meta();
 }
 
 } // namespace CrossCraft
