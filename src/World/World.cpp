@@ -245,6 +245,7 @@ auto World::draw_selection() -> void {
 
         auto ctx = &Rendering::RenderContext::get();
 
+#if PSP
         ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
         ctx->matrix_rotate({0, 0, 0});
         ctx->matrix_scale({1.01f, 1.01f, 1.01f});
@@ -275,6 +276,10 @@ auto World::draw_selection() -> void {
         ctx->matrix_translate({-0.005f, -0.005f - 1.0f, -0.005f});
 
         blockMesh.draw_wireframe();
+#else
+        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
+        blockMesh.draw_wireframe();
+#endif
 
         ctx->matrix_clear();
         return;
