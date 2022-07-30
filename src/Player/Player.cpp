@@ -853,6 +853,7 @@ void Player::update(float dt, World *wrld) {
     // Update camera
     cam.pos = pos;
     cam.pos.y += view_bob;
+    cam.pos.y -= (1.80f - 1.5965f);
     cam.rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
     cam.update();
 }
