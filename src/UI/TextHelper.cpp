@@ -113,10 +113,10 @@ auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col,
         break;
     }
 
-    if (bg_mode == CC_TEXT_BG_DYNAMIC) {
-        Rendering::RenderContext::get().draw_rect(pos + glm::vec2(-1, -1),
-                                                  {112, 12}, {0, 0, 0, 128}, 2);
-    }
+    //if (bg_mode == CC_TEXT_BG_DYNAMIC) {
+    //    Rendering::RenderContext::get().draw_rect(pos + glm::vec2(-1, -1),
+    //                                              {112, 12}, {0, 0, 0, 128}, 2);
+    //}
 
     fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, 1.0f);
     fontRenderer->add_text(text, {pos.x, pos.y}, front, 0.0f);

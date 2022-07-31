@@ -146,7 +146,6 @@ Player::Player()
         Rendering::Rectangle{
             {(256.0f - 16.0f) / 256.0f, (256.0f - 16.0f) / 256.0f},
             {16.0f / 256.0f, 16.0f / 256.0f}});
-    crosshair->set_position({240 - 8, 136 - 8});
     crosshair->set_layer(-1);
 
     water = create_scopeptr<Graphics::G2D::Sprite>(
