@@ -18,6 +18,7 @@
 #include "Graphics/2D/FontRenderer.hpp"
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
+#include <Rendering/Primitive/Rectangle.hpp>
 #include <any>
 #include <glm.hpp>
 using namespace Stardust_Celeste;
@@ -159,7 +160,7 @@ class Player {
 #else
     ScopePtr<Graphics::G2D::Sprite> blockRep[50];
 #endif
-
+    ScopePtr<Rendering::Primitive::Rectangle> background_rectangle;
     ScopePtr<UserInterface> playerHUD;
 
     float fps_timer;

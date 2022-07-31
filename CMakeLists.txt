@@ -44,9 +44,8 @@ else()
     target_compile_options(CrossCraft-Classic PRIVATE -g)
 endif()
 
-# target_compile_options(CrossCraft-Classic PRIVATE -fsanitize=address)
-# target_link_options(CrossCraft-Classic PRIVATE -fsanitize=address)
 if(PSP)
+    target_compile_options(CrossCraft-Classic PRIVATE -g)
     create_pbp_file(
         TARGET CrossCraft-Classic
         TITLE CrossCraft-Classic

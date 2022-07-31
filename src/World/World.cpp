@@ -456,7 +456,7 @@ void World::draw() {
     sceGuEnable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
     sceGuEnable(GU_DEPTH_TEST);
-    sceGuFog(12.0f, 32.0f, 0x00FFCCCC);
+    sceGuFog(16.0f, 40.0f, 0x00FFFFFF);
 #else
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);

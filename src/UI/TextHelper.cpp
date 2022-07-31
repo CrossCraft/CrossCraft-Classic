@@ -10,6 +10,10 @@ TextHelper::TextHelper() {
 
     fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
         font_texture, glm::vec2(16, 16));
+
+    background_rectangle = create_scopeptr<Rendering::Primitive::Rectangle>(
+        Rendering::Rectangle{glm::vec2(-1, -1), {112, 12}},
+        Rendering::Color{0, 0, 0, 255}, -2);
 }
 
 auto TextHelper::clear() -> void { fontRenderer->clear(); }
@@ -113,10 +117,11 @@ auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col,
         break;
     }
 
-    //if (bg_mode == CC_TEXT_BG_DYNAMIC) {
-    //    Rendering::RenderContext::get().draw_rect(pos + glm::vec2(-1, -1),
-    //                                              {112, 12}, {0, 0, 0, 128}, 2);
-    //}
+    if (bg_mode == CC_TEXT_BG_DYNAMIC) {
+        Rendering::RenderContext::get().matrix_translate(glm::vec3(pos, 0));
+        background_rectangle->draw();
+        Rendering::RenderContext::get().matrix_clear();
+    }
 
     fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, 1.0f);
     fontRenderer->add_text(text, {pos.x, pos.y}, front, 0.0f);

@@ -128,6 +128,10 @@ Player::Player()
     client_ref = nullptr;
     chat_text = "";
 
+    background_rectangle = create_scopeptr<Rendering::Primitive::Rectangle>(
+        Rendering::Rectangle{{126, 55}, {226, 167}},
+        Rendering::Color{0, 0, 0, 128}, 2);
+
     item_box = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
         Rendering::Rectangle{{0, (256.0f - 22.0f) / 256.0f},
@@ -137,7 +141,7 @@ Player::Player()
 
     selector = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{148, 0}, {24, 24}},
-        Rendering::Rectangle{{0, (256.0f - 22.0f - 24.0f) / 256.0f},
+        Rendering::Rectangle{{0, (256.0f - 22.0f - 24.0f) / 256.0f}, 
                              {24.0f / 256.0f, 24.0f / 256.0f}});
     selector->set_layer(-2);
 
@@ -964,8 +968,8 @@ auto Player::draw() -> void {
             playerHUD->get_block_name(inventorySelection[selectedBlock]),
             CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM, 0,
             6, CC_TEXT_BG_NONE);
-        Rendering::RenderContext::get().draw_rect({126, 55}, {226, 167},
-                                                  {0, 0, 0, 128}, 2);
+
+        background_rectangle->draw();
     } else {
         crosshair->draw();
 

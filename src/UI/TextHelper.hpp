@@ -5,6 +5,8 @@
 #include <Rendering/Rendering.hpp>
 #include <Utilities/Types.hpp>
 
+#include <Rendering/Primitive/Rectangle.hpp>
+
 // creds to https://minecraft.fandom.com/wiki/Formatting_codes
 #define CC_TEXT_COLOR_BLACK 0
 #define CC_TEXT_COLOR_DARK_BLUE 1
@@ -71,6 +73,8 @@ class TextHelper {
   private:
     uint32_t font_texture;
     ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
+
+    ScopePtr<Rendering::Primitive::Rectangle> background_rectangle;
 
 }; // class TextHelper
 
