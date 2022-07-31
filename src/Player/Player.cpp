@@ -141,7 +141,7 @@ Player::Player()
 
     selector = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{148, 0}, {24, 24}},
-        Rendering::Rectangle{{0, (256.0f - 22.0f - 24.0f) / 256.0f}, 
+        Rendering::Rectangle{{0, (256.0f - 22.0f - 24.0f) / 256.0f},
                              {24.0f / 256.0f, 24.0f / 256.0f}});
     selector->set_layer(-2);
 
@@ -357,7 +357,7 @@ auto Player::respawn(std::any d) -> void {
     auto p = std::any_cast<RespawnRequest>(d);
 
     if (!p.player->in_inventory && !p.player->in_chat && !p.wrld->client)
-    p.player->spawn(p.wrld);
+        p.player->spawn(p.wrld);
 }
 
 auto Player::move_right(std::any d) -> void {
@@ -453,7 +453,7 @@ auto Player::change_selector(std::any d) -> void {
     auto s = std::any_cast<SelData>(d);
     if (!s.player->in_chat) {
         s.player->selectorIDX = s.selIDX;
-        s.player->selector->set_position({ 148 + 20 * s.player->selectorIDX, 0 });
+        s.player->selector->set_position({148 + 20 * s.player->selectorIDX, 0});
     }
 }
 
@@ -998,6 +998,12 @@ auto Player::draw() -> void {
                          CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
                          CC_TEXT_ALIGN_TOP, 0, 0, false);
 
+#if PSP
+    playerHUD->draw_text("RAM: " + std::to_string(sceKernelTotalFreeMemSize()),
+                         CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
+                         CC_TEXT_ALIGN_TOP, 0, -1, false);
+#endif
+
     int i = 5;
     for (int x = chat->data.size() - 1; x >= 0; x--) {
         auto &p = chat->data.at(x);
@@ -1005,8 +1011,7 @@ auto Player::draw() -> void {
             break;
 
         playerHUD->draw_text(p.text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-                             CC_TEXT_ALIGN_CENTER, 0, -i - 5,
-                             CC_TEXT_BG_NONE);
+                             CC_TEXT_ALIGN_CENTER, 0, -i - 5, CC_TEXT_BG_NONE);
         i--;
     }
 

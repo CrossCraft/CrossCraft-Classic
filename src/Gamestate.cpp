@@ -23,6 +23,9 @@ void GameState::on_start() {
 
     if (forced_mp) {
         // Connect to Multiplayer
+#if BUILD_PLAT == BUILD_PSP
+        Network::NetworkDriver::get().initGUI();
+#endif
         client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip);
         world->client = client.get();
         world->player->client_ref = client.get();
@@ -36,7 +39,7 @@ void GameState::on_start() {
             else
                 CrossCraftGenerator::generate(world.get());
         }
-        if(fptr != nullptr)
+        if (fptr != nullptr)
             fclose(fptr);
 
         world->spawn();
