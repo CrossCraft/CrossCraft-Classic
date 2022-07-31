@@ -36,7 +36,8 @@ void GameState::on_start() {
             else
                 CrossCraftGenerator::generate(world.get());
         }
-        fclose(fptr);
+        if(fptr != nullptr)
+            fclose(fptr);
 
         world->spawn();
     }
