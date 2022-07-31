@@ -34,10 +34,10 @@ void ChunkMesh::rtick(World *wrld) {
     int y = rand() % 16; // + cY * 16;
     int z = rand() % 16; // + cZ * 16;
 
-    int idxl = ((x + cX * 16) * 256 * 4) + ((z + cZ * 16) * 4) + cY;
+    int idxl = ((x + cX * 16) * wrld->world_size.z * wrld->world_size.y / 16) + ((z + cZ * 16) * wrld->world_size.y / 16) + cY;
 
     bool is_dark = false;
-    if (idxl >= 0 && idxl < (256 * 4 * 256))
+    if (idxl >= 0 && idxl < (wrld->world_size.z * wrld->world_size.y /16 * wrld->world_size.z))
         is_dark = (!((wrld->lightData[idxl] >> (int)y) & 1));
 
     x += cX * 16;

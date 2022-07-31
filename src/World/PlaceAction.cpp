@@ -44,7 +44,7 @@ auto PlaceAction::place(std::any d) -> void {
         auto pos = w->player->get_pos();
 
         // Validate ivec is in bounds
-        if (!validate_ivec3(ivec))
+        if (!validate_ivec3(ivec, w->world_size))
             continue;
 
         // Get block
@@ -85,7 +85,7 @@ auto PlaceAction::place(std::any d) -> void {
                                   static_cast<s32>(cast_pos.y),
                                   static_cast<s32>(cast_pos.z + ym));
 
-                if (!validate_ivec3(ivec))
+                if (!validate_ivec3(ivec, w->world_size))
                     return;
 
                 if ((ivec == posivec || ivec == posivec2 || ivec == posivec3) &&

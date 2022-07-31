@@ -789,11 +789,11 @@ void Player::update(float dt, World *wrld) {
     is_falling = true;
 
     glm::vec3 testpos = pos + vel * dt;
-    if (testpos.x < 0.5f || testpos.x > 255.0f) {
+    if (testpos.x < 0.5f || testpos.x > wrld->world_size.x + 0.5f) {
         vel.x = 0;
         testpos = pos + vel * dt;
     }
-    if (testpos.z < 0.5f || testpos.z > 255.0f) {
+    if (testpos.z < 0.5f || testpos.z > wrld->world_size.z + 0.5f) {
         vel.z = 0;
         testpos = pos + vel * dt;
     }

@@ -239,8 +239,8 @@ auto World::draw_selection() -> void {
             blk == Block::Lava)
             continue;
 
-        if (ivec.x < 0 || ivec.x > 255 || ivec.y < 0 || ivec.y > 255 ||
-            ivec.z < 0 || ivec.z > 255)
+        if (ivec.x < 0 || ivec.x > world_size.x || ivec.y < 0 || ivec.y > world_size.y ||
+            ivec.z < 0 || ivec.z > world_size.z)
             return;
 
         auto ctx = &Rendering::RenderContext::get();
@@ -306,7 +306,7 @@ const auto RENDER_DISTANCE_DIAMETER = 5.0f;
 #elif BUILD_PLAT == BUILD_VITA
 const auto RENDER_DISTANCE_DIAMETER = 10.0f;
 #else
-const auto RENDER_DISTANCE_DIAMETER = 12.f;
+const auto RENDER_DISTANCE_DIAMETER = 16.f;
 #endif
 
 auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
@@ -315,11 +315,9 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
     std::vector<glm::ivec2> needed_chunks;
     for (auto x = (-rad - 1); x < (rad + 1); x++) {
         for (auto y = (-rad - 1); y < (rad + 1); y++) {
-            // Now bound check
             auto bx = x + pchunk_pos.x;
             auto by = y + pchunk_pos.y;
 
-            // Okay - this is in bounds - now, we check if in radius
             auto dx = (bx - pchunk_pos.x);
             dx *= dx;
 
@@ -456,7 +454,7 @@ void World::draw() {
     sceGuEnable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
     sceGuEnable(GU_DEPTH_TEST);
-    sceGuFog(16.0f, 40.0f, 0x00FFFFFF);
+    sceGuFog(8.0f, 32.0f, 0x00FFCC99);
 #else
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -576,7 +574,7 @@ auto World::update_surroundings(int x, int z) -> void {
 auto World::update_lighting(int x, int z) -> void {
     // Clear
     for (int i = 0; i < 4; i++) {
-        auto idx2 = (x * 256 * 4) + (z * 4) + i;
+        int idx2 = (x * world_size.z * (world_size.y / 16)) + (z * (world_size.y / 16)) + i;
         lightData[idx2] = 0;
     }
 
@@ -605,7 +603,7 @@ auto World::set_block(short x, short y, short z, uint8_t mode, uint8_t block)
 }
 
 auto World::add_update(glm::ivec3 ivec) -> void {
-    if (!validate_ivec3(ivec))
+    if (!validate_ivec3(ivec, world_size))
         return;
 
     uint16_t x = ivec.x / 16;

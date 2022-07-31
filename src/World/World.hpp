@@ -29,9 +29,9 @@ struct ChunkMeta {
     bool is_full;
 };
 
-inline auto validate_ivec3(glm::ivec3 ivec) -> bool {
-    return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
-           ivec.z >= 0 && ivec.z < 256;
+inline auto validate_ivec3(glm::ivec3 ivec, glm::vec3 size) -> bool {
+    return ivec.x >= 0 && ivec.x < size.x && ivec.y >= 0 && ivec.y < size.y &&
+           ivec.z >= 0 && ivec.z < size.z;
 }
 
 class Player;

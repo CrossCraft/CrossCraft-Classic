@@ -358,9 +358,9 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
             throw std::runtime_error("INVALID START!");
         }
 
-        char *outBuffer = new char[256 * 64 * 256 + 4];
+        char *outBuffer = new char[512 * 64 * 512 + 4];
 
-        strm.avail_out = 256 * 64 * 256 + 4;
+        strm.avail_out = 512 * 64 * 512 + 4;
         strm.next_out = (Bytef *)outBuffer;
 
         ret = inflate(&strm, Z_FINISH);
@@ -378,9 +378,13 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
 
         SC_APP_INFO("Decompressed {} bytes. Expected {}", len, expected);
 
-        for (auto x = 0; x < 256; x++)
-            for (auto y = 0; y < 64; y++)
-                for (auto z = 0; z < 256; z++) {
+        wrld->worldData = (block_t*)realloc(wrld->worldData, wrld->world_size.x * wrld->world_size.y * wrld->world_size.z);
+        wrld->lightData = (uint16_t*)realloc(wrld->lightData, wrld->world_size.x * (wrld->world_size.y / 16 + 1) * wrld->world_size.z * sizeof(uint16_t));
+        wrld->chunksMeta = (ChunkMeta*)realloc(wrld->chunksMeta, wrld->world_size.x / 16 * (wrld->world_size.y / 16 + 1) * wrld->world_size.z / 16 * sizeof(ChunkMeta));
+
+        for (auto x = 0; x < wrld->world_size.x; x++)
+            for (auto y = 0; y < wrld->world_size.y; y++)
+                for (auto z = 0; z < wrld->world_size.z; z++) {
                     auto idx_source = (y * data2->XSize * data2->ZSize) +
                                       (z * data2->XSize) + x + 4;
                     auto idx_destiny = wrld->getIdx(x, y, z);
@@ -398,6 +402,8 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
                 wrld->update_lighting(x, z);
             }
         }
+
+        wrld->generate_meta();
 
         is_ready = true;
 

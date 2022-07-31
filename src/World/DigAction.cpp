@@ -77,7 +77,7 @@ auto DigAction::dig(std::any d) -> void {
                                static_cast<s32>(cast_pos.z));
 
         // Check valid vector
-        if (!validate_ivec3(ivec))
+        if (!validate_ivec3(ivec, w->world_size))
             continue;
 
         // Get Block

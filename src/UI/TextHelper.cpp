@@ -15,7 +15,7 @@ namespace CrossCraft
 
         background_rectangle = create_scopeptr<Rendering::Primitive::Rectangle>(
             Rendering::Rectangle{glm::vec2(-1, -1), {112, 12}},
-            Rendering::Color{0, 0, 0, 255},
+            Rendering::Color{0, 0, 0, 128},
 #if BUILD_PLAT == BUILD_VITA
             -2
 #else
