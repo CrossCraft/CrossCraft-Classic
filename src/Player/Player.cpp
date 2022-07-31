@@ -49,7 +49,7 @@ void character_callback(GLFWwindow *window, unsigned int codepoint) {
 auto Player::enter_chat(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
 
-    if (!p->in_inventory) {
+    if (!p->in_inventory && chat_text.size() == 0) {
         if (p->in_chat) {
             chat_text = "";
         }
@@ -355,6 +355,8 @@ auto Player::move_left(std::any d) -> void {
 
 auto Player::respawn(std::any d) -> void {
     auto p = std::any_cast<RespawnRequest>(d);
+
+    if (!p.player->in_inventory && !p.player->in_chat && !p.wrld->client)
     p.player->spawn(p.wrld);
 }
 
@@ -447,9 +449,12 @@ auto Player::press_right(std::any d) -> void {
 }
 
 auto Player::change_selector(std::any d) -> void {
+
     auto s = std::any_cast<SelData>(d);
-    s.player->selectorIDX = s.selIDX;
-    s.player->selector->set_position({148 + 20 * s.player->selectorIDX, 0});
+    if (!s.player->in_chat) {
+        s.player->selectorIDX = s.selIDX;
+        s.player->selector->set_position({ 148 + 20 * s.player->selectorIDX, 0 });
+    }
 }
 
 auto Player::inc_selector(std::any d) -> void {
@@ -1001,7 +1006,7 @@ auto Player::draw() -> void {
 
         playerHUD->draw_text(p.text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
                              CC_TEXT_ALIGN_CENTER, 0, -i - 5,
-                             CC_TEXT_BG_DYNAMIC);
+                             CC_TEXT_BG_NONE);
         i--;
     }
 
