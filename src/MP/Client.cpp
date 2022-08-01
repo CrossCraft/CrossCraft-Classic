@@ -18,7 +18,10 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     name.sin_family = AF_INET;
     name.sin_port = htons(port);
 
-    inet_pton(AF_INET, ip.c_str(), &name.sin_addr.s_addr);
+    struct hostent* he = gethostbyname(ip.c_str());
+    char* addr = inet_ntoa(*(struct in_addr*)he->h_addr_list[0]);
+
+    inet_pton(AF_INET, addr, &name.sin_addr.s_addr);
     bool b =
         (::connect(my_socket, (struct sockaddr *)&name, sizeof(name)) >= 0);
 
