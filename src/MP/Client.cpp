@@ -671,7 +671,11 @@ void Client::receive() {
 
     for (int i = 0; i < len; i++) {
         Byte b;
-        ::recv(my_socket, reinterpret_cast<char *>(&b), 1, 0);
+        int result = ::recv(my_socket, reinterpret_cast<char *>(&b), 1, 0);
+        if (result != 1) {
+            i--;
+            continue;
+        }
 
         byte_buffer->WriteU8(b);
     }
