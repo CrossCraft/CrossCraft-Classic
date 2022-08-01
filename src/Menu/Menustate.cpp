@@ -52,22 +52,28 @@ void MenuState::on_start() {
         "assets/dirt.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST, false,
         true);
 
+    logo_texture = TexturePackManager::get().load_texture(
+        "assets/menu/logo.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, true);
+
+    gui_tex = TexturePackManager::get().load_texture(
+        "assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, true);
+
+    font_texture = TexturePackManager::get().load_texture(
+        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, false);
+
+
     bg_tile = create_scopeptr<Graphics::G2D::Sprite>(
         bg_texture, Rendering::Rectangle{{0, 0}, {32, 32}},
         Rendering::Color{80, 80, 80, 255});
 
-    logo_texture = TexturePackManager::get().load_texture(
-        "assets/menu/logo.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-        false, true);
 
     logo_sprite = create_scopeptr<Graphics::G2D::Sprite>(
         logo_texture, Rendering::Rectangle{{-16, 272 - 87}, {512, 64}});
 
     logo_sprite->set_layer(-1);
-
-    gui_tex = TexturePackManager::get().load_texture(
-        "assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-        false, true);
 
     unsel_sprite = create_scopeptr<Graphics::G2D::Sprite>(
         gui_tex, Rendering::Rectangle{{140, 144}, {200, 20}},
@@ -87,10 +93,6 @@ void MenuState::on_start() {
         Rendering::Rectangle{{0, (256.0f - 66.0f) / 256.0f},
                              {200.0f / 256.0f, 20.0f / 256.0f}});
     dis_sprite->set_layer(-1);
-
-    font_texture = TexturePackManager::get().load_texture(
-        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-        false, false);
 
     fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
         font_texture, glm::vec2(16, 16));
@@ -389,6 +391,38 @@ void MenuState::trigger(std::any m) {
             auto &vec = TexturePackManager::get().layers;
             if (std::find(vec.begin(), vec.end(), name) == vec.end()) {
                 vec.push_back(name);
+
+                Rendering::TextureManager::get().delete_texture(mstate->bg_texture);
+                Rendering::TextureManager::get().delete_texture(mstate->logo_texture);
+                Rendering::TextureManager::get().delete_texture(mstate->gui_tex);
+                Rendering::TextureManager::get().delete_texture(mstate->font_texture);
+
+                mstate->bg_texture = TexturePackManager::get().load_texture(
+                    "assets/dirt.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST, false,
+                    true);
+
+                mstate->logo_texture = TexturePackManager::get().load_texture(
+                    "assets/menu/logo.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+                    false, true);
+
+                mstate->gui_tex = TexturePackManager::get().load_texture(
+                    "assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+                    false, true);
+
+                mstate->font_texture = TexturePackManager::get().load_texture(
+                    "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+                    false, false);
+
+
+                mstate->bg_tile->texture = mstate->bg_texture;
+                mstate->logo_sprite->texture = mstate->logo_texture;
+                mstate->unsel_sprite->texture = mstate->gui_tex;
+                mstate->sel_sprite->texture = mstate->gui_tex;
+                mstate->dis_sprite->texture = mstate->gui_tex;
+
+                mstate->fontRenderer->texture = mstate->font_texture;
+                mstate->splashRenderer->texture = mstate->font_texture;
+
             } else {
                 if (name != "default")
                     vec.erase(std::find(vec.begin(), vec.end(), name));
