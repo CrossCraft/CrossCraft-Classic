@@ -4,6 +4,10 @@
 #include "Utility.hpp"
 #include <map>
 
+#if BUILD_PLAT != BUILD_WINDOWS
+#include <netdb.h>
+#endif
+
 #define DEFAULT_PORT 25565
 
 namespace CrossCraft {
