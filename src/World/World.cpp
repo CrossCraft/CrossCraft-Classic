@@ -90,6 +90,7 @@ World::World(std::shared_ptr<Player> p) {
 
     place_icd = 0.0f;
     break_icd = 0.0f;
+    chunk_generate_icd = 0.0f;
 
     idx_counter = 0;
     m_verts.clear();
@@ -302,6 +303,15 @@ World::~World() {
 }
 
 #if PSP
+const auto CHUNKS_PER_SECOND = 6.0f;
+#elif BUILD_PLAT == BUILD_VITA
+const auto CHUNKS_PER_SECOND = 12.0f;
+#else
+const auto CHUNKS_PER_SECOND = 96.0f;
+#endif
+
+
+#if PSP
 const auto RENDER_DISTANCE_DIAMETER = 5.0f;
 #elif BUILD_PLAT == BUILD_VITA
 const auto RENDER_DISTANCE_DIAMETER = 10.0f;
@@ -379,7 +389,6 @@ void World::update(double dt) {
         // Check what we have - what we still need
 
         std::map<int, ChunkStack *> existing_chunks;
-        std::vector<glm::ivec2> to_generate;
 
         for (auto &ipos : needed) {
             uint16_t x = ipos.x;
@@ -392,7 +401,13 @@ void World::update(double dt) {
                 chunks.erase(id);
             } else {
                 // needs generated
-                to_generate.push_back(ipos);
+
+                glm::vec2 appos = { ppos.x / 16.0f, ppos.y / 16.0f };
+                glm::vec2 aipos = { (float)ipos.x, (float)ipos.y };
+
+                glm::vec2 diff = appos - aipos;
+                float len = diff.x * diff.x + diff.y * diff.y;
+                to_generate.emplace(len, ipos);
             }
         }
 
@@ -405,19 +420,29 @@ void World::update(double dt) {
         // Now merge existing into blank map
         chunks.merge(existing_chunks);
 
-        // Generate remaining
-        for (auto &ipos : to_generate) {
+    }
+
+    chunk_generate_icd -= dt;
+
+    // Generate remaining
+    if (chunk_generate_icd <= 0.0f) {
+        chunk_generate_icd = 1.0f / (float)CHUNKS_PER_SECOND;
+
+        if (to_generate.size() > 0) {
+            auto ipos = to_generate.begin()->second;
+
             if (ipos.x >= 0 && ipos.x < (world_size.x / 16) && ipos.y >= 0 &&
                 ipos.y < (world_size.z / 16)) {
-                ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
+                ChunkStack* stack = new ChunkStack(ipos.x, ipos.y);
                 stack->generate(this);
 
                 uint16_t x = ipos.x;
                 uint16_t y = ipos.y;
                 uint32_t id = x << 16 | (y & 0x00FF);
                 chunks.emplace(id, stack);
-            } else if (cfg.compat) {
-                ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
+            }
+            else if (cfg.compat) {
+                ChunkStack* stack = new ChunkStack(ipos.x, ipos.y);
                 stack->generate_border();
 
                 uint16_t x = ipos.x;
@@ -425,6 +450,8 @@ void World::update(double dt) {
                 uint32_t id = x << 16 | (y & 0x00FF);
                 chunks.emplace(id, stack);
             }
+
+            to_generate.erase(to_generate.begin()->first);
         }
     }
 }

@@ -159,6 +159,9 @@ class World {
     float tick_counter;
 
     float place_icd, break_icd;
+    float chunk_generate_icd;
+
+    std::map<float, glm::ivec2> to_generate;
 
     uint16_t idx_counter;
     std::vector<Rendering::Vertex> m_verts;
