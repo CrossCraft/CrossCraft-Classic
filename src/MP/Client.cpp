@@ -28,16 +28,8 @@ Client::Client(World *wrld, std::string ip, u16 port) {
 #ifdef _WIN32
     unsigned long mode = (false) ? 0 : 1;
     ioctlsocket(my_socket, FIONBIO, &mode);
-#elif BUILD_PLAT == BUILD_VITA
-    int flag = 1;
-    sceNetSetsockopt(my_socket, SCE_NET_SOL_SOCKET, SCE_NET_SO_NBIO,
-                     (char *)&flag, sizeof(int));
-#else
-    int flags = fcntl(my_socket, F_GETFL, 0);
-
-    flags = (false) ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
-    fcntl(my_socket, F_SETFL, flags);
 #endif
+
     if (!b) {
         SC_APP_ERROR("Failed to open a connection! (Is the server open?)");
         throw std::runtime_error("Fail!");
@@ -659,7 +651,11 @@ auto get_len(Byte type) -> int {
 void Client::receive() {
     Byte newByte;
     int res =
-        ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1, MSG_PEEK);
+        ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1, MSG_PEEK 
+#if BUILD_PLAT != BUILD_WINDOWS
+            | MSG_DONTWAIT
+#endif
+        );
     if (res <= 0)
         return;
 
@@ -671,11 +667,15 @@ void Client::receive() {
 
     for (int i = 0; i < len; i++) {
         Byte b;
+#if BUILD_PLAT == BUILD_WINDOWS
         int result = ::recv(my_socket, reinterpret_cast<char *>(&b), 1, 0);
         if (result != 1) {
             i--;
             continue;
         }
+#else
+        ::recv(my_socket, reinterpret_cast<char*>(&b), 1, 0);
+#endif
 
         byte_buffer->WriteU8(b);
     }
