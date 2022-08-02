@@ -240,8 +240,8 @@ auto World::draw_selection() -> void {
             blk == Block::Lava)
             continue;
 
-        if (ivec.x < 0 || ivec.x > world_size.x || ivec.y < 0 || ivec.y > world_size.y ||
-            ivec.z < 0 || ivec.z > world_size.z)
+        if (ivec.x < 0 || ivec.x > world_size.x || ivec.y < 0 ||
+            ivec.y > world_size.y || ivec.z < 0 || ivec.z > world_size.z)
             return;
 
         auto ctx = &Rendering::RenderContext::get();
@@ -303,18 +303,17 @@ World::~World() {
 }
 
 #if PSP
-const auto CHUNKS_PER_SECOND = 6.0f;
+const auto CHUNKS_PER_SECOND = 2.0f;
 #elif BUILD_PLAT == BUILD_VITA
-const auto CHUNKS_PER_SECOND = 12.0f;
+const auto CHUNKS_PER_SECOND = 4.0f;
 #else
 const auto CHUNKS_PER_SECOND = 96.0f;
 #endif
 
-
 #if PSP
 const auto RENDER_DISTANCE_DIAMETER = 5.0f;
 #elif BUILD_PLAT == BUILD_VITA
-const auto RENDER_DISTANCE_DIAMETER = 10.0f;
+const auto RENDER_DISTANCE_DIAMETER = 8.0f;
 #else
 const auto RENDER_DISTANCE_DIAMETER = 16.f;
 #endif
@@ -402,8 +401,8 @@ void World::update(double dt) {
             } else {
                 // needs generated
 
-                glm::vec2 appos = { ppos.x / 16.0f, ppos.y / 16.0f };
-                glm::vec2 aipos = { (float)ipos.x, (float)ipos.y };
+                glm::vec2 appos = {ppos.x / 16.0f, ppos.y / 16.0f};
+                glm::vec2 aipos = {(float)ipos.x, (float)ipos.y};
 
                 glm::vec2 diff = appos - aipos;
                 float len = diff.x * diff.x + diff.y * diff.y;
@@ -419,7 +418,6 @@ void World::update(double dt) {
 
         // Now merge existing into blank map
         chunks.merge(existing_chunks);
-
     }
 
     chunk_generate_icd -= dt;
@@ -433,16 +431,15 @@ void World::update(double dt) {
 
             if (ipos.x >= 0 && ipos.x < (world_size.x / 16) && ipos.y >= 0 &&
                 ipos.y < (world_size.z / 16)) {
-                ChunkStack* stack = new ChunkStack(ipos.x, ipos.y);
+                ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
                 stack->generate(this);
 
                 uint16_t x = ipos.x;
                 uint16_t y = ipos.y;
                 uint32_t id = x << 16 | (y & 0x00FF);
                 chunks.emplace(id, stack);
-            }
-            else if (cfg.compat) {
-                ChunkStack* stack = new ChunkStack(ipos.x, ipos.y);
+            } else if (cfg.compat) {
+                ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
                 stack->generate_border();
 
                 uint16_t x = ipos.x;
@@ -601,7 +598,8 @@ auto World::update_surroundings(int x, int z) -> void {
 auto World::update_lighting(int x, int z) -> void {
     // Clear
     for (int i = 0; i < 4; i++) {
-        int idx2 = (x * world_size.z * (world_size.y / 16)) + (z * (world_size.y / 16)) + i;
+        int idx2 = (x * world_size.z * (world_size.y / 16)) +
+                   (z * (world_size.y / 16)) + i;
         lightData[idx2] = 0;
     }
 

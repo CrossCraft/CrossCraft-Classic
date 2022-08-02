@@ -98,7 +98,7 @@ class Player {
     static auto enter_chat(std::any p) -> void;
     static auto submit_chat(std::any p) -> void;
     static auto delete_chat(std::any p) -> void;
-    static auto psp_chat() -> void;
+    auto psp_chat() -> void;
 
     int32_t selectorIDX;
     uint8_t itemSelections[9];
@@ -130,7 +130,7 @@ class Player {
         -> void;
 
     auto drawBlk(uint8_t type, int x, int y, float scale) -> void;
-    auto drawBlkHand(uint8_t type, World* wrld) -> void;
+    auto drawBlkHand(uint8_t type, World *wrld) -> void;
 
     glm::vec3 vel;
 
