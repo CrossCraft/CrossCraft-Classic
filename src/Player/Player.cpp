@@ -668,7 +668,7 @@ auto Player::psp_chat() -> void {
                chat_text.length() < STRING_LENGTH ? message.length()
                                                   : STRING_LENGTH);
 
-        p->client_ref->packetsOut.push_back(
+        client_ref->packetsOut.push_back(
             MP::Outgoing::createOutgoingPacket(ptr.get()));
 
         SC_APP_INFO("Message Sent: {}", message);
