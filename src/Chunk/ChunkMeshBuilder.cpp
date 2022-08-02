@@ -48,11 +48,14 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
 
     // Bounds check
     if (!((posCheck.x == -1 && chunkMesh->cX == 0) ||
-          (posCheck.x == 16 && chunkMesh->cX == (wrld->world_size.x / 16 - 1)) ||
+          (posCheck.x == 16 &&
+           chunkMesh->cX == (wrld->world_size.x / 16 - 1)) ||
           (posCheck.y == -1 && chunkMesh->cY == 0) ||
-          (posCheck.y == 16 && chunkMesh->cY == (wrld->world_size.y / 16 - 1)) ||
+          (posCheck.y == 16 &&
+           chunkMesh->cY == (wrld->world_size.y / 16 - 1)) ||
           (posCheck.z == -1 && chunkMesh->cZ == 0) ||
-          (posCheck.z == 16 && chunkMesh->cZ == (wrld->world_size.z / 16 - 1)))) {
+          (posCheck.z == 16 &&
+           chunkMesh->cZ == (wrld->world_size.z / 16 - 1)))) {
 
         int idxl = ((World *)wrld)
                        ->getIdxl(posCheck.x + chunkMesh->cX * 16,
@@ -63,16 +66,22 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
 
         if (idxl >= 0 &&
             !((wrld->lightData[idxl] >> ((int)posCheck.y % 16)) & 1)) {
-            switch(lv) {
-                case LIGHT_TOP:
-                    lv = LIGHT_TOP_DARK; break;
-                case LIGHT_SIDE_X:
-                    lv = LIGHT_SIDE_X_DARK; break;
-                case LIGHT_SIDE_Z:
-                    lv = LIGHT_SIDE_Z_DARK; break;
-                case LIGHT_BOT:
-                    lv = LIGHT_BOT_DARK; break;
-                default: lv = LIGHT_BOT_DARK; break;
+            switch (lv) {
+            case LIGHT_TOP:
+                lv = LIGHT_TOP_DARK;
+                break;
+            case LIGHT_SIDE_X:
+                lv = LIGHT_SIDE_X_DARK;
+                break;
+            case LIGHT_SIDE_Z:
+                lv = LIGHT_SIDE_Z_DARK;
+                break;
+            case LIGHT_BOT:
+                lv = LIGHT_BOT_DARK;
+                break;
+            default:
+                lv = LIGHT_BOT_DARK;
+                break;
             }
         }
 
@@ -83,11 +92,15 @@ void ChunkMeshBuilder::try_add_face(ChunkMesh *chunkMesh, const World *wrld,
                                posCheck.z + chunkMesh->cZ * 16);
 
         // Add face to mesh
-        if (idx >= 0 && idx < (wrld->world_size.x * wrld->world_size.y * wrld->world_size.z) &&
+        if (idx >= 0 &&
+            idx < (wrld->world_size.x * wrld->world_size.y *
+                   wrld->world_size.z) &&
             (wrld->worldData[idx] == Block::Air ||
              wrld->worldData[idx] == Block::Water ||
              wrld->worldData[idx] == Block::Still_Water ||
+#ifndef PSP
              wrld->worldData[idx] == Block::Leaves ||
+#endif
              wrld->worldData[idx] == Block::Flower1 ||
              wrld->worldData[idx] == Block::Flower2 ||
              wrld->worldData[idx] == Block::Mushroom1 ||
@@ -127,23 +140,30 @@ void ChunkMeshBuilder::add_xface_to_mesh(ChunkMesh *chunkMesh,
                                          std::array<float, 8> uv, glm::vec3 pos,
                                          uint32_t lightVal, const World *wrld) {
 
-    int idxl = ((pos.x + chunkMesh->cX * 16) * wrld->world_size.z * wrld->world_size.y / 16) +
-               ((pos.z + chunkMesh->cZ * 16) * wrld->world_size.y / 16) + chunkMesh->cY;
+    int idxl = ((pos.x + chunkMesh->cX * 16) * wrld->world_size.z *
+                wrld->world_size.y / 16) +
+               ((pos.z + chunkMesh->cZ * 16) * wrld->world_size.y / 16) +
+               chunkMesh->cY;
 
     auto lv = lightVal;
     if (!((wrld->lightData[idxl] >> (int)pos.y) & 1)) {
-        switch(lv) {
-            case LIGHT_TOP:
-                lv = LIGHT_TOP_DARK; break;
-            case LIGHT_SIDE_X:
-                lv = LIGHT_SIDE_X_DARK; break;
-            case LIGHT_SIDE_Z:
-                lv = LIGHT_SIDE_Z_DARK; break;
-            case LIGHT_BOT:
-                lv = LIGHT_BOT_DARK; break;
-            default: lv = LIGHT_BOT_DARK; break;
+        switch (lv) {
+        case LIGHT_TOP:
+            lv = LIGHT_TOP_DARK;
+            break;
+        case LIGHT_SIDE_X:
+            lv = LIGHT_SIDE_X_DARK;
+            break;
+        case LIGHT_SIDE_Z:
+            lv = LIGHT_SIDE_Z_DARK;
+            break;
+        case LIGHT_BOT:
+            lv = LIGHT_BOT_DARK;
+            break;
+        default:
+            lv = LIGHT_BOT_DARK;
+            break;
         }
-
     }
 
     // Set data objects

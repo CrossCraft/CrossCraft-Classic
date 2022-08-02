@@ -311,7 +311,7 @@ const auto CHUNKS_PER_SECOND = 96.0f;
 #endif
 
 #if PSP
-const auto RENDER_DISTANCE_DIAMETER = 5.0f;
+const auto RENDER_DISTANCE_DIAMETER = 7.0f;
 #elif BUILD_PLAT == BUILD_VITA
 const auto RENDER_DISTANCE_DIAMETER = 8.0f;
 #else
@@ -474,11 +474,11 @@ void World::draw() {
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
 #if BUILD_PLAT == BUILD_PSP
-    sceGuEnable(GU_BLEND);
-    sceGuEnable(GU_ALPHA_TEST);
+    sceGuDisable(GU_BLEND);
+    sceGuDisable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
     sceGuEnable(GU_DEPTH_TEST);
-    sceGuFog(8.0f, 32.0f, 0x00FFCC99);
+    sceGuFog(0.2f * 3.5f * 16.0f, 0.8f * 3.5f * 16.0f, 0x00FFCC99);
 #else
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
