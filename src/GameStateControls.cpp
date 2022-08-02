@@ -105,8 +105,6 @@ namespace CrossCraft
             {Player::toggle_inv, world->player.get()});
         psp_controller->add_command({(int)Input::PSPButtons::Start, KeyFlag::Press},
                                     {World::save, world.get()});
-        psp_controller->add_command({(int)Input::PSPButtons::Down, KeyFlag::Press},
-                                    {Player::psp_chat, world->player.get()});
 
         vita_controller->add_command(
             {(int)Input::VitaButtons::Select, KeyFlag::Press},
@@ -114,9 +112,6 @@ namespace CrossCraft
         vita_controller->add_command(
             {(int)Input::VitaButtons::Start, KeyFlag::Press},
             {World::save, world.get()});
-        vita_controller->add_command(
-            {(int)Input::VitaButtons::Down, KeyFlag::Press},
-            {Player::psp_chat, world->player.get()});
 
         //
         // PSP Triggers: Press/Hold

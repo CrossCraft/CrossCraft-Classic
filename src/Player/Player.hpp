@@ -98,7 +98,7 @@ class Player {
     static auto enter_chat(std::any p) -> void;
     static auto submit_chat(std::any p) -> void;
     static auto delete_chat(std::any p) -> void;
-    static auto psp_chat(std::any p) -> void;
+    static auto psp_chat() -> void;
 
     int32_t selectorIDX;
     uint8_t itemSelections[9];

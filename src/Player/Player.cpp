@@ -411,7 +411,9 @@ auto Player::press_up(std::any d) -> void {
 
 auto Player::press_down(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (p->in_inventory && !p->in_chat) {
+    if (!p->in_inventory) {
+        psp_chat();
+    } else if (!p->in_chat && p->in_inventory) {
         p->in_cursor_y += 1;
         if (p->in_cursor_y >= 5)
             p->in_cursor_y = 0;
@@ -636,11 +638,10 @@ auto ShowOSK(unsigned short *descritpion, unsigned short *outtext,
 }
 #endif
 
-auto Player::psp_chat(std::any d) -> void {
-    auto p = std::any_cast<Player *>(d);
+auto Player::psp_chat() -> void {
 
 #if PSP
-    if (p->client_ref != nullptr) {
+    if (client_ref != nullptr) {
 
         unsigned short test2[64];
         memset(test2, 0, 64 * sizeof(short));
