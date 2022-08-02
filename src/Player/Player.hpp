@@ -56,7 +56,7 @@ class Player {
      * @brief Draw the player UI
      *
      */
-    auto draw() -> void;
+    auto draw(World *wrld) -> void;
 
     auto spawn(World *wrld) -> void;
 
@@ -130,7 +130,7 @@ class Player {
         -> void;
 
     auto drawBlk(uint8_t type, int x, int y, float scale) -> void;
-    auto drawBlkHand(uint8_t type) -> void;
+    auto drawBlkHand(uint8_t type, World* wrld) -> void;
 
     glm::vec3 vel;
 

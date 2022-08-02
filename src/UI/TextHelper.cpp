@@ -129,15 +129,19 @@ namespace CrossCraft
             break;
         }
 
-        if (bg_mode == CC_TEXT_BG_DYNAMIC)
+        if (bg_mode >= CC_TEXT_BG_DYNAMIC)
         {
             Rendering::RenderContext::get().matrix_translate(glm::vec3(pos, 0));
+
+            if (bg_mode > CC_TEXT_BG_DYNAMIC)
+                Rendering::RenderContext::get().matrix_scale({bg_mode, 1.0f, 1.0f});
+
             background_rectangle->draw();
             Rendering::RenderContext::get().matrix_clear();
         }
 
-        fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, 1.0f);
-        fontRenderer->add_text(text, {pos.x, pos.y}, front, 0.0f);
+        fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, -20);
+        fontRenderer->add_text(text, {pos.x, pos.y}, front, -21);
     }
 
 } // namespace CrossCraft

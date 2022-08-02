@@ -528,7 +528,7 @@ void World::draw() {
     clouds->draw();
     psystem->draw();
 
-    player->draw();
+    player->draw(this);
 }
 
 auto World::update_surroundings(int x, int z) -> void {

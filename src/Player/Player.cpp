@@ -898,8 +898,6 @@ auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {
     blockMesh[type].draw();
 
 #else
-    // if (type == Block::Cobblestone && blockRep[type] != nullptr)
-    //     SC_APP_INFO("CBL");
     blockRep[type]->texture = terrain_atlas;
     blockRep[type]->draw();
 #endif
@@ -916,7 +914,7 @@ auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {
     Rendering::RenderContext::get().matrix_clear();
 }
 
-auto Player::drawBlkHand(uint8_t type) -> void {
+auto Player::drawBlkHand(uint8_t type, World *wrld) -> void {
     auto ctx = &Rendering::RenderContext::get();
 
     ctx->matrix_view(glm::mat4(1.0f));
@@ -940,7 +938,43 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 #if BUILD_PLAT != BUILD_VITA
+
+    bool on_shaded_block;
+
+    int idxl = wrld->getIdxl((int)pos.x, (int)pos.y, (int)pos.z);
+    if((wrld->lightData[idxl] >> ((int)pos.y % 16)) & 1)
+        on_shaded_block = false;
+    else
+        on_shaded_block = true;
+
+
+    // manipulate the model on the fly to tint when under a shadow
+    if (on_shaded_block) {
+        for(auto & vert : m_verts[type]) {
+            vert.color.rgba.r *= 0.6;
+            vert.color.rgba.g *= 0.6;
+            vert.color.rgba.b *= 0.6;
+        }
+        blockMesh[type].delete_data();
+        blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
+                                m_index[type].data(), idx_counter[type]);
+    }
+
+
     blockMesh[type].draw();
+
+    // revert back
+    if (on_shaded_block) {
+        for(auto & vert : m_verts[type]) {
+            vert.color.rgba.r /= 0.6;
+            vert.color.rgba.g /= 0.6;
+            vert.color.rgba.b /= 0.6;
+        }
+        blockMesh[type].delete_data();
+        blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
+                                m_index[type].data(), idx_counter[type]);
+    }
+
 #endif
 
     // ENABLE CULL
@@ -953,11 +987,11 @@ auto Player::drawBlkHand(uint8_t type) -> void {
     ctx->matrix_clear();
 }
 
-auto Player::draw() -> void {
+auto Player::draw(World *wrld) -> void {
     int selectedBlock;
     selectedBlock = (in_cursor_x) + (in_cursor_y * 9);
 
-    drawBlkHand(itemSelections[selectorIDX]);
+    drawBlkHand(itemSelections[selectorIDX], wrld);
 
     playerHUD->begin2D();
 
@@ -1004,20 +1038,20 @@ auto Player::draw() -> void {
                          CC_TEXT_ALIGN_TOP, 0, -1, false);
 #endif
 
-    int i = 5;
+    int i = 9;
     for (int x = chat->data.size() - 1; x >= 0; x--) {
         auto &p = chat->data.at(x);
         if (i < 0)
             break;
 
         playerHUD->draw_text(p.text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-                             CC_TEXT_ALIGN_CENTER, 0, -i - 5, CC_TEXT_BG_NONE);
+                             CC_TEXT_ALIGN_CENTER, 0, -i - 2, CC_TEXT_BG_NONE);
         i--;
     }
 
     if (in_chat) {
-        playerHUD->draw_text(chat_text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-                             CC_TEXT_ALIGN_CENTER, 0, -11, CC_TEXT_BG_DYNAMIC);
+        playerHUD->draw_text("> " + chat_text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
+                             CC_TEXT_ALIGN_BOTTOM, 0, 0, 5);
     }
 
     playerHUD->end2D();
