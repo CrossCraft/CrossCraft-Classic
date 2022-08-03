@@ -336,10 +336,7 @@ namespace CrossCraft
 
                     // Chunk Updates
                     value->chunk_update(this);
-                }
 
-                for (auto &[key, value] : chunks)
-                {
                     value->post_update(this);
                 }
             }

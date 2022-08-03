@@ -16,6 +16,7 @@ namespace CrossCraft
 
         if (version == 1) {
             gzread(save_file, wrld->worldData, 256 * 64 * 256);
+            gzclose(save_file);
         }
         else if (version == 2) {
             gzread(save_file, &wrld->world_size, sizeof(wrld->world_size));
