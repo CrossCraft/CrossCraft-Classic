@@ -69,19 +69,18 @@ class ChunkMesh {
 
     bool needsRegen;
 
-    /**
-     * @brief Finalize a mesh - cleanup memory use
-     *
-     */
-    void finalize_mesh();
-    bool needsFinal;
-
   private:
     /**
      * @brief Reset a mesh and allocate space
      *
      */
     void reset_allocate();
+
+    /**
+     * @brief Finalize a mesh - cleanup memory use
+     *
+     */
+    void finalize_mesh();
 
     int cX, cY, cZ;
     int rtcounter;

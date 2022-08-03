@@ -15,11 +15,6 @@
 
 #define BUILD_PC (BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX)
 
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
-#include <thread>
-std::thread pool[4];
-#endif
-
 #if PSP
 #include <pspkernel.h>
 #elif BUILD_PLAT == BUILD_VITA
@@ -299,34 +294,6 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
     return needed_chunks;
 }
 
-auto World::generate_threaded(World *wrld, glm::ivec2 ipos) -> void {
-    SC_APP_INFO("THREAD STARTED {} {}", ipos.x, ipos.y);
-    if (ipos.x >= 0 && ipos.x < (wrld->world_size.x / 16) && ipos.y >= 0 &&
-        ipos.y < (wrld->world_size.z / 16)) {
-        ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
-        stack->generate(wrld);
-
-        uint16_t x = ipos.x;
-        uint16_t y = ipos.y;
-        uint32_t id = x << 16 | (y & 0x00FF);
-
-        wrld->chunkMapMutex.lock();
-        wrld->chunks.emplace(id, stack);
-        wrld->chunkMapMutex.unlock();
-    } else if (wrld->cfg.compat) {
-        ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
-        stack->generate_border();
-
-        uint16_t x = ipos.x;
-        uint16_t y = ipos.y;
-        uint32_t id = x << 16 | (y & 0x00FF);
-
-        wrld->chunkMapMutex.lock();
-        wrld->chunks.emplace(id, stack);
-        wrld->chunkMapMutex.unlock();
-    }
-}
-
 void World::update(double dt) {
 
     // Request 3D Mode
@@ -407,7 +374,6 @@ void World::update(double dt) {
     if (chunk_generate_icd <= 0.0f) {
         chunk_generate_icd = 1.0f / (float)CHUNKS_PER_SECOND;
 
-#if PSP
         if (to_generate.size() > 0) {
             auto ipos = to_generate.begin()->second;
 
@@ -432,19 +398,6 @@ void World::update(double dt) {
 
             to_generate.erase(to_generate.begin()->first);
         }
-#else
-        for (int i = 0; i < 4; i++) {
-            if (pool[i].joinable())
-                pool[i].join();
-
-            if (to_generate.size() > 0) {
-
-                glm::ivec2 ipos = to_generate.begin()->second;
-                to_generate.erase(to_generate.begin()->first);
-                pool[i] = std::thread(World::generate_threaded, this, ipos);
-            }
-        }
-#endif
     }
 }
 

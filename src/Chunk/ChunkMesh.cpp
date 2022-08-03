@@ -7,7 +7,6 @@ namespace CrossCraft {
 ChunkMesh::ChunkMesh(int x, int y, int z)
     : cX(x), cY(y), cZ(z), rtcounter(0), needsRegen(0) {
     blank = false;
-    needsFinal = true;
 }
 
 ChunkMesh::~ChunkMesh() {}
@@ -20,7 +19,7 @@ void ChunkMesh::reset_allocate() {
 }
 
 void ChunkMesh::finalize_mesh() {
-    needsFinal = false;
+
     meshCollection.transparent.finalize();
     meshCollection.flora.finalize();
     meshCollection.opaque.finalize();
@@ -35,12 +34,10 @@ void ChunkMesh::rtick(World *wrld) {
     int y = rand() % 16; // + cY * 16;
     int z = rand() % 16; // + cZ * 16;
 
-    int idxl = ((x + cX * 16) * wrld->world_size.z * wrld->world_size.y / 16) +
-               ((z + cZ * 16) * wrld->world_size.y / 16) + cY;
+    int idxl = ((x + cX * 16) * wrld->world_size.z * wrld->world_size.y / 16) + ((z + cZ * 16) * wrld->world_size.y / 16) + cY;
 
     bool is_dark = false;
-    if (idxl >= 0 && idxl < (wrld->world_size.z * wrld->world_size.y / 16 *
-                             wrld->world_size.z))
+    if (idxl >= 0 && idxl < (wrld->world_size.z * wrld->world_size.y /16 * wrld->world_size.z))
         is_dark = (!((wrld->lightData[idxl] >> (int)y) & 1));
 
     x += cX * 16;
@@ -306,19 +303,14 @@ void ChunkMesh::generate(const World *wrld) {
         }
     }
 
-#if PSP
     // Finalize the mesh
     finalize_mesh();
-#endif
 }
 void ChunkMesh::generate_blank() {
     // Reset + Allocate
     reset_allocate();
-
-#if PSP
     // Finalize the mesh
     finalize_mesh();
-#endif
 
     blank = true;
 }
@@ -411,10 +403,8 @@ void ChunkMesh::generate_border() {
         }
     }
 
-#if PSP
     // Finalize the mesh
     finalize_mesh();
-#endif
 }
 
 void ChunkMesh::draw(ChunkMeshSelection meshSel) {

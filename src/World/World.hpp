@@ -128,11 +128,6 @@ class World {
      */
     auto add_update(glm::ivec3 ivec) -> void;
 
-#ifndef PSP
-    std::mutex chunkMapMutex;
-    static auto generate_threaded(World *wrld, glm::ivec2 ipos) -> void;
-#endif
-
     auto spawn() -> void;
 
     std::map<int, ChunkStack *> chunks;
