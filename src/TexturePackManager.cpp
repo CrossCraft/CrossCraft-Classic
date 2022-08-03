@@ -51,7 +51,6 @@ auto TexturePackManager::scan_folder(std::string path) -> void {
             auto filename = entry.path().filename().string();
 
             if (filename.find(".zip") != std::string::npos) {
-                SC_APP_INFO("EXTRACT");
                 extract_zip(path + filename);
                 path_names.push_back(entry.path().filename().string().substr(
                     0, filename.find(".zip")));
@@ -62,10 +61,6 @@ auto TexturePackManager::scan_folder(std::string path) -> void {
     std::sort(path_names.begin(), path_names.end());
     path_names.erase(std::unique(path_names.begin(), path_names.end()),
                      path_names.end());
-
-    SC_APP_INFO("TEXTURE PACK INFO: ");
-    for (auto &str : path_names)
-        SC_APP_INFO("Texture Pack Found: {}", str);
 }
 
 auto TexturePackManager::extract_zip(std::string path) -> int {

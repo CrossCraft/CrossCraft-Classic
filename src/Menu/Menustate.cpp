@@ -64,11 +64,9 @@ void MenuState::on_start() {
         "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, false);
 
-
     bg_tile = create_scopeptr<Graphics::G2D::Sprite>(
         bg_texture, Rendering::Rectangle{{0, 0}, {32, 32}},
         Rendering::Color{80, 80, 80, 255});
-
 
     logo_sprite = create_scopeptr<Graphics::G2D::Sprite>(
         logo_texture, Rendering::Rectangle{{-16, 272 - 87}, {512, 64}});
@@ -112,6 +110,8 @@ void MenuState::on_cleanup() {
     delete psp_controller;
     delete key_controller;
     delete mouse_controller;
+    delete vita_controller;
+
     Input::clear_controller();
 
     Rendering::TextureManager::get().delete_texture(gui_tex);
@@ -392,27 +392,30 @@ void MenuState::trigger(std::any m) {
             if (std::find(vec.begin(), vec.end(), name) == vec.end()) {
                 vec.push_back(name);
 
-                Rendering::TextureManager::get().delete_texture(mstate->bg_texture);
-                Rendering::TextureManager::get().delete_texture(mstate->logo_texture);
-                Rendering::TextureManager::get().delete_texture(mstate->gui_tex);
-                Rendering::TextureManager::get().delete_texture(mstate->font_texture);
+                Rendering::TextureManager::get().delete_texture(
+                    mstate->bg_texture);
+                Rendering::TextureManager::get().delete_texture(
+                    mstate->logo_texture);
+                Rendering::TextureManager::get().delete_texture(
+                    mstate->gui_tex);
+                Rendering::TextureManager::get().delete_texture(
+                    mstate->font_texture);
 
                 mstate->bg_texture = TexturePackManager::get().load_texture(
-                    "assets/dirt.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST, false,
-                    true);
+                    "assets/dirt.png", SC_TEX_FILTER_NEAREST,
+                    SC_TEX_FILTER_NEAREST, false, true);
 
                 mstate->logo_texture = TexturePackManager::get().load_texture(
-                    "assets/menu/logo.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-                    false, true);
+                    "assets/menu/logo.png", SC_TEX_FILTER_NEAREST,
+                    SC_TEX_FILTER_NEAREST, false, true);
 
                 mstate->gui_tex = TexturePackManager::get().load_texture(
-                    "assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-                    false, true);
+                    "assets/gui/gui.png", SC_TEX_FILTER_NEAREST,
+                    SC_TEX_FILTER_NEAREST, false, true);
 
                 mstate->font_texture = TexturePackManager::get().load_texture(
-                    "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-                    false, false);
-
+                    "assets/default.png", SC_TEX_FILTER_NEAREST,
+                    SC_TEX_FILTER_NEAREST, false, false);
 
                 mstate->bg_tile->texture = mstate->bg_texture;
                 mstate->logo_sprite->texture = mstate->logo_texture;
