@@ -2,6 +2,7 @@
 
 #include "World/DigAction.hpp"
 #include "World/PlaceAction.hpp"
+#include "World/SaveData.hpp"
 
 namespace CrossCraft
 {
@@ -104,14 +105,14 @@ namespace CrossCraft
             {(int)Input::PSPButtons::Select, KeyFlag::Press},
             {Player::toggle_inv, world->player.get()});
         psp_controller->add_command({(int)Input::PSPButtons::Start, KeyFlag::Press},
-                                    {World::save, world.get()});
+                                    {SaveData::save, world.get()});
 
         vita_controller->add_command(
             {(int)Input::VitaButtons::Select, KeyFlag::Press},
             {Player::toggle_inv, world->player.get()});
         vita_controller->add_command(
             {(int)Input::VitaButtons::Start, KeyFlag::Press},
-            {World::save, world.get()});
+            { SaveData::save, world.get()});
 
         //
         // PSP Triggers: Press/Hold
@@ -131,7 +132,7 @@ namespace CrossCraft
             {PlaceAction::place, world.get()});
 
         key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
-                                    {World::save, world.get()});
+                                    { SaveData::save, world.get()});
 
         key_controller->add_command({(int)Input::Keys::W, KeyFlag::Release},
                                     {Player::move_reset, world->player.get()});

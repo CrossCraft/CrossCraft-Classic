@@ -1,19 +1,82 @@
 #include "Gamestate.hpp"
 
+#include "Rendering/ShaderManager.hpp"
 #include "TexturePackManager.hpp"
 #include "Utils.hpp"
 #include "World/Generation/ClassicGenerator.hpp"
 #include "World/Generation/CrossCraftGenerator.hpp"
+#include "World/SaveData.hpp"
 
 namespace CrossCraft {
 using namespace Stardust_Celeste::Utilities;
 
 GameState::~GameState() { on_cleanup(); }
 
+#if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX
+const std::string vert_source = R"(
+    #version 400
+    layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec4 aCol;
+    layout (location = 2) in vec2 aTex;
+
+    layout (std140) uniform Matrices {
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+    };
+    
+    out vec2 uv;
+    out vec4 color;
+    out vec3 position;
+
+    void main() {
+        gl_Position = proj * view * model * vec4(aPos, 1.0);
+        position = gl_Position.xyz;
+        uv = aTex;
+        color = aCol;
+    }
+)";
+
+const std::string frag_source = R"(
+    #version 400
+    uniform sampler2D tex;
+    in vec2 uv;
+    in vec4 color;
+    in vec3 position;
+
+    out vec4 FragColor;
+
+    const vec3 fogColor = vec3(0.59765f, 0.796875, 1.0f);
+    const float density = 0.0005f;
+
+    void main() {
+        vec4 texColor = texture(tex, uv);
+        texColor *= vec4(1.0f / 255.0f) * color;
+
+        float dist = abs(position.z);
+        const float fogMax = (8.0f * 16.0f * 0.8);
+        const float fogMin = (8.0f * 16.0f * 0.2);
+        float fogFactor = (fogMax - dist) / (fogMax - fogMin);
+        fogFactor = clamp(fogFactor, 0.0f, 1.0f);
+
+        FragColor = vec4(mix(fogColor.rgb, texColor.rgb, fogFactor), texColor.a); 
+
+        if(FragColor.a < 0.1f)
+            discard;
+   }
+)";
+#endif
+
 void GameState::on_start() {
     // Set Color
     Rendering::RenderContext::get().set_color(
         Rendering::Color{0x99, 0xCC, 0xFF, 0xFF});
+
+#if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX
+    auto shad =
+        Rendering::ShaderManager::get().load_shader(vert_source, frag_source);
+    Rendering::ShaderManager::get().bind_shader(shad);
+#endif
 
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
@@ -33,7 +96,7 @@ void GameState::on_start() {
         // Try Load Save -- if fails, do generation
 
         FILE *fptr = fopen((PLATFORM_FILE_PREFIX + "save.ccc").c_str(), "r");
-        if (!fptr || !world->load_world()) {
+        if (!fptr || !SaveData::load_world(world.get())) {
             if (world->cfg.compat)
                 ClassicGenerator::generate(world.get());
             else
