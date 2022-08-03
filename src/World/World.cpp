@@ -373,7 +373,7 @@ namespace CrossCraft
                 {
                     // needs generated
 
-                    glm::vec2 appos = {ppos.x / 16.0f, ppos.y / 16.0f};
+                    glm::vec2 appos = {ppos.x / 16.0f, ppos.z / 16.0f};
                     glm::vec2 aipos = {(float)ipos.x, (float)ipos.y};
 
                     glm::vec2 diff = appos - aipos;
