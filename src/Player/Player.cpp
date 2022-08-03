@@ -914,6 +914,27 @@ auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {
     Rendering::RenderContext::get().matrix_clear();
 }
 
+#if PSP
+u32 totalRamFree() {
+    u32 size = 0;
+    const u32 BLOCK_SIZE = 1024 * 512;
+
+    while (true) {
+        size += BLOCK_SIZE;
+        u8* ram = (u8*)malloc(size);
+
+        if (ram == NULL) {
+            size -= BLOCK_SIZE;
+            break;
+        }
+
+        free(ram);
+    }
+
+    return size;
+}
+#endif
+
 auto Player::drawBlkHand(uint8_t type, World *wrld) -> void {
     auto ctx = &Rendering::RenderContext::get();
 
@@ -1031,7 +1052,8 @@ auto Player::draw(World *wrld) -> void {
                          CC_TEXT_ALIGN_TOP, 0, 0, false);
 
 #if PSP
-    playerHUD->draw_text("RAM: " + std::to_string(sceKernelTotalFreeMemSize()),
+    auto total = totalRamFree() + sceKernelTotalFreeMemSize();
+    playerHUD->draw_text("RAM: " + std::to_string(total),
                          CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
                          CC_TEXT_ALIGN_TOP, 0, -1, false);
 #endif
