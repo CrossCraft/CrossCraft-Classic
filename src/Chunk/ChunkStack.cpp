@@ -193,6 +193,9 @@ void ChunkStack::generate_border() {
 void ChunkStack::draw() {
     // Draw meshes
     for (int i = 0; i < 4; i++) {
+        if (stack[i]->needsFinal)
+            stack[i]->finalize_mesh();
+
         stack[i]->draw(ChunkMeshSelection::Opaque);
     }
 }
