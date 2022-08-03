@@ -7,7 +7,9 @@ void ChunkMeshBuilder::add_slab_to_mesh(ChunkMesh *chunkMesh, const World *wrld,
                                         SurroundPos surround) {
     try_add_face(chunkMesh, wrld, bottomFace, blk, {pos.x, pos.y, pos.z},
                  surround.down, LIGHT_BOT);
-    add_face_to_mesh(chunkMesh, topFace, getTexCoord(blk, LIGHT_TOP),
+
+    // FIXME: have to duplicate and pass world to do a light check.. sigh..
+    add_face_to_mesh_wrld(chunkMesh, wrld, topFace, getTexCoord(blk, LIGHT_TOP),
                      {pos.x, pos.y - 0.5f, pos.z}, LIGHT_TOP,
                      ChunkMeshSelection::Opaque);
 
@@ -239,6 +241,65 @@ void ChunkMeshBuilder::add_xface_to_mesh(ChunkMesh *chunkMesh,
             xFace4[idx++] + pos.x,
             xFace4[idx++] + pos.y,
             xFace4[idx++] + pos.z,
+        });
+    }
+
+    // Push Back Indices
+    mi->push_back((*idc));
+    mi->push_back((*idc) + 1);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 2);
+    mi->push_back((*idc) + 3);
+    mi->push_back((*idc) + 0);
+    (*idc) += 4;
+}
+
+// TODO: REMOVE ME
+void ChunkMeshBuilder::add_face_to_mesh_wrld(ChunkMesh *chunkMesh, const World *wrld,
+                                        std::array<float, 12> data,
+                                        std::array<float, 8> uv, glm::vec3 pos,
+                                        uint32_t lightVal,
+                                        ChunkMeshSelection meshSel) {
+
+    auto mesh = chunkMesh->meshCollection.select(meshSel);
+
+    auto *m = &mesh->m_verts;
+    auto *mi = &mesh->m_index;
+    auto *idc = &mesh->idx_counter;
+
+    int idxl = ((pos.x + chunkMesh->cX * 16) * wrld->world_size.z * wrld->world_size.y / 16) +
+               ((pos.z + chunkMesh->cZ * 16) * wrld->world_size.y / 16) + chunkMesh->cY;
+
+    auto lv = lightVal;
+    if (!((wrld->lightData[idxl] >> (int)pos.y) & 1)) {
+        switch(lv) {
+            case LIGHT_TOP:
+                lv = LIGHT_TOP_DARK; break;
+            case LIGHT_SIDE_X:
+                lv = LIGHT_SIDE_X_DARK; break;
+            case LIGHT_SIDE_Z:
+                lv = LIGHT_SIDE_Z_DARK; break;
+            case LIGHT_BOT:
+                lv = LIGHT_BOT_DARK; break;
+            default: lv = LIGHT_BOT_DARK; break;
+        }
+
+    }
+
+    // Create color
+    Rendering::Color c;
+    c.color = lv;
+
+    // Push Back Verts
+    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
+
+        m->push_back(Rendering::Vertex{
+            uv[tx++],
+            uv[tx++],
+            c,
+            data[idx++] + pos.x,
+            data[idx++] + pos.y,
+            data[idx++] + pos.z,
         });
     }
 
