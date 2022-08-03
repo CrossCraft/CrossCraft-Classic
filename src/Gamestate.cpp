@@ -4,6 +4,7 @@
 #include "Utils.hpp"
 #include "World/Generation/ClassicGenerator.hpp"
 #include "World/Generation/CrossCraftGenerator.hpp"
+#include "World/SaveData.hpp"
 
 namespace CrossCraft {
 using namespace Stardust_Celeste::Utilities;
@@ -33,7 +34,7 @@ void GameState::on_start() {
         // Try Load Save -- if fails, do generation
 
         FILE *fptr = fopen((PLATFORM_FILE_PREFIX + "save.ccc").c_str(), "r");
-        if (!fptr || !world->load_world()) {
+        if (!fptr || !SaveData::load_world(world.get())) {
             if (world->cfg.compat)
                 ClassicGenerator::generate(world.get());
             else

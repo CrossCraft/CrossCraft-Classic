@@ -58,8 +58,6 @@ class World {
      */
     ~World();
 
-    auto load_world() -> bool;
-
     /**
      * @brief Update (checks chunks, run chunk updates, tick updates);
      *
@@ -131,7 +129,6 @@ class World {
     auto add_update(glm::ivec3 ivec) -> void;
 
     auto spawn() -> void;
-    static auto save(std::any p) -> void;
 
     std::map<int, ChunkStack *> chunks;
     ChunkMeta *chunksMeta;
