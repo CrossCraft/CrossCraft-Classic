@@ -130,7 +130,8 @@ class World {
 
 #ifndef PSP
     std::mutex chunkMapMutex;
-    static auto generate_threaded(World *wrld, glm::ivec2 ipos) -> void;
+    static auto generate_threaded(World *wrld, glm::ivec2 ipos, float key) -> void;
+    std::vector<float> assignedKeys;
 #endif
 
     auto spawn() -> void;

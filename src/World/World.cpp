@@ -262,7 +262,7 @@ const auto CHUNKS_PER_SECOND = 2.0f;
 #elif BUILD_PLAT == BUILD_VITA
 const auto CHUNKS_PER_SECOND = 4.0f;
 #else
-const auto CHUNKS_PER_SECOND = 96.0f;
+const auto CHUNKS_PER_SECOND = 96.0f / 4.0f;
 #endif
 
 #if PSP
@@ -298,9 +298,8 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
     }
     return needed_chunks;
 }
-
-auto World::generate_threaded(World *wrld, glm::ivec2 ipos) -> void {
-    SC_APP_INFO("THREAD STARTED {} {}", ipos.x, ipos.y);
+#ifndef PSP
+auto World::generate_threaded(World *wrld, glm::ivec2 ipos, float key) -> void {
     if (ipos.x >= 0 && ipos.x < (wrld->world_size.x / 16) && ipos.y >= 0 &&
         ipos.y < (wrld->world_size.z / 16)) {
         ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
@@ -325,7 +324,10 @@ auto World::generate_threaded(World *wrld, glm::ivec2 ipos) -> void {
         wrld->chunks.emplace(id, stack);
         wrld->chunkMapMutex.unlock();
     }
+
+    wrld->to_generate.erase(key);
 }
+#endif
 
 void World::update(double dt) {
 
@@ -407,7 +409,7 @@ void World::update(double dt) {
     if (chunk_generate_icd <= 0.0f) {
         chunk_generate_icd = 1.0f / (float)CHUNKS_PER_SECOND;
 
-#if PSP
+#if BUILD_PLAT != BUILD_VITA
         if (to_generate.size() > 0) {
             auto ipos = to_generate.begin()->second;
 
@@ -433,16 +435,34 @@ void World::update(double dt) {
             to_generate.erase(to_generate.begin()->first);
         }
 #else
-        for (int i = 0; i < 4; i++) {
-            if (pool[i].joinable())
-                pool[i].join();
 
-            if (to_generate.size() > 0) {
+        for (int c = 0; c < 4; c++) {
+            if (pool[c].joinable()) {
+                pool[c].join();
 
-                glm::ivec2 ipos = to_generate.begin()->second;
-                to_generate.erase(to_generate.begin()->first);
-                pool[i] = std::thread(World::generate_threaded, this, ipos);
+                for (auto& [key, val] : chunks) {
+                    val->finalize();
+                }
             }
+        }
+
+        int i = 0;
+
+        for (std::map<float, glm::ivec2>::iterator it = to_generate.begin(); it != to_generate.end(); ++it) {
+            if (i >= 4)
+                break;
+
+            auto key = it->first;
+            for (auto k : assignedKeys) {
+                if (key == k)
+                    goto skip;
+            }
+
+            pool[i++] = std::thread(World::generate_threaded, this, it->second, it->first);
+            assignedKeys.push_back(key);
+
+        skip:
+            continue;
         }
 #endif
     }
@@ -569,8 +589,10 @@ auto World::update_surroundings(int x, int z) -> void {
 
     if (xMod && nX >= 0 && nX < 16) {
         uint32_t idxx = nX << 16 | (cY & 0x00FF);
-        if (chunks.find(idxx) != chunks.end())
+        if (chunks.find(idxx) != chunks.end()) {
             chunks[idxx]->generate(this);
+            chunks[idxx]->finalize();
+        }
     }
 
     bool zMod = true;
@@ -585,8 +607,10 @@ auto World::update_surroundings(int x, int z) -> void {
 
     if (zMod && nY >= 0 && nY < 16) {
         uint32_t idzz = 0 | cX << 16 | (nY & 0x00FF);
-        if (chunks.find(idzz) != chunks.end())
+        if (chunks.find(idzz) != chunks.end()) {
             chunks[idzz]->generate(this);
+            chunks[idzz]->finalize();
+        }
     }
 }
 

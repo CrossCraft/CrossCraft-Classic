@@ -17,6 +17,7 @@ ChunkStack::~ChunkStack() {
     }
 }
 
+
 auto is_valid(glm::ivec3 ivec) -> bool {
     return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
            ivec.z >= 0 && ivec.z < 256;
@@ -151,6 +152,14 @@ void ChunkStack::post_update(World *wrld) {
     updated.clear();
 }
 
+void ChunkStack::finalize() {
+    for (int i = 0; i < 4; i++) {
+        if (stack[i]->needsFinal)
+            stack[i]->finalize_mesh();
+    }
+}
+
+
 /**
  * @brief Random Tick Update
  *
@@ -193,8 +202,6 @@ void ChunkStack::generate_border() {
 void ChunkStack::draw() {
     // Draw meshes
     for (int i = 0; i < 4; i++) {
-        if (stack[i]->needsFinal)
-            stack[i]->finalize_mesh();
 
         stack[i]->draw(ChunkMeshSelection::Opaque);
     }

@@ -169,8 +169,10 @@ auto PlaceAction::place(std::any d) -> void {
         // Update Lighting
         w->update_lighting(ivec.x, ivec.z);
 
-        if (w->chunks.find(id) != w->chunks.end())
+        if (w->chunks.find(id) != w->chunks.end()) {
             w->chunks[id]->generate(w);
+            w->chunks[id]->finalize();
+        }
 
         w->update_surroundings(ivec.x, ivec.z);
         w->update_nearby_blocks(ivec);
