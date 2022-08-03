@@ -1,17 +1,16 @@
 #include "Gamestate.hpp"
 
+#include "Rendering/ShaderManager.hpp"
 #include "TexturePackManager.hpp"
 #include "Utils.hpp"
 #include "World/Generation/ClassicGenerator.hpp"
 #include "World/Generation/CrossCraftGenerator.hpp"
 #include "World/SaveData.hpp"
-#include "Rendering/ShaderManager.hpp"
 
 namespace CrossCraft {
 using namespace Stardust_Celeste::Utilities;
 
 GameState::~GameState() { on_cleanup(); }
-
 
 #if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX
 const std::string vert_source = R"(
@@ -74,9 +73,10 @@ void GameState::on_start() {
         Rendering::Color{0x99, 0xCC, 0xFF, 0xFF});
 
 #if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX
-    auto shad = Rendering::ShaderManager::get().load_shader(vert_source, frag_source);
+    auto shad =
+        Rendering::ShaderManager::get().load_shader(vert_source, frag_source);
     Rendering::ShaderManager::get().bind_shader(shad);
-#endif;
+#endif
 
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
