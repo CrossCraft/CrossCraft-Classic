@@ -7,6 +7,7 @@ namespace CrossCraft {
 ChunkMesh::ChunkMesh(int x, int y, int z)
     : cX(x), cY(y), cZ(z), rtcounter(0), needsRegen(0) {
     blank = false;
+    needsFinal = true;
 }
 
 ChunkMesh::~ChunkMesh() {}
@@ -106,7 +107,6 @@ void ChunkMesh::rtick(World *wrld) {
 }
 
 void ChunkMesh::generate(const World *wrld) {
-    needsFinal = true;
 
     // Reset + Allocate
     reset_allocate();
@@ -306,18 +306,16 @@ void ChunkMesh::generate(const World *wrld) {
         }
     }
 
-#if BUILD_PLAT != BUILD_VITA
+#if PSP
     // Finalize the mesh
     finalize_mesh();
 #endif
 }
 void ChunkMesh::generate_blank() {
-
-    needsFinal = true;
     // Reset + Allocate
     reset_allocate();
 
-#if BUILD_PLAT != BUILD_VITA
+#if PSP
     // Finalize the mesh
     finalize_mesh();
 #endif
@@ -326,7 +324,6 @@ void ChunkMesh::generate_blank() {
 }
 
 void ChunkMesh::generate_border() {
-    needsFinal = true;
 
     // Reset + Allocate
     reset_allocate();
@@ -414,7 +411,7 @@ void ChunkMesh::generate_border() {
         }
     }
 
-#if BUILD_PLAT != BUILD_VITA
+#if PSP
     // Finalize the mesh
     finalize_mesh();
 #endif

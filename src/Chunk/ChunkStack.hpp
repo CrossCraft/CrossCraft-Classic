@@ -82,8 +82,6 @@ class ChunkStack {
 
     void draw_flora();
 
-    void finalize();
-
     /**
      * @brief Get the chunk position
      *
