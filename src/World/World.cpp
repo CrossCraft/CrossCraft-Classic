@@ -90,6 +90,7 @@ World::World(std::shared_ptr<Player> p) {
 
     place_icd = 0.0f;
     break_icd = 0.0f;
+    chunk_generate_icd = 0.0f;
 
     idx_counter = 0;
     m_verts.clear();
@@ -239,8 +240,8 @@ auto World::draw_selection() -> void {
             blk == Block::Lava)
             continue;
 
-        if (ivec.x < 0 || ivec.x > world_size.x || ivec.y < 0 || ivec.y > world_size.y ||
-            ivec.z < 0 || ivec.z > world_size.z)
+        if (ivec.x < 0 || ivec.x > world_size.x || ivec.y < 0 ||
+            ivec.y > world_size.y || ivec.z < 0 || ivec.z > world_size.z)
             return;
 
         auto ctx = &Rendering::RenderContext::get();
@@ -302,9 +303,17 @@ World::~World() {
 }
 
 #if PSP
-const auto RENDER_DISTANCE_DIAMETER = 5.0f;
+const auto CHUNKS_PER_SECOND = 2.0f;
 #elif BUILD_PLAT == BUILD_VITA
-const auto RENDER_DISTANCE_DIAMETER = 10.0f;
+const auto CHUNKS_PER_SECOND = 4.0f;
+#else
+const auto CHUNKS_PER_SECOND = 96.0f;
+#endif
+
+#if PSP
+const auto RENDER_DISTANCE_DIAMETER = 7.0f;
+#elif BUILD_PLAT == BUILD_VITA
+const auto RENDER_DISTANCE_DIAMETER = 8.0f;
 #else
 const auto RENDER_DISTANCE_DIAMETER = 16.f;
 #endif
@@ -379,7 +388,6 @@ void World::update(double dt) {
         // Check what we have - what we still need
 
         std::map<int, ChunkStack *> existing_chunks;
-        std::vector<glm::ivec2> to_generate;
 
         for (auto &ipos : needed) {
             uint16_t x = ipos.x;
@@ -392,7 +400,13 @@ void World::update(double dt) {
                 chunks.erase(id);
             } else {
                 // needs generated
-                to_generate.push_back(ipos);
+
+                glm::vec2 appos = {ppos.x / 16.0f, ppos.y / 16.0f};
+                glm::vec2 aipos = {(float)ipos.x, (float)ipos.y};
+
+                glm::vec2 diff = appos - aipos;
+                float len = diff.x * diff.x + diff.y * diff.y;
+                to_generate.emplace(len, ipos);
             }
         }
 
@@ -404,9 +418,17 @@ void World::update(double dt) {
 
         // Now merge existing into blank map
         chunks.merge(existing_chunks);
+    }
 
-        // Generate remaining
-        for (auto &ipos : to_generate) {
+    chunk_generate_icd -= dt;
+
+    // Generate remaining
+    if (chunk_generate_icd <= 0.0f) {
+        chunk_generate_icd = 1.0f / (float)CHUNKS_PER_SECOND;
+
+        if (to_generate.size() > 0) {
+            auto ipos = to_generate.begin()->second;
+
             if (ipos.x >= 0 && ipos.x < (world_size.x / 16) && ipos.y >= 0 &&
                 ipos.y < (world_size.z / 16)) {
                 ChunkStack *stack = new ChunkStack(ipos.x, ipos.y);
@@ -425,6 +447,8 @@ void World::update(double dt) {
                 uint32_t id = x << 16 | (y & 0x00FF);
                 chunks.emplace(id, stack);
             }
+
+            to_generate.erase(to_generate.begin()->first);
         }
     }
 }
@@ -450,11 +474,11 @@ void World::draw() {
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
 #if BUILD_PLAT == BUILD_PSP
-    sceGuEnable(GU_BLEND);
-    sceGuEnable(GU_ALPHA_TEST);
+    sceGuDisable(GU_BLEND);
+    sceGuDisable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
     sceGuEnable(GU_DEPTH_TEST);
-    sceGuFog(8.0f, 32.0f, 0x00FFCC99);
+    sceGuFog(0.2f * 3.5f * 16.0f, 0.8f * 3.5f * 16.0f, 0x00FFCC99);
 #else
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -574,7 +598,8 @@ auto World::update_surroundings(int x, int z) -> void {
 auto World::update_lighting(int x, int z) -> void {
     // Clear
     for (int i = 0; i < 4; i++) {
-        int idx2 = (x * world_size.z * (world_size.y / 16)) + (z * (world_size.y / 16)) + i;
+        int idx2 = (x * world_size.z * (world_size.y / 16)) +
+                   (z * (world_size.y / 16)) + i;
         lightData[idx2] = 0;
     }
 

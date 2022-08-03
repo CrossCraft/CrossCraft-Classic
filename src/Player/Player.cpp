@@ -412,7 +412,8 @@ auto Player::press_up(std::any d) -> void {
 auto Player::press_down(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory) {
-        psp_chat();
+        p->psp_chat();
+        p->in_chat = false;
     } else if (!p->in_chat && p->in_inventory) {
         p->in_cursor_y += 1;
         if (p->in_cursor_y >= 5)
@@ -673,8 +674,6 @@ auto Player::psp_chat() -> void {
 
         SC_APP_INFO("Message Sent: {}", message);
     }
-
-    p->in_chat = false;
 #endif
 }
 
@@ -943,37 +942,35 @@ auto Player::drawBlkHand(uint8_t type, World *wrld) -> void {
     bool on_shaded_block;
 
     int idxl = wrld->getIdxl((int)pos.x, (int)pos.y, (int)pos.z);
-    if((wrld->lightData[idxl] >> ((int)pos.y % 16)) & 1)
+    if ((wrld->lightData[idxl] >> ((int)pos.y % 16)) & 1)
         on_shaded_block = false;
     else
         on_shaded_block = true;
 
-
     // manipulate the model on the fly to tint when under a shadow
     if (on_shaded_block) {
-        for(auto & vert : m_verts[type]) {
+        for (auto &vert : m_verts[type]) {
             vert.color.rgba.r *= 0.6;
             vert.color.rgba.g *= 0.6;
             vert.color.rgba.b *= 0.6;
         }
         blockMesh[type].delete_data();
         blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
-                                m_index[type].data(), idx_counter[type]);
+                                 m_index[type].data(), idx_counter[type]);
     }
-
 
     blockMesh[type].draw();
 
     // revert back
     if (on_shaded_block) {
-        for(auto & vert : m_verts[type]) {
+        for (auto &vert : m_verts[type]) {
             vert.color.rgba.r /= 0.6;
             vert.color.rgba.g /= 0.6;
             vert.color.rgba.b /= 0.6;
         }
         blockMesh[type].delete_data();
         blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
-                                m_index[type].data(), idx_counter[type]);
+                                 m_index[type].data(), idx_counter[type]);
     }
 
 #endif
@@ -1051,8 +1048,8 @@ auto Player::draw(World *wrld) -> void {
     }
 
     if (in_chat) {
-        playerHUD->draw_text("> " + chat_text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-                             CC_TEXT_ALIGN_BOTTOM, 0, 0, 5);
+        playerHUD->draw_text("> " + chat_text, CC_TEXT_COLOR_WHITE,
+                             CC_TEXT_ALIGN_LEFT, CC_TEXT_ALIGN_BOTTOM, 0, 0, 5);
     }
 
     playerHUD->end2D();
