@@ -65,6 +65,47 @@ const std::string frag_source = R"(
             discard;
    }
 )";
+#elif BUILD_PLAT == BUILD_VITA
+const std::string vert_source =
+    R"(
+    void main ( float3 position, float4 color, float2 uv,
+                float2 out vTexcoord : TEXCOORD0, 
+                float4 out vPosition : POSITION, 
+                float4 out vColor : COLOR, 
+                uniform float4x4 proj, 
+                uniform float4x4 view, 
+                uniform float4x4 model)
+    {
+        vPosition = mul(mul(mul(float4(position, 1.f), model), view), proj);
+        vTexcoord = uv;
+        vColor = color;
+    }
+)";
+
+const std::string frag_source =
+    R"(
+    float4 main(float2 vTexcoord : TEXCOORD0, float4 vColor : COLOR0, float4 coords : WPOS, uniform sampler2D tex) {
+
+        float4 texColor = tex2D(tex, vTexcoord);
+        texColor *= vColor;
+        texColor = clamp(texColor, 0.0f, 1.0f);
+
+        float dist = coords.z / coords.w;
+
+        float fogMax = (4.0f * 16.0f * 0.8f);
+        float fogMin = (4.0f * 16.0f * 0.2f);
+        float fogFactor = (fogMax - dist) / (fogMax - fogMin);
+        fogFactor = clamp(fogFactor, 0.0f, 1.0f);
+    
+        float3 fogColor = float3(0.59765f, 0.796875, 1.0f);
+        texColor.rgb = lerp(fogColor.rgb, texColor.rgb, fogFactor);
+
+        if(texColor.a < 0.1f)
+            discard;
+
+        return texColor;
+    }
+)";
 #endif
 
 void GameState::on_start() {
@@ -72,7 +113,8 @@ void GameState::on_start() {
     Rendering::RenderContext::get().set_color(
         Rendering::Color{0x99, 0xCC, 0xFF, 0xFF});
 
-#if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX
+#if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX ||                \
+    BUILD_PLAT == BUILD_VITA
     auto shad =
         Rendering::ShaderManager::get().load_shader(vert_source, frag_source);
     Rendering::ShaderManager::get().bind_shader(shad);

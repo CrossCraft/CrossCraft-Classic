@@ -261,7 +261,7 @@ const auto CHUNKS_PER_SECOND = 96.0f;
 #endif
 
 #if PSP
-const auto RENDER_DISTANCE_DIAMETER = 7.0f;
+const auto RENDER_DISTANCE_DIAMETER = 6.0f;
 #elif BUILD_PLAT == BUILD_VITA
 const auto RENDER_DISTANCE_DIAMETER = 8.0f;
 #else
@@ -426,7 +426,7 @@ void World::draw() {
     sceGuDisable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
     sceGuEnable(GU_DEPTH_TEST);
-    sceGuFog(0.2f * 3.5f * 16.0f, 0.8f * 3.5f * 16.0f, 0x00FFCC99);
+    sceGuFog(0.2f * 3.0f * 16.0f, 0.8f * 3.0f * 16.0f, 0x00FFCC99);
 #else
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
