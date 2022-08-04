@@ -24,10 +24,17 @@
 #include <vector>
 namespace CrossCraft {
 
-struct ChunkMeta {
-    bool is_empty;
-    bool is_full;
-};
+    struct LayerMeta {
+        bool is_empty;
+        bool is_full;
+    };
+
+    struct ChunkMeta {
+        bool is_empty;
+        bool is_full;
+
+        LayerMeta layers[16];
+    };
 
 inline auto validate_ivec3(glm::ivec3 ivec, glm::vec3 size) -> bool {
     return ivec.x >= 0 && ivec.x < size.x && ivec.y >= 0 && ivec.y < size.y &&

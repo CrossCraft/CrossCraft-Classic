@@ -132,6 +132,11 @@ auto World::generate_meta() -> void {
                 meta.is_empty = true;
                 meta.is_full = true;
 
+                for (int layer = 0; layer < 16; layer++) {
+                    meta.layers[layer].is_empty = true;
+                    meta.layers[layer].is_empty = false;
+                }
+
                 for (int local_x = 0; local_x < 16; local_x++)
                     for (int local_z = 0; local_z < 16; local_z++)
                         for (int local_y = 0; local_y < 16; local_y++) {
@@ -143,16 +148,20 @@ auto World::generate_meta() -> void {
 
                             auto blk = worldData[idx];
 
-                            if (blk != Block::Air)
+                            if (blk != Block::Air) {
                                 meta.is_empty = false;
+                                meta.layers[local_y].is_empty = false;
+                            }
                             if (blk == Block::Air || blk == Block::Water ||
                                 blk == Block::Sapling || blk == Block::Leaves ||
                                 blk == Block::Glass || blk == Block::Slab ||
                                 blk == Block::Flower1 ||
                                 blk == Block::Flower2 ||
                                 blk == Block::Mushroom1 ||
-                                blk == Block::Mushroom2)
+                                blk == Block::Mushroom2) {
                                 meta.is_full = false;
+                                meta.layers[local_y].is_full = false;
+                            }
                         }
             }
 }

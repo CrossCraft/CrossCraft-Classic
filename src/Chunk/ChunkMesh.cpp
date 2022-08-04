@@ -261,6 +261,9 @@ void ChunkMesh::generate(const World *wrld) {
             for (int z = 0; z < 16; z++) {
                 for (int y = 0; y < 16; y++) {
 
+                    if (meta.layers[y].is_empty)
+                        continue;
+
                     int idx =
                         ((World *)wrld)
                             ->getIdx(x + cX * 16, y + cY * 16, z + cZ * 16);
