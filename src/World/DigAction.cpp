@@ -106,8 +106,8 @@ auto DigAction::dig(std::any d) -> void {
         w->worldData[idx] = Block::Air;
 
         // Update metadata
-        int mIdx = ivec.x / 16 * w->world_size.z / 16 * w->world_size.y / 16 +
-                   ivec.z / 16 * w->world_size.y / 16 + ivec.y / 16;
+        int mIdx = ivec.y / 16 * w->world_size.z / 16 * w->world_size.x / 16 +
+                   ivec.z / 16 * w->world_size.x / 16 + ivec.x / 16;
 
         w->chunksMeta[mIdx].is_full = false;
 
