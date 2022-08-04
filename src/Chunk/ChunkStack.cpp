@@ -96,6 +96,29 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
                 updated.push_back(chk);
             }
         }
+        else if (blk == Block::Water || blk == Block::Still_Water || blk == Block::Lava || blk == Block::Still_Lava) {
+            if (blkr == Block::Gravel || blkr == Block::Sand) {
+                uint16_t x = chk.x / 16;
+                uint16_t y = chk.z / 16;
+                uint32_t id = x << 16 | (y & 0x00FF);
+
+                auto idx = wrld->getIdx(chk.x, chk.y + 1, chk.z);
+                wrld->worldData[idx] = 0;
+                idx = wrld->getIdx(chk.x, chk.y, chk.z);
+
+                wrld->worldData[idx] = blkr;
+                wrld->update_lighting(chk.x, chk.z);
+
+                wrld->update_nearby_blocks({ chk.x, chk.y + 1, chk.z });
+
+                if (wrld->chunks.find(id) != wrld->chunks.end())
+                    wrld->chunks[id]->generate(wrld);
+
+                wrld->update_surroundings(chk.x, chk.z);
+
+                updated.push_back(chk);
+            }
+        }
     }
 }
 
