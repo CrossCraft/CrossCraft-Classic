@@ -34,10 +34,11 @@ void ChunkMesh::rtick(World *wrld) {
     int y = rand() % 16; // + cY * 16;
     int z = rand() % 16; // + cZ * 16;
 
-    int idxl = ((x + cX * 16) * wrld->world_size.z * wrld->world_size.y / 16) + ((z + cZ * 16) * wrld->world_size.y / 16) + cY;
+    int idxl = wrld->getIdxl(x + cX * 16, cY * 16, z + cZ * 16);
 
     bool is_dark = false;
-    if (idxl >= 0 && idxl < (wrld->world_size.z * wrld->world_size.y /16 * wrld->world_size.z))
+    if (idxl >= 0 && idxl < (wrld->world_size.z * wrld->world_size.y / 16 *
+                             wrld->world_size.z))
         is_dark = (!((wrld->lightData[idxl] >> (int)y) & 1));
 
     x += cX * 16;
@@ -111,7 +112,7 @@ void ChunkMesh::generate(const World *wrld) {
     auto worldSize = wrld->world_size;
 
     int metaIdx =
-        cX * worldSize.z / 16 * worldSize.y / 16 + cZ * worldSize.y / 16 + cY;
+        cY * worldSize.z / 16 * worldSize.x / 16 + cZ * worldSize.x / 16 + cX;
 
     auto meta = wrld->chunksMeta[metaIdx];
 
@@ -257,12 +258,13 @@ void ChunkMesh::generate(const World *wrld) {
     } else {
 
         // Loop over the mesh
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                for (int y = 0; y < 16; y++) {
+        for (int y = 0; y < 16; y++) {
 
-                    if (meta.layers[y].is_empty)
-                        continue;
+            if (meta.layers[y].is_empty)
+                continue;
+
+            for (int z = 0; z < 16; z++) {
+                for (int x = 0; x < 16; x++) {
 
                     int idx =
                         ((World *)wrld)

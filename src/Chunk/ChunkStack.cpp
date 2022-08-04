@@ -95,8 +95,8 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
 
                 updated.push_back(chk);
             }
-        }
-        else if (blk == Block::Water || blk == Block::Still_Water || blk == Block::Lava || blk == Block::Still_Lava) {
+        } else if (blk == Block::Water || blk == Block::Still_Water ||
+                   blk == Block::Lava || blk == Block::Still_Lava) {
             if (blkr == Block::Gravel || blkr == Block::Sand) {
                 uint16_t x = chk.x / 16;
                 uint16_t y = chk.z / 16;
@@ -109,7 +109,7 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
                 wrld->worldData[idx] = blkr;
                 wrld->update_lighting(chk.x, chk.z);
 
-                wrld->update_nearby_blocks({ chk.x, chk.y + 1, chk.z });
+                wrld->update_nearby_blocks({chk.x, chk.y + 1, chk.z});
 
                 if (wrld->chunks.find(id) != wrld->chunks.end())
                     wrld->chunks[id]->generate(wrld);
@@ -192,8 +192,8 @@ void ChunkStack::generate(World *wrld) {
         if (stack[i] != nullptr && wrld != nullptr) {
             auto worldSize = wrld->world_size;
 
-            int metaIdx = cX * worldSize.z / 16 * worldSize.y / 16 +
-                          cZ * worldSize.y / 16 + i;
+            int metaIdx = i * worldSize.z / 16 * worldSize.x / 16 +
+                          cZ * worldSize.x / 16 + cX;
 
             auto meta = wrld->chunksMeta[metaIdx];
 

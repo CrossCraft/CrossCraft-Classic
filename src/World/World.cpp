@@ -125,8 +125,8 @@ auto World::generate_meta() -> void {
     for (int x = 0; x < world_size.x / 16; x++)
         for (int y = 0; y < world_size.y / 16; y++)
             for (int z = 0; z < world_size.z / 16; z++) {
-                int idx = x * world_size.y / 16 * world_size.z / 16 +
-                          z * world_size.y / 16 + y;
+                int idx = y * world_size.x / 16 * world_size.z / 16 +
+                          z * world_size.x / 16 + x;
 
                 auto &meta = chunksMeta[idx];
                 meta.is_empty = true;
@@ -414,15 +414,14 @@ auto World::getIdx(int x, int y, int z) -> uint32_t const {
     if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
         z >= world_size.z)
         return 0;
-    return (x * world_size.z * world_size.y) + (z * world_size.y) + y;
+    return (y * world_size.z * world_size.x) + (z * world_size.x) + x;
 }
 
 auto World::getIdxl(int x, int y, int z) -> uint32_t const {
     if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
         z >= world_size.z)
         return 0;
-    return (x * world_size.z * (world_size.y / 16)) +
-           (z * (world_size.y / 16)) + y / 16;
+    return ((y / 16) * world_size.z * world_size.x) + (z * world_size.x) + x;
 }
 
 void World::draw() {
@@ -555,8 +554,7 @@ auto World::update_surroundings(int x, int z) -> void {
 auto World::update_lighting(int x, int z) -> void {
     // Clear
     for (int i = 0; i < 4; i++) {
-        int idx2 = (x * world_size.z * (world_size.y / 16)) +
-                   (z * (world_size.y / 16)) + i;
+        int idx2 = getIdxl(x, i * 16, z);
         lightData[idx2] = 0;
     }
 
