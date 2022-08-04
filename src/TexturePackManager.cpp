@@ -14,8 +14,8 @@ TexturePackManager::TexturePackManager() {
 }
 TexturePackManager::~TexturePackManager() {}
 auto TexturePackManager::load_texture(std::string filename, u32 magFilter,
-                                      u32 minFilter, bool repeat, bool flip)
-    -> u32 {
+                                      u32 minFilter, bool repeat, bool flip,
+                                      bool vram) -> u32 {
 
     for (int i = layers.size() - 1; i >= 0; i--) {
         auto &l = layers[i];
@@ -28,7 +28,7 @@ auto TexturePackManager::load_texture(std::string filename, u32 magFilter,
             file.close();
 
             return Rendering::TextureManager::get().load_texture(
-                path, magFilter, minFilter, repeat, flip);
+                path, magFilter, minFilter, repeat, flip, vram);
         }
     }
 

@@ -63,7 +63,7 @@ World::World(std::shared_ptr<Player> p) {
 
     terrain_atlas = TexturePackManager::get().load_texture(
         "assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-        true, false);
+        true, false, true);
     p->terrain_atlas = terrain_atlas;
 
     NoiseUtil::initialize();
