@@ -70,6 +70,8 @@ class ChunkMesh {
     bool needsRegen;
 
   private:
+    void full_check(World *wrld);
+    void layer_check(World *wrld, int y);
     /**
      * @brief Reset a mesh and allocate space
      *
