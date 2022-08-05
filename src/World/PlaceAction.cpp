@@ -134,7 +134,7 @@ auto PlaceAction::place(std::any d) -> void {
                 for (auto i = ivec.x - 2; i <= ivec.x + 2; i++) {
                     for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
                         for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
-                            idx = (i * 256 * 64) + (k * 64) + j;
+                            idx = (j * 256 * 256) + (k * 256) + i;
 
                             // If it's water or flowing water, replace with air.
                             if (idx >= 0 && idx < (256 * 64 * 256) &&

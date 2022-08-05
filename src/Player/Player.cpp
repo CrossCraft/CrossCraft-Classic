@@ -86,6 +86,7 @@ Player::Player()
 
     player_ptr = this;
     in_chat = false;
+    in_chat_delta = true;
     client_ref = nullptr;
     chat_text = "";
 
@@ -127,6 +128,7 @@ Player::Player()
     selectorIDX = 0;
     is_underwater = false;
     in_inventory = false;
+    in_inv_delta = true;
     jump_icd = 0.2f;
     terrain_atlas = 0;
     view_timer = 0.0f;
@@ -382,64 +384,90 @@ auto Player::draw(World *wrld) -> void {
 
     playerHUD->begin2D();
 
+    auto ipos = glm::ivec3(static_cast<int>(pos.x), static_cast<int>(pos.y),
+                           static_cast<int>(pos.z));
+
+    bool change =
+        in_inv_delta != in_inventory || in_chat_delta != in_chat ||
+        fps_count == 0 || prev_ipos != ipos || chat_size != chat->data.size() ||
+        selector_block_prev != selectedBlock ||
+        selector_idx_prev != selectorIDX || chat_text_size != chat_text.size();
+
+    if (change)
+        playerHUD->clear();
+
     if (is_head_water) {
         water->draw();
     }
 
-    if (in_inventory) {
-        playerHUD->draw_text("Select block", CC_TEXT_COLOR_WHITE,
-                             CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_CENTER, 0, 7,
-                             CC_TEXT_BG_NONE);
-        playerHUD->draw_text(
-            playerHUD->get_block_name(inventorySelection[selectedBlock]),
-            CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM, 0,
-            6, CC_TEXT_BG_NONE);
+    if (change) {
+        if (in_inventory) {
+            playerHUD->draw_text("Select block", CC_TEXT_COLOR_WHITE,
+                                 CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_CENTER, 0,
+                                 7, CC_TEXT_BG_NONE);
+            playerHUD->draw_text(
+                playerHUD->get_block_name(inventorySelection[selectedBlock]),
+                CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM,
+                0, 6, CC_TEXT_BG_NONE);
+        } else {
+            playerHUD->draw_text(
+                playerHUD->get_block_name(itemSelections[selectorIDX]),
+                CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM,
+                0, 3, CC_TEXT_BG_NONE);
+        }
 
+        selector_block_prev = selectedBlock;
+        selector_idx_prev = selectorIDX;
+        in_inv_delta = in_inventory;
+    }
+
+    if (in_inventory) {
         background_rectangle->draw();
     } else {
         crosshair->draw();
-
-        playerHUD->draw_text(
-            playerHUD->get_block_name(itemSelections[selectorIDX]),
-            CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_BOTTOM, 0,
-            3, CC_TEXT_BG_NONE);
     }
 
     item_box->draw();
     selector->draw();
 
-    playerHUD->draw_text(
-        "Position: " + std::to_string(static_cast<int>(pos.x)) + ", " +
-            std::to_string(static_cast<int>(pos.y)) + ", " +
-            std::to_string(static_cast<int>(pos.z)),
-        CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT, CC_TEXT_ALIGN_TOP, 0, 0,
-        CC_TEXT_BG_DYNAMIC);
+    if (change) {
+        playerHUD->draw_text("Position: " + std::to_string((int)ipos.x) + ", " +
+                                 std::to_string((int)ipos.y) + ", " +
+                                 std::to_string((int)ipos.z),
+                             CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
+                             CC_TEXT_ALIGN_TOP, 0, 0, CC_TEXT_BG_DYNAMIC);
 
-    playerHUD->draw_text("FPS: " + std::to_string(fps_display),
-                         CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
-                         CC_TEXT_ALIGN_TOP, 0, 0, false);
-
-#if PSP
-    auto total = totalRamFree() + sceKernelTotalFreeMemSize();
-    playerHUD->draw_text("RAM: " + std::to_string(total), CC_TEXT_COLOR_WHITE,
-                         CC_TEXT_ALIGN_RIGHT, CC_TEXT_ALIGN_TOP, 0, -1, false);
-#endif
-
-    int i = 9;
-    for (int x = chat->data.size() - 1; x >= 0; x--) {
-        auto &p = chat->data.at(x);
-        if (i < 0)
-            break;
-
-        playerHUD->draw_text(p.text, CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_LEFT,
-                             CC_TEXT_ALIGN_CENTER, 0, -i - 2, CC_TEXT_BG_NONE);
-        i--;
+        prev_ipos = ipos;
     }
 
-    if (in_chat) {
+    if (change)
+        playerHUD->draw_text("FPS: " + std::to_string(fps_display),
+                             CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
+                             CC_TEXT_ALIGN_TOP, 0, 0, false);
+
+    if (change) {
+        int i = 9;
+        for (int x = chat->data.size() - 1; x >= 0; x--) {
+            auto &p = chat->data.at(x);
+            if (i < 0)
+                break;
+
+            playerHUD->draw_text(p.text, CC_TEXT_COLOR_WHITE,
+                                 CC_TEXT_ALIGN_LEFT, CC_TEXT_ALIGN_CENTER, 0,
+                                 -i - 2, CC_TEXT_BG_NONE);
+            i--;
+        }
+        chat_size = chat->data.size();
+    }
+
+    if (in_chat && change) {
         playerHUD->draw_text("> " + chat_text, CC_TEXT_COLOR_WHITE,
                              CC_TEXT_ALIGN_LEFT, CC_TEXT_ALIGN_BOTTOM, 0, 0, 5);
+
+        chat_text_size = chat_text.size();
     }
+
+    in_chat_delta = in_chat;
 
     playerHUD->end2D();
 

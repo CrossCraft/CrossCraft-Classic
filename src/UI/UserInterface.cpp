@@ -109,11 +109,11 @@ auto UserInterface::get_block_name(uint8_t id) -> std::string {
     }
 }
 
+auto UserInterface::clear() -> void { textHelper->clear(); }
+
 auto UserInterface::begin2D() -> void {
     Rendering::RenderContext::get().set_mode_2D();
     Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 100, -100);
-
-    textHelper->clear();
 }
 
 auto UserInterface::end2D() -> void { textHelper->draw(); }
