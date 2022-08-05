@@ -118,6 +118,10 @@ auto UserInterface::begin2D() -> void {
 
 auto UserInterface::end2D() -> void { textHelper->draw(); }
 
+auto UserInterface::rebuild() -> void {
+    textHelper->rebuild();
+}
+
 auto get_color(char c) -> uint8_t {
     switch (c) {
     case '0':

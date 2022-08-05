@@ -464,11 +464,13 @@ auto Player::draw(World *wrld) -> void {
         playerHUD->draw_text("> " + chat_text, CC_TEXT_COLOR_WHITE,
                              CC_TEXT_ALIGN_LEFT, CC_TEXT_ALIGN_BOTTOM, 0, 0, 5);
 
-        chat_text_size = chat_text.size();
     }
 
+    chat_text_size = chat_text.size();
     in_chat_delta = in_chat;
 
+    if (change)
+        playerHUD->rebuild();
     playerHUD->end2D();
 
     for (int i = 0; i < 9; i++)

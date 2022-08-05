@@ -70,6 +70,8 @@ class TextHelper {
     auto clear() -> void;
     auto draw() -> void;
 
+    auto rebuild() -> void;
+
   private:
     uint32_t font_texture;
     ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;

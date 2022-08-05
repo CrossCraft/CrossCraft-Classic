@@ -26,8 +26,11 @@ auto TextHelper::clear() -> void {
     fontRenderer->clear();
     posBox.clear();
 }
-auto TextHelper::draw() -> void {
+auto TextHelper::rebuild() -> void {
     fontRenderer->rebuild();
+}
+
+auto TextHelper::draw() -> void {
 
     for (auto pos : posBox) {
         Rendering::RenderContext::get().matrix_translate(

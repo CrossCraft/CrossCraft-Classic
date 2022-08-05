@@ -37,6 +37,7 @@ class UserInterface {
     auto clear() -> void;
     auto begin2D() -> void;
     auto end2D() -> void;
+    auto rebuild() -> void;
 
   private:
     ScopePtr<TextHelper> textHelper;
