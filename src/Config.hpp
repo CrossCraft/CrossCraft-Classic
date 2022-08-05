@@ -12,6 +12,7 @@ struct Config {
     std::string ip;
     std::string username;
     u16 port;
+    std::string key;
 
     inline static auto loadConfig() -> Config {
         Config config;
@@ -49,6 +50,11 @@ struct Config {
                     std::stringstream str(line);
 
                     str >> config.port;
+                } else if (line == "key") {
+                    std::getline(file, line);
+                    std::stringstream str(line);
+
+                    str >> config.key;
                 }
             }
         } else {

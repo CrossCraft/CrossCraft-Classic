@@ -48,6 +48,7 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     memset(ptr->Username.contents, 0x20, STRING_LENGTH);
     strcpy((char *)ptr->Username.contents, wrld->cfg.username.c_str());
     memset(ptr->VerificationKey.contents, 0x20, STRING_LENGTH);
+    strcpy((char *)ptr->VerificationKey.contents, wrld->cfg.key.c_str());
     ptr->Unused = 0x00;
 
     packetsOut.push_back(Outgoing::createOutgoingPacket(ptr.get()));
