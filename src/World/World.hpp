@@ -86,8 +86,7 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    inline auto World::getIdx(int x, int y, int z) -> uint32_t const
-    {
+    inline uint32_t getIdx(int x, int y, int z) {
         if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
             z >= world_size.z)
             return 0;
@@ -102,12 +101,12 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    inline auto World::getIdxl(int x, int y, int z) -> uint32_t const
-    {
+    inline uint32_t getIdxl(int x, int y, int z) {
         if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
             z >= world_size.z)
             return 0;
-        return ((y / 16) * world_size.z * world_size.x) + (z * world_size.x) + x;
+        return ((y / 16) * world_size.z * world_size.x) + (z * world_size.x) +
+               x;
     }
 
     block_t *worldData;
