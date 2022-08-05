@@ -18,8 +18,8 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     name.sin_family = AF_INET;
     name.sin_port = htons(port);
 
-    struct hostent* he = gethostbyname(ip.c_str());
-    char* addr = inet_ntoa(*(struct in_addr*)he->h_addr_list[0]);
+    struct hostent *he = gethostbyname(ip.c_str());
+    char *addr = inet_ntoa(*(struct in_addr *)he->h_addr_list[0]);
 
     inet_pton(AF_INET, addr, &name.sin_addr.s_addr);
     bool b =
@@ -29,6 +29,9 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     unsigned long mode = (false) ? 0 : 1;
     ioctlsocket(my_socket, FIONBIO, &mode);
 #endif
+
+    int flag = 1;
+    setsockopt(my_socket, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
 
     if (!b) {
         SC_APP_ERROR("Failed to open a connection! (Is the server open?)");
@@ -650,12 +653,12 @@ auto get_len(Byte type) -> int {
 
 void Client::receive() {
     Byte newByte;
-    int res =
-        ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1, MSG_PEEK 
+    int res = ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1,
+                     MSG_PEEK
 #if BUILD_PLAT != BUILD_WINDOWS
-            | MSG_DONTWAIT
+                         | MSG_DONTWAIT
 #endif
-        );
+    );
     if (res <= 0)
         return;
 
@@ -674,7 +677,7 @@ void Client::receive() {
             continue;
         }
 #else
-        ::recv(my_socket, reinterpret_cast<char*>(&b), 1, 0);
+        ::recv(my_socket, reinterpret_cast<char *>(&b), 1, 0);
 #endif
 
         byte_buffer->WriteU8(b);
