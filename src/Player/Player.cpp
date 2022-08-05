@@ -7,6 +7,8 @@
 #include <Utilities/Input.hpp>
 #include <Utilities/Logger.hpp>
 #include <gtx/projection.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtx/rotate_vector.hpp>
 
 #if PSP
 #include <malloc.h>
@@ -158,6 +160,9 @@ Player::Player()
     water->set_layer(1);
 
     playerHUD = create_scopeptr<UserInterface>();
+
+    projmat = glm::perspective(DEGTORAD(70.0f), 16.0f / 9.0f, 0.1f,
+        255.0f);
 
     selectorIDX = 0;
     is_underwater = false;
@@ -864,6 +869,11 @@ void Player::update(float dt, World *wrld) {
     cam.pos.y -= (1.80f - 1.5965f);
     cam.rot = glm::vec3(DEGTORAD(rot.x), DEGTORAD(rot.y), 0.f);
     cam.update();
+
+    viewmat = glm::mat4(1.0f);
+    viewmat = glm::rotate(viewmat, DEGTORAD(rot.x), { 1, 0, 0 });
+    viewmat = glm::rotate(viewmat, DEGTORAD(rot.y), { 0, 1, 0 });
+    viewmat = glm::translate(viewmat, -pos);
 }
 
 auto Player::drawBlk(uint8_t type, int x, int y, float scale) -> void {

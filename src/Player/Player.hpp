@@ -119,6 +119,8 @@ class Player {
 
     Rendering::Camera cam;
 
+    glm::mat4 projmat, viewmat;
+
   private:
     auto rotate(float dt, float sense) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;

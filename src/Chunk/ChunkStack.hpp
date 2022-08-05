@@ -72,7 +72,7 @@ class ChunkStack {
      * @brief Draw the chunk stack
      *
      */
-    void draw();
+    void draw(World* wrld);
 
     /**
      * @brief Draw the transparent chunks

@@ -1,5 +1,9 @@
 #include "ChunkStack.hpp"
 
+#include <gtc/matrix_transform.hpp>
+#include <gtx/rotate_vector.hpp>
+
+
 namespace CrossCraft {
 ChunkStack::ChunkStack(int x, int z) : cX(x), cZ(z) {
     // Create new meshes
@@ -213,10 +217,23 @@ void ChunkStack::generate_border() {
     border = true;
 }
 
-void ChunkStack::draw() {
+void ChunkStack::draw(World* wrld) {
     // Draw meshes
     for (int i = 0; i < 4; i++) {
-        stack[i]->draw(ChunkMeshSelection::Opaque);
+
+        glm::vec2 relative_chunk_pos = glm::vec2(
+            cX * 16.0f, cZ * 16.0f);
+        auto diff =
+            glm::vec2(wrld->player->pos.x, wrld->player->pos.z) - relative_chunk_pos;
+        auto len = fabsf(sqrtf(diff.x * diff.x + diff.y * diff.y));
+
+        glm::vec4 centerpos =
+            glm::vec4(cX * 16 + 8.0f, i * 16, cZ * 16 + 8.0f, 1.0f);
+
+        glm::vec4 res = wrld->player->projmat * wrld->player->viewmat * centerpos;
+
+        if(res.w >= 0 || len <= 25.0f)
+            stack[i]->draw(ChunkMeshSelection::Opaque);
     }
 }
 
