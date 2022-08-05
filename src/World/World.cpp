@@ -2,10 +2,10 @@
 #include "../TexturePackManager.hpp"
 #include "Generation/NoiseUtil.hpp"
 #include "Generation/WorldGenUtil.hpp"
+#include "SelectionBox.hpp"
 #include <Platform/Platform.hpp>
 #include <Rendering/Rendering.hpp>
 #include <Utilities/Input.hpp>
-#include <gtc/matrix_transform.hpp>
 #include <gtx/rotate_vector.hpp>
 #include <iostream>
 
@@ -24,34 +24,6 @@
 #endif
 
 namespace CrossCraft {
-
-auto World::add_face_to_mesh(std::array<float, 12> data,
-                             std::array<float, 8> uv, uint32_t lightVal,
-                             glm::vec3 mypos) -> void { // Create color
-    Rendering::Color c;
-    c.color = lightVal;
-
-    // Push Back Verts
-    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
-        m_verts.push_back(Rendering::Vertex{
-            uv[tx++],
-            uv[tx++],
-            c,
-            data[idx++] + mypos.x,
-            data[idx++] + mypos.y,
-            data[idx++] + mypos.z,
-        });
-    }
-
-    // Push Back Indices
-    m_index.push_back(idx_counter);
-    m_index.push_back(idx_counter + 1);
-    m_index.push_back(idx_counter + 2);
-    m_index.push_back(idx_counter + 2);
-    m_index.push_back(idx_counter + 3);
-    m_index.push_back(idx_counter + 0);
-    idx_counter += 4;
-}
 
 World::World(std::shared_ptr<Player> p) {
     tick_counter = 0;
@@ -87,35 +59,11 @@ World::World(std::shared_ptr<Player> p) {
 
     chunks.clear();
 
+    sbox = create_scopeptr<SelectionBox>();
+
     place_icd = 0.0f;
     break_icd = 0.0f;
     chunk_generate_icd = 0.0f;
-
-    idx_counter = 0;
-    m_verts.clear();
-    m_verts.shrink_to_fit();
-    m_index.clear();
-    m_index.shrink_to_fit();
-    blockMesh.delete_data();
-
-    add_face_to_mesh(bottomFace, getTexCoord(96, LIGHT_BOT), LIGHT_BOT,
-                     {0, 0, 0});
-    add_face_to_mesh(topFace, getTexCoord(96, LIGHT_TOP), LIGHT_TOP, {0, 0, 0});
-    add_face_to_mesh(frontFace, getTexCoord(96, LIGHT_SIDE_Z), LIGHT_SIDE_Z,
-                     {0, 0, 0});
-    add_face_to_mesh(backFace, getTexCoord(96, LIGHT_SIDE_Z), LIGHT_SIDE_Z,
-                     {0, 0, 0});
-    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE_X), LIGHT_SIDE_X,
-                     {0, 0, 0});
-    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE_X), LIGHT_SIDE_X,
-                     {0, 0, 0});
-    add_face_to_mesh(leftFace, getTexCoord(96, LIGHT_SIDE_X), LIGHT_SIDE_X,
-                     {0, 0, 1});
-    add_face_to_mesh(rightFace, getTexCoord(96, LIGHT_SIDE_X), LIGHT_SIDE_X,
-                     {0, 0, 1});
-
-    blockMesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
-                       idx_counter);
 }
 
 auto World::spawn() -> void { player->spawn(this); }
@@ -164,85 +112,6 @@ auto World::generate_meta() -> void {
                             }
                         }
             }
-}
-
-auto World::draw_selection() -> void {
-    auto pos = player->get_pos();
-    auto default_vec = glm::vec3(0, 0, 1);
-    default_vec = glm::rotateX(default_vec, DEGTORAD(player->get_rot().x));
-    default_vec =
-        glm::rotateY(default_vec, DEGTORAD(-player->get_rot().y + 180));
-
-    const float REACH_DISTANCE = 4.0f;
-    default_vec *= REACH_DISTANCE;
-
-    const u32 NUM_STEPS = 50;
-
-    for (u32 i = 0; i < NUM_STEPS; i++) {
-        float percentage =
-            static_cast<float>(i) / static_cast<float>(NUM_STEPS);
-
-        auto cast_pos = pos + (default_vec * percentage);
-
-        auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
-                               static_cast<s32>(cast_pos.y),
-                               static_cast<s32>(cast_pos.z));
-
-        u32 idx = getIdx(ivec.x, ivec.y, ivec.z);
-        if (idx < 0)
-            return;
-
-        auto blk = worldData[idx];
-
-        if (blk == Block::Air || blk == Block::Bedrock || blk == Block::Water ||
-            blk == Block::Lava)
-            continue;
-
-        if (ivec.x < 0 || ivec.x > world_size.x || ivec.y < 0 ||
-            ivec.y > world_size.y || ivec.z < 0 || ivec.z > world_size.z)
-            return;
-
-        auto ctx = &Rendering::RenderContext::get();
-
-#if PSP || BUILD_PLAT == BUILD_VITA
-        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
-        ctx->matrix_rotate({0, 0, 0});
-        ctx->matrix_scale({1.01f, 1.01f, 1.01f});
-        ctx->matrix_translate({-0.005f, -0.005f, -0.005f});
-
-        blockMesh.draw_wireframe();
-
-        ctx->matrix_clear();
-        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
-        ctx->matrix_rotate({90, 0, 0});
-        ctx->matrix_scale({1.01f, 1.01f, 1.01f});
-        ctx->matrix_translate({-0.005f, -0.005f, -0.005f - 1.0f});
-
-        blockMesh.draw_wireframe();
-
-        ctx->matrix_clear();
-        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
-        ctx->matrix_rotate({0, 90, 0});
-        ctx->matrix_scale({1.01f, 1.01f, 1.01f});
-        ctx->matrix_translate({-0.005f - 1.0f, -0.005f, -0.005f});
-
-        blockMesh.draw_wireframe();
-
-        ctx->matrix_clear();
-        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
-        ctx->matrix_rotate({0, 0, 90});
-        ctx->matrix_scale({1.01f, 1.01f, 1.01f});
-        ctx->matrix_translate({-0.005f, -0.005f - 1.0f, -0.005f});
-
-        blockMesh.draw_wireframe();
-#else
-        ctx->matrix_translate(glm::vec3(ivec.x, ivec.y, ivec.z));
-        blockMesh.draw_wireframe();
-#endif
-
-        ctx->matrix_clear();
-        return;
-    }
 }
 
 World::~World() {
@@ -308,6 +177,7 @@ void World::update(double dt) {
     // Request 3D Mode
     Rendering::RenderContext::get().set_mode_3D();
     player->update(static_cast<float>(dt), this);
+    sbox->update_position(this);
     clouds->update(dt);
     psystem->update(dt);
 
@@ -487,8 +357,6 @@ void World::draw() {
     glEnable(GL_BLEND);
 #endif
 
-    draw_selection();
-
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
@@ -504,6 +372,8 @@ void World::draw() {
 #if BUILD_PLAT == BUILD_PSP
     sceGuDisable(GU_FOG);
 #endif
+
+    sbox->draw();
 
     clouds->draw();
     psystem->draw();

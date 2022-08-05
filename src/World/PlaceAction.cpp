@@ -26,7 +26,7 @@ auto PlaceAction::place(std::any d) -> void {
         glm::rotateY(default_vec, DEGTORAD(-w->player->get_rot().y + 180));
 
     // Vector has reach
-    const float REACH_DISTANCE = 5.0f;
+    const float REACH_DISTANCE = 4.0f;
     default_vec *= REACH_DISTANCE;
 
     // Iterate over vector to check for placement
