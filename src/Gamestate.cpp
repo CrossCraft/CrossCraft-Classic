@@ -131,7 +131,8 @@ void GameState::on_start() {
 #if BUILD_PLAT == BUILD_PSP
         Network::NetworkDriver::get().initGUI();
 #endif
-        client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip);
+        client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip,
+                                             world->cfg.port);
         world->client = client.get();
         world->player->client_ref = client.get();
     } else {
