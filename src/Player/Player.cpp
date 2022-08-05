@@ -40,7 +40,9 @@ namespace CrossCraft
     template <typename T>
     constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 
+#if BUILD_PC
     extern void character_callback(GLFWwindow *window, unsigned int codepoint);
+#endif
     extern std::string chat_text;
     extern Player *player_ptr;
 
