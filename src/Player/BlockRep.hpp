@@ -13,35 +13,29 @@
 #include <glm.hpp>
 using namespace Stardust_Celeste;
 
-namespace CrossCraft
-{
-    class BlockRep
-    {
-    public:
-        BlockRep();
-        ~BlockRep();
+namespace CrossCraft {
+class BlockRep {
+  public:
+    BlockRep();
+    ~BlockRep();
 
-        auto drawBlk(uint8_t type, int x, int y, float scale) -> void;
-        auto drawBlkHand(uint8_t type, World* wrld, double cube_bob) -> void;
+    auto drawBlk(uint8_t type, int x, int y, float scale) -> void;
+    auto drawBlkHand(uint8_t type, World *wrld, double cube_bob) -> void;
 
-        uint32_t terrain_atlas;
-    private:
-        // Block Drawing
+    uint32_t terrain_atlas;
 
-        auto setup_model(uint8_t type) -> void;
+  private:
+    // Block Drawing
 
-        auto add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
-                              uint32_t lightVal, glm::vec3 pos, uint8_t type)
-            -> void;
+    auto setup_model(uint8_t type) -> void;
 
-#if BUILD_PLAT != BUILD_VITA
-        uint16_t idx_counter[50];
-        std::vector<Rendering::Vertex> m_verts[50];
-        std::vector<uint16_t> m_index[50];
-        Rendering::Mesh blockMesh[50];
-#else
-        ScopePtr<Graphics::G2D::Sprite> blockRep[50];
-#endif
+    auto add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
+                          uint32_t lightVal, glm::vec3 pos, uint8_t type)
+        -> void;
 
-    };
+    uint16_t idx_counter[50];
+    std::vector<Rendering::Vertex> m_verts[50];
+    std::vector<uint16_t> m_index[50];
+    Rendering::Mesh blockMesh[50];
+};
 } // namespace CrossCraft
