@@ -98,6 +98,7 @@ class Player {
 
     static auto toggle_inv(std::any p) -> void;
     static auto enter_chat(std::any p) -> void;
+    static auto enter_chat_slash(std::any p) -> void;
     static auto submit_chat(std::any p) -> void;
     static auto delete_chat(std::any p) -> void;
     auto psp_chat() -> void;
