@@ -276,6 +276,7 @@ void ChunkStack::draw(World* wrld) {
 
         if (res.w >= 0 || len <= 24.0f) {
 
+#if BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA
             bool visible = false;
 
             visible = visible || check_visible(wrld, glm::vec3(centerpos.x, centerpos.y + 8.0f, centerpos.z), i);
@@ -289,6 +290,9 @@ void ChunkStack::draw(World* wrld) {
             visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, (i + 1) * 16, (cZ + 0) * 16), i);
             visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, (i + 1) * 16, (cZ + 1) * 16), i);
             visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, (i + 1) * 16, (cZ + 1) * 16), i);
+#else 
+            bool visible = true;
+#endif
 
             if(visible || len <= 33.0f)
                 stack[i]->draw(ChunkMeshSelection::Opaque);
