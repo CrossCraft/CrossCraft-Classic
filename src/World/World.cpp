@@ -309,22 +309,6 @@ namespace CrossCraft
         }
     }
 
-    auto World::getIdx(int x, int y, int z) -> uint32_t const
-    {
-        if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
-            z >= world_size.z)
-            return 0;
-        return (y * world_size.z * world_size.x) + (z * world_size.x) + x;
-    }
-
-    auto World::getIdxl(int x, int y, int z) -> uint32_t const
-    {
-        if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
-            z >= world_size.z)
-            return 0;
-        return ((y / 16) * world_size.z * world_size.x) + (z * world_size.x) + x;
-    }
-
     void World::draw()
     {
 

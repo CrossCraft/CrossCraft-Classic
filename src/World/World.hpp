@@ -86,7 +86,13 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    auto getIdx(int x, int y, int z) -> uint32_t const;
+    inline auto World::getIdx(int x, int y, int z) -> uint32_t const
+    {
+        if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
+            z >= world_size.z)
+            return 0;
+        return (y * world_size.z * world_size.x) + (z * world_size.x) + x;
+    }
 
     /**
      * @brief Get a World Light Index
@@ -96,7 +102,13 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    auto getIdxl(int x, int y, int z) -> uint32_t const;
+    inline auto World::getIdxl(int x, int y, int z) -> uint32_t const
+    {
+        if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
+            z >= world_size.z)
+            return 0;
+        return ((y / 16) * world_size.z * world_size.x) + (z * world_size.x) + x;
+    }
 
     block_t *worldData;
     uint16_t *lightData;

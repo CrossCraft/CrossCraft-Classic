@@ -93,6 +93,7 @@ class ChunkStack {
     bool border;
 
   private:
+    bool check_visible(World* wrld, glm::vec3 posCheck, int cY);
     auto update_check(World *wrld, int blkr, glm::ivec3 chk) -> void;
     std::vector<glm::ivec3> updated;
 

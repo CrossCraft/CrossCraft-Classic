@@ -217,6 +217,48 @@ void ChunkStack::generate_border() {
     border = true;
 }
 
+bool ChunkStack::check_visible(World* wrld, glm::vec3 posCheck, int cY) {
+    auto pos = wrld->player->get_pos();
+    pos.y -= (1.80f - 1.5965f);
+
+    auto default_vec = pos - glm::vec3(posCheck.x, posCheck.y, posCheck.z);
+
+    const u32 NUM_STEPS = 15;
+
+    default_vec /= static_cast<float>(NUM_STEPS);
+    for (u32 c = 0; c < NUM_STEPS; c++) {
+        auto cast_pos = pos + (default_vec * static_cast<float>(c));
+
+        auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
+            static_cast<s32>(cast_pos.y),
+            static_cast<s32>(cast_pos.z));
+
+        u32 idx = wrld->getIdx(ivec.x, ivec.y, ivec.z);
+        if (idx < 0)
+            return false;
+
+        auto blk = wrld->worldData[idx];
+
+        if (blk == Block::Air || blk == Block::Water ||
+            blk == Block::Leaves || blk == Block::Glass)
+            continue;
+
+        if (ivec.x < 0 || ivec.x > wrld->world_size.x || ivec.y < 0 ||
+            ivec.y > wrld->world_size.y || ivec.z < 0 ||
+            ivec.z > wrld->world_size.z)
+            return false;
+
+        auto chkPos = glm::ivec3(ivec.x / 16, ivec.y / 16, ivec.z / 16);
+
+        if (chkPos.x == cX && chkPos.y == cY && chkPos.z == cZ)
+            break;
+
+        return false;
+    }
+
+    return true;
+}
+
 void ChunkStack::draw(World* wrld) {
     // Draw meshes
     for (int i = 0; i < 4; i++) {
@@ -232,8 +274,25 @@ void ChunkStack::draw(World* wrld) {
 
         glm::vec4 res = wrld->player->projmat * wrld->player->viewmat * centerpos;
 
-        if(res.w >= 0 || len <= 25.0f)
-            stack[i]->draw(ChunkMeshSelection::Opaque);
+        if (res.w >= 0 || len <= 24.0f) {
+
+            bool visible = false;
+
+            visible = visible || check_visible(wrld, glm::vec3(centerpos.x, centerpos.y + 8.0f, centerpos.z), i);
+
+            visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, i * 16, (cZ + 0) * 16), i);
+            visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, i * 16, (cZ + 0) * 16), i);
+            visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, i * 16, (cZ + 1) * 16), i);
+            visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, i * 16, (cZ + 1) * 16), i);
+
+            visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, (i + 1) * 16, (cZ + 0) * 16), i);
+            visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, (i + 1) * 16, (cZ + 0) * 16), i);
+            visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, (i + 1) * 16, (cZ + 1) * 16), i);
+            visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, (i + 1) * 16, (cZ + 1) * 16), i);
+
+            if(visible || len <= 33.0f)
+                stack[i]->draw(ChunkMeshSelection::Opaque);
+        }
     }
 }
 
