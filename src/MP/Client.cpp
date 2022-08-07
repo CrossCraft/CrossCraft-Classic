@@ -10,6 +10,7 @@ namespace CrossCraft::MP {
 
 Client::Client(World *wrld, std::string ip, u16 port) {
     update_timer = 0.0f;
+    disconnected = false;
     this->wrld = wrld;
     SC_APP_INFO("Connecting to: [" + ip + "]@" + std::to_string(port));
 
@@ -35,8 +36,8 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     setsockopt(my_socket, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
 
     if (!b) {
-        SC_APP_ERROR("Failed to open a connection! (Is the server open?)");
-        throw std::runtime_error("Fail!");
+        disconnected = true;
+        disconnectReason = "Couldn't contact server!";
     }
     is_ready = false;
     connected = true;
@@ -320,6 +321,10 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         break;
     }
 
+    case Incoming::ePing: {
+        break;
+    }
+
     case Incoming::eLevelInitialize: {
         SC_APP_INFO("World Initializing!");
         ringbuffer = create_scopeptr<Network::ByteBuffer>(256 * 64 * 256 + 4);
@@ -422,50 +427,8 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         break;
     }
 
-    case Incoming::eMessage: {
-        auto data2 = reinterpret_cast<Incoming::Message *>(data.get());
-        wrld->player->chat->add_message(
-            std::string((char *)data2->Message.contents));
-        SC_APP_INFO("[Chat]: {}", data2->Message.contents);
-        break;
-    }
-
-    case Incoming::eDespawnPlayer: {
-        auto data2 = reinterpret_cast<Incoming::DespawnPlayer *>(data.get());
-        auto id = data2->PlayerID;
-
-        if (player_rep.find(id) != player_rep.end())
-            player_rep.erase(id);
-
-        break;
-    }
-
-    case Incoming::eSpawnPlayer: {
-        auto data2 = reinterpret_cast<Incoming::SpawnPlayer *>(data.get());
-
-        if (data2->PlayerID == -1) {
-            wrld->player->pos = {(float)data2->X / 32.0f,
-                                 (float)data2->Y / 32.0f,
-                                 (float)data2->Z / 32.0f};
-            wrld->player->rot = {(float)data2->Pitch / 256.0f * 360.0f,
-                                 (float)data2->Yaw / 256.0f * 360.0f};
-        } else {
-            std::string user = std::string((char*)data2->PlayerName.contents);
-            user = user.substr(0, user.find_first_of(0x20));
-            player_rep.emplace(data2->PlayerID,
-                               PlayerInfo{user, data2->X, data2->Y, data2->Z,
-                                          data2->Yaw, data2->Pitch});
-        }
-
-        break;
-    }
-
-    case Incoming::ePing: {
-        break;
-    }
-
     case Incoming::eSetBlock: {
-        auto data2 = reinterpret_cast<Incoming::SetBlock *>(data.get());
+        auto data2 = reinterpret_cast<Incoming::SetBlock*>(data.get());
 
         wrld->worldData[wrld->getIdx(data2->X, data2->Y, data2->Z)] =
             data2->BlockType;
@@ -484,16 +447,38 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         break;
     }
 
-    case Incoming::ePlayerTeleport: {
-        auto data2 = reinterpret_cast<Incoming::PlayerTeleport *>(data.get());
+    case Incoming::eSpawnPlayer: {
+        auto data2 = reinterpret_cast<Incoming::SpawnPlayer*>(data.get());
 
         if (data2->PlayerID == -1) {
-            wrld->player->pos = {(float)data2->X / 32.0f,
+            wrld->player->pos = { (float)data2->X / 32.0f,
                                  (float)data2->Y / 32.0f,
-                                 (float)data2->Z / 32.0f};
-            wrld->player->rot = {(float)data2->Pitch / 256.0f * 360.0f,
-                                 (float)data2->Yaw / 256.0f * 360.0f};
-        } else {
+                                 (float)data2->Z / 32.0f };
+            wrld->player->rot = { (float)data2->Pitch / 256.0f * 360.0f,
+                                 (float)data2->Yaw / 256.0f * 360.0f };
+        }
+        else {
+            std::string user = std::string((char*)data2->PlayerName.contents);
+            user = user.substr(0, user.find_first_of(0x20));
+            player_rep.emplace(data2->PlayerID,
+                PlayerInfo{ user, data2->X, data2->Y, data2->Z,
+                           data2->Yaw, data2->Pitch });
+        }
+
+        break;
+    }
+
+    case Incoming::ePlayerTeleport: {
+        auto data2 = reinterpret_cast<Incoming::PlayerTeleport*>(data.get());
+
+        if (data2->PlayerID == -1) {
+            wrld->player->pos = { (float)data2->X / 32.0f,
+                                 (float)data2->Y / 32.0f,
+                                 (float)data2->Z / 32.0f };
+            wrld->player->rot = { (float)data2->Pitch / 256.0f * 360.0f,
+                                 (float)data2->Yaw / 256.0f * 360.0f };
+        }
+        else {
             if (player_rep.find(data2->PlayerID) != player_rep.end()) {
                 player_rep[data2->PlayerID].X = data2->X;
                 player_rep[data2->PlayerID].Y = data2->Y;
@@ -503,6 +488,74 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
             }
         }
 
+        break;
+    }
+
+    case Incoming::ePlayerUpdate: {
+
+        auto data2 = reinterpret_cast<Incoming::PlayerUpdate*>(data.get());
+        if (player_rep.find(data2->PlayerID) != player_rep.end()) {
+             player_rep[data2->PlayerID].X += data2->DX;
+             player_rep[data2->PlayerID].Y += data2->DY;
+             player_rep[data2->PlayerID].Z += data2->DZ;
+             player_rep[data2->PlayerID].Yaw = data2->Yaw;
+             player_rep[data2->PlayerID].Pitch = data2->Pitch;
+         }
+
+        break;
+    }
+
+    case Incoming::ePositionUpdate: {
+
+        auto data2 = reinterpret_cast<Incoming::PositionUpdate*>(data.get());
+        if (player_rep.find(data2->PlayerID) != player_rep.end()) {
+            player_rep[data2->PlayerID].X += data2->DX;
+            player_rep[data2->PlayerID].Y += data2->DY;
+            player_rep[data2->PlayerID].Z += data2->DZ;
+        }
+
+        break;
+    }
+
+    case Incoming::eOrientationUpdate: {
+
+        auto data2 = reinterpret_cast<Incoming::OrientationUpdate*>(data.get());
+        if (player_rep.find(data2->PlayerID) != player_rep.end()) {
+            player_rep[data2->PlayerID].Yaw = data2->Yaw;
+            player_rep[data2->PlayerID].Pitch = data2->Pitch;
+        }
+
+        break;
+    }
+
+    case Incoming::eMessage: {
+        auto data2 = reinterpret_cast<Incoming::Message *>(data.get());
+        wrld->player->chat->add_message(
+            std::string((char *)data2->Message.contents));
+        SC_APP_INFO("[Chat]: {}", data2->Message.contents);
+        break;
+    }
+
+    case Incoming::eDespawnPlayer: {
+        auto data2 = reinterpret_cast<Incoming::DespawnPlayer *>(data.get());
+        auto id = data2->PlayerID;
+
+        if (player_rep.find(id) != player_rep.end())
+            player_rep.erase(id);
+
+        break;
+    }
+
+
+    case Incoming::eDisconnect: {
+        auto data2 = reinterpret_cast<Incoming::Disconnect*>(data.get());
+        disconnected = true;
+        disconnectReason = std::string((char*)data2->Reason.contents);
+        break;
+    }
+
+    case Incoming::eUpdateUserType: {
+        // We don't care
         break;
     }
 

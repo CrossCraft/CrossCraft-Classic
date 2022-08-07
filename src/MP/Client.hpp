@@ -48,7 +48,11 @@ class Client {
     bool is_ready;
 
     std::map<uint8_t, PlayerInfo> player_rep;
+
+    bool disconnected;
+    std::string disconnectReason;
   private:
+
     ScopePtr<Network::ByteBuffer> ringbuffer;
     int my_socket;
     std::vector<RefPtr<Network::ByteBuffer>> packetsIn;
