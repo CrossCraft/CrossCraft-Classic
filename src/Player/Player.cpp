@@ -278,6 +278,10 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
 }
 
 void Player::update(float dt, World *wrld) {
+
+    if (wrld->client != nullptr && wrld->client->disconnected)
+        return;
+
     fps_timer += dt;
     fps_count++;
     if (fps_timer > 1.0f) {
@@ -381,7 +385,9 @@ auto Player::draw(World *wrld) -> void {
     selectedBlock = (in_cursor_x) + (in_cursor_y * 9);
 
     blockRep->terrain_atlas = terrain_atlas;
-    blockRep->drawBlkHand(itemSelections[selectorIDX], wrld, cube_bob);
+
+    if (wrld->client == nullptr || !wrld->client->disconnected)
+        blockRep->drawBlkHand(itemSelections[selectorIDX], wrld, cube_bob);
 
     playerHUD->begin2D();
 
@@ -392,10 +398,21 @@ auto Player::draw(World *wrld) -> void {
         in_inv_delta != in_inventory || in_chat_delta != in_chat ||
         fps_count == 0 || prev_ipos != ipos || chat_size != chat->data.size() ||
         selector_block_prev != selectedBlock ||
-        selector_idx_prev != selectorIDX || chat_text_size != chat_text.size() || in_tab;
+        selector_idx_prev != selectorIDX || chat_text_size != chat_text.size() || in_tab || (wrld->client != nullptr && wrld->client->disconnected);
 
     if (change)
         playerHUD->clear();
+
+
+    if (change) {
+        if (wrld->client != nullptr) {
+            if (wrld->client->disconnected) {
+                playerHUD->draw_text(wrld->client->disconnectReason, CC_TEXT_COLOR_WHITE,
+                    CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_CENTER, 0, 0, CC_TEXT_BG_NONE);
+            }
+        }
+    }
+
 
     if (is_head_water) {
         water->draw();
@@ -493,18 +510,22 @@ auto Player::draw(World *wrld) -> void {
 
     if (change)
         playerHUD->rebuild();
+
     playerHUD->end2D();
 
-    for (int i = 0; i < 9; i++)
-        blockRep->drawBlk(itemSelections[i], i, 0, 9.0f);
-    if (in_inventory) {
-        for (int i = 0; i < 42; i++) {
-            if (i == selectedBlock)
-                blockRep->drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
-                                  13.0f);
-            else
-                blockRep->drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
-                                  9.0f);
+
+    if (wrld->client == nullptr || !wrld->client->disconnected) {
+        for (int i = 0; i < 9; i++)
+            blockRep->drawBlk(itemSelections[i], i, 0, 9.0f);
+        if (in_inventory) {
+            for (int i = 0; i < 42; i++) {
+                if (i == selectedBlock)
+                    blockRep->drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
+                        13.0f);
+                else
+                    blockRep->drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
+                        9.0f);
+            }
         }
     }
 }

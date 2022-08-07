@@ -551,6 +551,10 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         auto data2 = reinterpret_cast<Incoming::Disconnect*>(data.get());
         disconnected = true;
         disconnectReason = std::string((char*)data2->Reason.contents);
+
+        std::size_t found = disconnectReason.find("  ");
+        disconnectReason = disconnectReason.substr(0, found);
+        is_ready = true;
         break;
     }
 
@@ -637,6 +641,9 @@ auto Client::set_block(short x, short y, short z, uint8_t mode, uint8_t block)
 }
 
 void Client::send() {
+    if (!connected)
+        return;
+
     for (auto &p : packetsOut) {
 
         int res = ::send(my_socket, p->m_Buffer,

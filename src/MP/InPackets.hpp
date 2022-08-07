@@ -130,7 +130,6 @@ namespace CrossCraft::MP::Incoming
 
     struct Disconnect : public BasePacket
     {
-        Byte PlayerID;
         String Reason;
     };
 
