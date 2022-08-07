@@ -103,6 +103,9 @@ class Player {
     static auto delete_chat(std::any p) -> void;
     auto psp_chat() -> void;
 
+    static auto tab_start(std::any p) -> void;
+    static auto tab_end(std::any p) -> void;
+
     int32_t selectorIDX;
     uint8_t itemSelections[9];
 
@@ -114,7 +117,7 @@ class Player {
 
     int in_cursor_x;
     int in_cursor_y;
-
+    bool in_tab;
     glm::vec3 pos;
     glm::vec2 rot;
     ScopePtr<Chat> chat;

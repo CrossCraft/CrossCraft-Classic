@@ -4,6 +4,7 @@
 #include "OutPackets.hpp"
 #include <thread>
 #include <zlib.h>
+#include <string>
 
 namespace CrossCraft::MP {
 
@@ -449,8 +450,10 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
             wrld->player->rot = {(float)data2->Pitch / 256.0f * 360.0f,
                                  (float)data2->Yaw / 256.0f * 360.0f};
         } else {
+            std::string user = std::string((char*)data2->PlayerName.contents);
+            user = user.substr(0, user.find_first_of(0x20));
             player_rep.emplace(data2->PlayerID,
-                               PlayerInfo{data2->X, data2->Y, data2->Z,
+                               PlayerInfo{user, data2->X, data2->Y, data2->Z,
                                           data2->Yaw, data2->Pitch});
         }
 

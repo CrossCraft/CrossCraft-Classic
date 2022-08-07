@@ -84,6 +84,7 @@ Player::Player()
         "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, false);
 
+    in_tab = false;
     player_ptr = this;
     in_chat = false;
     in_chat_delta = true;
@@ -391,7 +392,7 @@ auto Player::draw(World *wrld) -> void {
         in_inv_delta != in_inventory || in_chat_delta != in_chat ||
         fps_count == 0 || prev_ipos != ipos || chat_size != chat->data.size() ||
         selector_block_prev != selectedBlock ||
-        selector_idx_prev != selectorIDX || chat_text_size != chat_text.size();
+        selector_idx_prev != selectorIDX || chat_text_size != chat_text.size() || in_tab;
 
     if (change)
         playerHUD->clear();
@@ -421,8 +422,29 @@ auto Player::draw(World *wrld) -> void {
         in_inv_delta = in_inventory;
     }
 
-    if (in_inventory) {
-        background_rectangle->draw();
+    if (change && in_tab && client_ref != nullptr) {
+        std::vector<std::string> names;
+        for (auto& [key, val] : client_ref->player_rep) {
+            names.push_back(val.name);
+        }
+
+        for (int i = 0; i < names.size(); i++) {
+            playerHUD->draw_text(names[i], CC_TEXT_COLOR_WHITE,
+                CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_CENTER, (i % 3) * 20 - 20,
+                (-i / 3) + 10, CC_TEXT_BG_NONE);
+        }
+    }
+
+    if (in_inventory || in_tab) {
+        if (in_tab) {
+            Rendering::RenderContext::get().matrix_scale({ 1.25f, 1.25f, 1.25f });
+            Rendering::RenderContext::get().matrix_translate({ -46.0f, -20.875f, 0.0f });
+            background_rectangle->draw();
+            Rendering::RenderContext::get().matrix_clear();
+        }
+        else {
+            background_rectangle->draw();
+        }
     } else {
         crosshair->draw();
     }

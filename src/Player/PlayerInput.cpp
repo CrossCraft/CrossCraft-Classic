@@ -47,6 +47,15 @@ void character_callback(GLFWwindow *window, unsigned int codepoint) {
 }
 #endif
 
+auto Player::tab_start(std::any d) -> void {
+    auto p = std::any_cast<Player*>(d);
+    p->in_tab = true;
+}
+auto Player::tab_end(std::any d) -> void {
+    auto p = std::any_cast<Player*>(d);
+    p->in_tab = false;
+}
+
 auto Player::enter_chat(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
 

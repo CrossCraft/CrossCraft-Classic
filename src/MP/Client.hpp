@@ -19,6 +19,7 @@ namespace CrossCraft::MP {
 using namespace Stardust_Celeste;
 
 struct PlayerInfo {
+    std::string name;
     short X;
     short Y;
     short Z;
@@ -46,13 +47,13 @@ class Client {
     World *wrld;
     bool is_ready;
 
+    std::map<uint8_t, PlayerInfo> player_rep;
   private:
     ScopePtr<Network::ByteBuffer> ringbuffer;
     int my_socket;
     std::vector<RefPtr<Network::ByteBuffer>> packetsIn;
     bool connected;
 
-    std::map<uint8_t, PlayerInfo> player_rep;
 
     void process_packet(RefPtr<Network::ByteBuffer> packet);
     Rendering::Mesh mesh;
