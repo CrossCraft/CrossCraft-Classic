@@ -30,7 +30,7 @@ inline void createDirs() {
 #if BUILD_PLAT == BUILD_VITA
     sceIoMkdir("ux0:/data/CrossCraft-Classic", 0777);
     sceIoMkdir("ux0:/data/CrossCraft-Classic/texturepacks", 0777);
-
+    Utilities::Logger::get_app_log()->flush_output = true;
     {
         std::ifstream src("app0:/texturepacks/default.zip", std::ios::binary);
         std::ofstream dst(

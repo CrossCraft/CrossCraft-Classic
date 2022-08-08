@@ -87,7 +87,7 @@ if(VITA)
     set(VITA_VERSION "01.10")
 
     target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/include/)
-    target_link_libraries(CrossCraft-Classic SceCtrl_stub vitaGL vitashark mathneon SceShaccCg_stub SceShaccCgExt SceAppMgr_stub SceGxm_stub SceCommonDialog_stub SceProcessmgr_stub SceDisplay_stub SceKernelDmacMgr_stub ScePower_stub taihen_stub)
+    target_link_libraries(CrossCraft-Classic SceCtrl_stub vitaGL vitashark mathneon SceShaccCg_stub SceShaccCgExt SceIme_stub SceAppMgr_stub SceGxm_stub SceCommonDialog_stub SceProcessmgr_stub SceDisplay_stub SceKernelDmacMgr_stub ScePower_stub taihen_stub)
 
     vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME})
 

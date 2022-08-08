@@ -48,11 +48,11 @@ void character_callback(GLFWwindow *window, unsigned int codepoint) {
 #endif
 
 auto Player::tab_start(std::any d) -> void {
-    auto p = std::any_cast<Player*>(d);
+    auto p = std::any_cast<Player *>(d);
     p->in_tab = true;
 }
 auto Player::tab_end(std::any d) -> void {
-    auto p = std::any_cast<Player*>(d);
+    auto p = std::any_cast<Player *>(d);
     p->in_tab = false;
 }
 
@@ -470,6 +470,46 @@ auto ShowOSK(unsigned short *descritpion, unsigned short *outtext,
 
     return 0;
 }
+#elif BUILD_PLAT == BUILD_VITA
+
+auto ShowOSK(unsigned short *descritpion, unsigned short *outtext,
+             int maxtextinput) -> int {
+
+    SceImeDialogParam param;
+    sceImeDialogParamInit(&param);
+
+    param.supportedLanguages = 0x0001FFFF;
+    param.languagesForced = true;
+    param.type = SCE_IME_TYPE_BASIC_LATIN;
+    param.title = descritpion;
+    param.textBoxMode = SCE_IME_DIALOG_TEXTBOX_MODE_DEFAULT;
+    param.inputTextBuffer = outtext;
+    param.maxTextLength = maxtextinput;
+    sceImeDialogInit(&param);
+
+    bool done = true;
+
+    int result = 0;
+    while (done) {
+        auto status = sceImeDialogGetStatus();
+
+        if (status == SCE_COMMON_DIALOG_STATUS_FINISHED) {
+            SceImeDialogResult res;
+            memset(&res, 0, sizeof(SceImeDialogResult));
+            sceImeDialogGetResult(&res);
+
+            if (res.button != SCE_IME_DIALOG_BUTTON_ENTER) {
+                result = -1;
+            }
+            done = false;
+        }
+
+        vglSwapBuffers(true);
+    }
+
+    sceImeDialogTerm();
+    return result;
+}
 #endif
 
 auto Player::psp_chat() -> void {
@@ -494,6 +534,41 @@ auto Player::psp_chat() -> void {
             return;
         }
         sceKernelDcacheWritebackInvalidateAll();
+
+        auto ptr = create_refptr<MP::Outgoing::Message>();
+        ptr->PacketID = MP::Outgoing::eMessage;
+        memset(ptr->Message.contents, 0x20, STRING_LENGTH);
+        memcpy(ptr->Message.contents, message.c_str(),
+               chat_text.length() < STRING_LENGTH ? message.length()
+                                                  : STRING_LENGTH);
+
+        client_ref->packetsOut.push_back(
+            MP::Outgoing::createOutgoingPacket(ptr.get()));
+
+        SC_APP_INFO("Message Sent: {}", message);
+    }
+#elif BUILD_PLAT == BUILD_VITA
+    if (client_ref != nullptr) {
+
+        unsigned short test2[64];
+        memset(test2, 0, 64 * sizeof(short));
+        std::string message = "";
+
+        unsigned short desc[5] = {'C', 'h', 'a', 't', '\0'};
+
+        SC_APP_INFO("Calling OSK!");
+        if (ShowOSK(desc, test2, 64) != -1) {
+            for (int j = 0; test2[j] && j < 64; j++) {
+                unsigned c = test2[j];
+
+                if (32 <= c && c <= 127) // print ascii only
+                    message += c;
+            }
+            SC_APP_INFO("RES {}", message);
+        } else {
+            SC_APP_INFO("FAILED!");
+            return;
+        }
 
         auto ptr = create_refptr<MP::Outgoing::Message>();
         ptr->PacketID = MP::Outgoing::eMessage;
