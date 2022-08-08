@@ -249,20 +249,10 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
         {
             for (int z = zMin; z <= zMax; z++)
             {
-                glm::ivec3 ipos = glm::ivec3(x, y, z);
-                if (test(ipos, wrld)) {
-
-                    auto idx = wrld->getIdx(ipos.x, ipos.y, ipos.z);
-                    auto blk = wrld->worldData[idx];
-
-                    if (blk == Block::Slab && (pos.y - 1.8f + vel.y * dt) - ipos.y < 0.4f) {
-                        pos.y += 0.5f;
-                    }
-                    else if (blk == Block::Slab) {}
-                    else {
-                        collided = true;
-                        vel.z = 0;
-                    }
+                glm::ivec3 pos = glm::ivec3(x, y, z);
+                if (test(pos, wrld)) {
+                    collided = true;
+                    vel.x = 0;
                 }
             }
         }
@@ -276,19 +266,11 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
         {
             for (int z = zMin; z <= zMax; z++)
             {
-                glm::ivec3 ipos = glm::ivec3(x, y, z);
-                if (test(ipos, wrld)) {
-
-                    auto idx = wrld->getIdx(ipos.x, ipos.y, ipos.z);
-                    auto blk = wrld->worldData[idx];
-
-                    if (!(blk == Block::Slab && (pos.y - 1.8f + vel.y * dt) - ipos.y > 0.5f)) {
-
-                        collided = true;
-                        vel.y = 0;
-                        is_falling = false;
-                    }
-
+                glm::ivec3 pos = glm::ivec3(x, y, z);
+                if (test(pos, wrld)) {
+                    collided = true;
+                    vel.y = 0;
+                    is_falling = false;
                 }
             }
         }
@@ -301,19 +283,10 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
         {
             for (int y = yMin; y <= yMax; y++)
             {
-                glm::ivec3 ipos = glm::ivec3(x, y, z);
-                if (test(ipos, wrld)) {
-
-                    auto idx = wrld->getIdx(ipos.x, ipos.y, ipos.z);
-                    auto blk = wrld->worldData[idx];
-                    if (blk == Block::Slab && (pos.y - 1.8f + vel.y * dt) - ipos.y < 0.4f){
-                        pos.y += 0.5f;
-                    }
-                    else if (blk == Block::Slab) {}
-                    else  {
-                        collided = true;
-                        vel.z = 0;
-                    }
+                glm::ivec3 pos = glm::ivec3(x, y, z);
+                if (test(pos, wrld)) {
+                    collided = true;
+                    vel.z = 0;
                 }
             }
         }
