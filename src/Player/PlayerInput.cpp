@@ -210,7 +210,7 @@ auto Player::move_up(std::any d) -> void {
         }
 
         if (p->is_underwater && p->water_cutoff) {
-            p->vel.y = 3.2f;
+            p->vel.y = 4.3f;
             p->jumping = true;
             p->jump_icd = 0.33f;
             p->is_falling = true;

@@ -195,89 +195,101 @@ auto test(glm::vec3 pos, World *wrld) -> bool {
 }
 
 void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
-    model.ext = glm::vec3(0.6f, 1.8f, 0.6f);
+    int x, y, z;
+    bool testX = false;
+    bool testY = false;
+    bool testZ = false;
 
-    for (int x = -1; x <= 1; x++)
-        for (int y = 0; y <= 4; y++)
-            for (int z = -1; z <= 1; z++) {
-                float xoff = x;
-                float zoff = z;
+    int xMin = (int)(pos.x - 0.3f);
+    int xMax = (int)(pos.x + 0.3f);
+    int yMin = (int)(pos.y - 1.8f);
+    int yMax = (int)(pos.y);
+    int zMin = (int)(pos.z - 0.3f);
+    int zMax = (int)(pos.z + 0.3f);
 
-                auto new_vec =
-                    glm::vec3(testpos.x + xoff, testpos.y - 3.8f + (float)y,
-                              testpos.z + zoff);
+    if (vel.x < 0.0)
+    {
+        x = (int)(pos.x - 0.3f + vel.x * dt);
+        testX = true;
+    }
+    else if (vel.x > 0.0)
+    {
+        x = (int)(pos.x + 0.3f + vel.x * dt);
+        testX = true;
+    }
 
-                if (test(new_vec, wrld)) {
-                    AABB test_box =
-                        AABB(glm::ivec3(new_vec.x, new_vec.y + 1, new_vec.z),
-                             {1, 1, 1});
+    if (vel.y < 0.0)
+    {
+        y = (int)(pos.y - 1.8f + vel.y * dt );
+        testY = true;
+    }
+    else if (vel.y > 0.0)
+    {
+        y = (int)(pos.y + vel.y * dt);
+        testY = true;
+    }
 
-                    if (AABB::intersect(test_box, model)) {
-                        float player_bottom = model.getMax().x;
-                        float tiles_bottom = test_box.getMax().x;
-                        float player_right = model.getMax().z;
-                        float tiles_right = test_box.getMax().z;
+    if (vel.z < 0.0)
+    {
+        z = (int)(pos.z - 0.3f + vel.z * dt);
+        testZ = true;
+    }
+    else if (vel.z > 0.0)
+    {
+        z = (int)(pos.z + 0.3f + vel.z * dt);
+        testZ = true;
+    }
 
-                        float b_collision = tiles_bottom - model.getMin().x;
-                        float t_collision = player_bottom - test_box.getMin().x;
-                        float l_collision = player_right - test_box.getMin().z;
-                        float r_collision = tiles_right - model.getMin().z;
+    glm::vec3 newPosition = pos;
 
-                        if (t_collision < b_collision &&
-                            t_collision < l_collision &&
-                            t_collision < r_collision) {
-                            // Top collision
-
-                            if (vel.x > 0)
-                                vel.x = 0.0f;
-                        } else if (b_collision < t_collision &&
-                                   b_collision < l_collision &&
-                                   b_collision < r_collision) {
-                            // bottom collision
-                            if (vel.x < 0)
-                                vel.x = 0.0f;
-                        } else if (l_collision < r_collision &&
-                                   l_collision < t_collision &&
-                                   l_collision < b_collision) {
-                            // Left collision
-                            if (vel.z > 0)
-                                vel.z = -0.0f;
-                        } else if (r_collision < l_collision &&
-                                   r_collision < t_collision &&
-                                   r_collision < b_collision) {
-                            // Right collision
-                            if (vel.z < 0)
-                                vel.z = 0.0f;
-                        } else {
-                            vel.x = 0.0f;
-                            vel.z = 0.0f;
-                        }
-                    }
+    if (testX)
+    {
+        bool collided = false;
+        for (int y = yMin; y <= yMax; y++)
+        {
+            for (int z = zMin; z <= zMax; z++)
+            {
+                glm::ivec3 pos = glm::ivec3(x, y, z);
+                if (test(pos, wrld)) {
+                    collided = true;
+                    vel.x = 0;
                 }
             }
+        }
+    }
 
-    testpos = pos + vel * dt;
 
-    for (int x = -1; x <= 1; x++)
-        for (int z = -1; z <= 1; z++) {
-            if (test({testpos.x + (float)x, testpos.y - 1.8f,
-                      testpos.z + (float)z},
-                     wrld) &&
-                vel.y < 0 && is_falling) {
-                AABB test_box =
-                    AABB(glm::ivec3(testpos.x + (float)x, testpos.y + 1,
-                                    testpos.z + (float)z),
-                         {1, 1, 1});
-                if (AABB::intersect(test_box, model)) {
+    if (testY)
+    {
+        bool collided = false;
+        for (int x = xMin; x <= xMax; x++)
+        {
+            for (int z = zMin; z <= zMax; z++)
+            {
+                glm::ivec3 pos = glm::ivec3(x, y, z);
+                if (test(pos, wrld)) {
+                    collided = true;
                     vel.y = 0;
                     is_falling = false;
                 }
             }
         }
+    }
 
-    if (test({testpos.x, testpos.y + 0.05f, testpos.z}, wrld)) {
-        vel.y = 0;
-        is_falling = true;
+    if (testZ)
+    {
+        bool collided = false;
+        for (int x = xMin; x <= xMax; x++)
+        {
+            for (int y = yMin; y <= yMax; y++)
+            {
+                glm::ivec3 pos = glm::ivec3(x, y, z);
+                if (test(pos, wrld)) {
+                    collided = true;
+                    vel.z = 0;
+                }
+            }
+        }
     }
 }
 
@@ -320,7 +332,8 @@ void Player::update(float dt, World *wrld) {
         vel.z = 0;
         testpos = pos + vel * dt;
     }
-    model.pos = testpos - glm::vec3(0.3f, 0, 0.3f);
+
+    model.pos = pos - glm::vec3(0.3f, 1.8f, 0.3f);
 
     auto blk =
         wrld->worldData[wrld->getIdx(testpos.x, testpos.y + 0.2f, testpos.z)];
@@ -352,13 +365,6 @@ void Player::update(float dt, World *wrld) {
 
     pos += vel * dt;
     vel = vel2;
-
-    auto diff = (pos.y - 1.80f) - static_cast<float>((int)(pos.y - 1.80f));
-    if ((diff > 0.875f) && on_ground) {
-        pos.y -= 1.80f;
-        pos.y = roundf(pos.y);
-        pos.y += 1.80f;
-    }
 
     blk = wrld->worldData[wrld->getIdx(pos.x, pos.y - 1.85f, pos.z)];
 
