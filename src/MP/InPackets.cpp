@@ -164,7 +164,6 @@ namespace CrossCraft::MP::Incoming
             auto ptr = create_refptr<Disconnect>();
             ptr->PacketID = id;
 
-            byte_buffer->ReadU8(ptr->PlayerID);
             byte_buffer->ReadBuf(ptr->Reason.contents, STRING_LENGTH);
 
             return ptr;

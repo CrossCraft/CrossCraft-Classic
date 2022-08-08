@@ -9,57 +9,49 @@ template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
 auto PlaceAction::place(std::any d) -> void {
     auto w = std::any_cast<World *>(d);
 
+    // Check if we can place
     if (w->place_icd < 0)
         w->place_icd = 0.2f;
     else
         return;
 
-    auto pos = w->player->get_pos();
-
+    // If in inventory, skip
     if (w->player->in_inventory)
         return;
 
-    auto pos_ivec = glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
-                               static_cast<s32>(pos.z));
-
-    if (!validate_ivec3(pos_ivec))
-        return;
-
-    auto pidx = w->getIdx(pos_ivec.x, pos_ivec.y, pos_ivec.z);
-    if (w->worldData[pidx] != 0 && w->worldData[pidx] != 8)
-        return;
-
+    // Setup default camera pointing vector
     auto default_vec = glm::vec3(0, 0, 1);
-
     default_vec = glm::rotateX(default_vec, DEGTORAD(w->player->get_rot().x));
     default_vec =
         glm::rotateY(default_vec, DEGTORAD(-w->player->get_rot().y + 180));
 
+    // Vector has reach
     const float REACH_DISTANCE = 4.0f;
     default_vec *= REACH_DISTANCE;
 
+    // Iterate over vector to check for placement
     const u32 NUM_STEPS = 50;
-
     for (u32 i = 0; i < NUM_STEPS; i++) {
         float percentage =
             static_cast<float>(i) / static_cast<float>(NUM_STEPS);
 
-        auto cast_pos = pos + (default_vec * percentage);
+        auto cast_pos = w->player->get_pos() + (default_vec * percentage);
 
         auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
                                static_cast<s32>(cast_pos.y),
                                static_cast<s32>(cast_pos.z));
 
-        auto posivec =
-            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
-                       static_cast<s32>(pos.z));
+        auto pos = w->player->get_pos();
 
-        if (!validate_ivec3(ivec) || ivec == posivec)
+        // Validate ivec is in bounds
+        if (!validate_ivec3(ivec, w->world_size))
             continue;
 
+        // Get block
         u32 idx = w->getIdx(ivec.x, ivec.y, ivec.z);
         auto blk = w->worldData[idx];
 
+        // Pass through these blocks
         if (blk == Block::Air || blk == Block::Water || blk == Block::Lava)
             continue;
 
@@ -79,9 +71,9 @@ auto PlaceAction::place(std::any d) -> void {
             float ym = -0.3f;
             for (int c = 0; c < 2; c++) {
 
-                posivec = glm::ivec3(static_cast<s32>(pos.x + xm),
-                                     static_cast<s32>(pos.y),
-                                     static_cast<s32>(pos.z + ym));
+                auto posivec = glm::ivec3(static_cast<s32>(pos.x + xm),
+                                          static_cast<s32>(pos.y),
+                                          static_cast<s32>(pos.z + ym));
                 auto posivec2 = glm::ivec3(static_cast<s32>(pos.x + xm),
                                            static_cast<s32>(pos.y - 1),
                                            static_cast<s32>(pos.z + ym));
@@ -93,11 +85,13 @@ auto PlaceAction::place(std::any d) -> void {
                                   static_cast<s32>(cast_pos.y),
                                   static_cast<s32>(cast_pos.z + ym));
 
-                if (!validate_ivec3(ivec))
+                if (!validate_ivec3(ivec, w->world_size))
                     return;
 
                 if ((ivec == posivec || ivec == posivec2 || ivec == posivec3) &&
-                    (bk != 6 && bk != 37 && bk != 38 && bk != 39 && bk != 40))
+                    (bk != Block::Sapling && bk != Block::Flower1 &&
+                     bk != Block::Flower2 && bk != Block::Mushroom1 &&
+                     bk != Block::Mushroom2))
                     return;
 
                 ym += 0.3f;
@@ -105,10 +99,12 @@ auto PlaceAction::place(std::any d) -> void {
             xm += 0.3f;
         }
 
-        posivec = glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
-                             static_cast<s32>(pos.z));
+        auto posivec =
+            glm::ivec3(static_cast<s32>(pos.x), static_cast<s32>(pos.y),
+                       static_cast<s32>(pos.z));
 
         ivec = copy_ivec;
+        // Enforce block placement rules
         idx = w->getIdx(ivec.x, ivec.y, ivec.z);
 
         auto idx2 = w->getIdx(ivec.x, ivec.y - 1, ivec.z);
@@ -138,7 +134,7 @@ auto PlaceAction::place(std::any d) -> void {
                 for (auto i = ivec.x - 2; i <= ivec.x + 2; i++) {
                     for (auto j = ivec.y - 2; j <= ivec.y + 2; j++) {
                         for (auto k = ivec.z - 2; k <= ivec.z + 2; k++) {
-                            idx = (i * 256 * 64) + (k * 64) + j;
+                            idx = (j * 256 * 256) + (k * 256) + i;
 
                             // If it's water or flowing water, replace with air.
                             if (idx >= 0 && idx < (256 * 64 * 256) &&
@@ -154,6 +150,13 @@ auto PlaceAction::place(std::any d) -> void {
             }
         }
 
+        // Update metadata
+        int mIdx = ivec.y / 16 * w->world_size.z / 16 * w->world_size.x / 16 +
+                   ivec.z / 16 * w->world_size.x / 16 + ivec.x / 16;
+
+        w->chunksMeta[mIdx].is_empty = false;
+
+        // Update client if necessary
         if (w->client != nullptr) {
             w->set_block(ivec.x, ivec.y, ivec.z, 1,
                          w->player->itemSelections[w->player->selectorIDX]);
@@ -173,7 +176,6 @@ auto PlaceAction::place(std::any d) -> void {
         w->update_nearby_blocks(ivec);
 
         return;
-        break;
     }
 }
 

@@ -10,11 +10,37 @@ TextHelper::TextHelper() {
 
     fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
         font_texture, glm::vec2(16, 16));
+
+    background_rectangle = create_scopeptr<Rendering::Primitive::Rectangle>(
+        Rendering::Rectangle{glm::vec2(-1, -1), {112, 12}},
+        Rendering::Color{0, 0, 0, 128},
+#if BUILD_PLAT == BUILD_VITA
+        -2
+#else
+        2
+#endif
+    );
 }
 
-auto TextHelper::clear() -> void { fontRenderer->clear(); }
-auto TextHelper::draw() -> void {
+auto TextHelper::clear() -> void {
+    fontRenderer->clear();
+    posBox.clear();
+}
+auto TextHelper::rebuild() -> void {
     fontRenderer->rebuild();
+}
+
+auto TextHelper::draw() -> void {
+
+    for (auto pos : posBox) {
+        Rendering::RenderContext::get().matrix_translate(
+            glm::vec3(pos.x, pos.y, 0));
+
+        Rendering::RenderContext::get().matrix_scale({pos.z, 1.0f, 1.0f});
+
+        background_rectangle->draw();
+        Rendering::RenderContext::get().matrix_clear();
+    }
 
 #if PSP
     sceKernelDcacheWritebackInvalidateAll();
@@ -113,13 +139,12 @@ auto TextHelper::draw_text(std::string text, glm::vec2 pos, unsigned char col,
         break;
     }
 
-    if (bg_mode == CC_TEXT_BG_DYNAMIC) {
-        Rendering::RenderContext::get().draw_rect(pos + glm::vec2(-1, -1),
-                                                  {112, 12}, {0, 0, 0, 128}, 2);
+    if (bg_mode >= CC_TEXT_BG_DYNAMIC) {
+        posBox.push_back(glm::vec3(pos, bg_mode));
     }
 
-    fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, 1.0f);
-    fontRenderer->add_text(text, {pos.x, pos.y}, front, 0.0f);
+    fontRenderer->add_text(text, {pos.x + 1, pos.y - 1}, back, -20);
+    fontRenderer->add_text(text, {pos.x, pos.y}, front, -21);
 }
 
 } // namespace CrossCraft

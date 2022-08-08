@@ -1,5 +1,5 @@
 #pragma once
-#include <Platform/Platform.hpp>
+#include "Utils.hpp"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -7,20 +7,19 @@
 namespace CrossCraft {
 
 struct Config {
-    float sense = 1.50f;
-    bool compat = true;
-    std::string ip = "192.168.184.130";
-    std::string username = "CCC-Client";
+    float sense;
+    bool compat;
+    std::string ip;
+    std::string username;
+    u16 port;
+    std::string key;
 
     inline static auto loadConfig() -> Config {
         Config config;
         config.sense = 1.0f;
 
-#if BUILD_PLAT != BUILD_VITA
-        std::ifstream file("config.cfg");
-#else
-        std::ifstream file("ux0:/data/CrossCraft-Classic/config.cfg");
-#endif
+        std::ifstream file(PLATFORM_FILE_PREFIX + "config.cfg");
+
         if (file.is_open()) {
             std::string line;
 
@@ -46,17 +45,23 @@ struct Config {
                     std::stringstream str(line);
 
                     str >> config.username;
+                } else if (line == "port") {
+                    std::getline(file, line);
+                    std::stringstream str(line);
+
+                    str >> config.port;
+                } else if (line == "key") {
+                    std::getline(file, line);
+                    std::stringstream str(line);
+
+                    str >> config.key;
                 }
             }
         } else {
-#if BUILD_PLAT != BUILD_VITA
-            std::ofstream file2("config.cfg");
-#else
-            std::ofstream file2("ux0:/data/CrossCraft-Classic/config.cfg");
-#endif
+            std::ofstream file2(PLATFORM_FILE_PREFIX + "config.cfg");
+
             file2 << "sense:1.50" << std::endl;
             file2 << "compat:0" << std::endl;
-            file2 << "client:0" << std::endl;
             file2 << "ip:127.0.0.1" << std::endl;
             file2 << "username:CCC-Client" << std::endl;
             file2.close();

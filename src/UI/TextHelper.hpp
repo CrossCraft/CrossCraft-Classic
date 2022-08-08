@@ -5,6 +5,15 @@
 #include <Rendering/Rendering.hpp>
 #include <Utilities/Types.hpp>
 
+#include <Rendering/Primitive/Rectangle.hpp>
+
+// because classic likes being inconsistent and uses non-colorcodes
+// for menu/ui stuff..
+#define CC_TEXT_COLOR_SELECT_FRONT {255, 255, 160, 255}
+#define CC_TEXT_COLOR_SELECT_BACK {63, 63, 40, 255}
+#define CC_TEXT_COLOR_SPLASH_FRONT {63, 63, 0, 255}
+#define CC_TEXT_COLOR_SPLASH_BACK {255, 255, 0, 255}
+
 // creds to https://minecraft.fandom.com/wiki/Formatting_codes
 #define CC_TEXT_COLOR_BLACK 0
 #define CC_TEXT_COLOR_DARK_BLUE 1
@@ -68,9 +77,13 @@ class TextHelper {
     auto clear() -> void;
     auto draw() -> void;
 
+    auto rebuild() -> void;
+
   private:
     uint32_t font_texture;
     ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
+    std::vector<glm::vec3> posBox;
+    ScopePtr<Rendering::Primitive::Rectangle> background_rectangle;
 
 }; // class TextHelper
 

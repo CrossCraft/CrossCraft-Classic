@@ -19,11 +19,11 @@ auto ClassicGenerator::generate_tree(World *wrld, int x, int z) -> void {
 
 auto ClassicGenerator::setBlk(int x, int y, int z, uint8_t blk, uint8_t *data)
     -> void {
-    auto idx = (x * 256 * 64) + (z * 64) + y;
+    auto idx = (y * 256 * 256) + (z * 256) + x;
 
-    if (idx >= 0 && idx < 256 * 64 * 256)
-        if (data[idx] == Block::Stone)
-            data[idx] = blk;
+    if (idx >= 0 && idx < (256 * 64 * 256) && data[idx] == Block::Stone) {
+        data[idx] = blk;
+    }
 }
 
 auto ClassicGenerator::generate(World *wrld) -> void {
@@ -49,7 +49,7 @@ auto ClassicGenerator::generate(World *wrld) -> void {
         for (int z = 0; z < 256; z++) {
             int h = wrld->hmap[x * 256 + z] * 64.f;
             for (int y = 0; y < h; y++) {
-                auto idx = (x * 256 * 64) + (z * 64) + y;
+                auto idx = (y * 256 * 256) + (z * 256) + x;
                 if (y == 1)
                     wrld->worldData[idx] = Block::Lava;
                 else if (y < (h - 4))
@@ -72,7 +72,7 @@ auto ClassicGenerator::generate(World *wrld) -> void {
 
             if (h < 32) {
                 for (int y = h; y < 32; y++) {
-                    auto idx = (x * 256 * 64) + (z * 64) + y;
+                    auto idx = (y * 256 * 256) + (z * 256) + x;
                     wrld->worldData[idx] = Block::Water;
                 }
             }
@@ -86,7 +86,7 @@ auto ClassicGenerator::generate(World *wrld) -> void {
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
             int h = wrld->hmap[x * 256 + z] * 64.f;
-            auto idx = (x * 256 * 64) + (z * 64) + h;
+            auto idx = (h * 256 * 256) + (z * 256) + x;
 
             auto v = get_noise(x, z, &settings2);
 
@@ -146,7 +146,7 @@ auto ClassicGenerator::generate(World *wrld) -> void {
     // Bottom of World = Bedrock
     for (int x = 0; x < 256; x++) {
         for (int z = 0; z < 256; z++) {
-            auto idx = (x * 256 * 64) + (z * 64) + 0;
+            auto idx = (0 * 256 * 256) + (z * 256) + x;
             wrld->worldData[idx] = Block::Bedrock;
         }
     }
@@ -157,6 +157,8 @@ auto ClassicGenerator::generate(World *wrld) -> void {
             wrld->update_lighting(x, z);
         }
     }
+
+    wrld->generate_meta();
 }
 
 } // namespace CrossCraft

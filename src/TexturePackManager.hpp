@@ -5,29 +5,28 @@
 #include <string>
 #include <vector>
 
-namespace CrossCraft
-{
+namespace CrossCraft {
 
-    class TexturePackManager
-    {
-    public:
-        TexturePackManager();
-        ~TexturePackManager();
+class TexturePackManager {
+  public:
+    TexturePackManager();
+    ~TexturePackManager();
 
-        auto scan_folder(std::string path) -> void;
-        auto load_texture(std::string filename, u32 magFilter,
-            u32 minFilter, bool repeat, bool flip = false) ->u32;
-        auto add_layer(std::string name) -> void;
+    auto scan_folder(std::string path) -> void;
+    auto load_texture(std::string filename, u32 magFilter, u32 minFilter,
+                      bool repeat, bool flip = false, bool vram = false) -> u32;
+    auto add_layer(std::string name) -> void;
 
-        inline static auto get() -> TexturePackManager& {
-            static TexturePackManager txm;
-            return txm;
-        }
+    inline static auto get() -> TexturePackManager & {
+        static TexturePackManager txm;
+        return txm;
+    }
 
-        std::vector<std::string> path_names;
-        std::vector<std::string> layers;
-    private:
-        auto extract_zip(std::string path) -> int;
-    };
+    std::vector<std::string> path_names;
+    std::vector<std::string> layers;
 
-}
+  private:
+    auto extract_zip(std::string path) -> int;
+};
+
+} // namespace CrossCraft

@@ -1,4 +1,5 @@
 #include "TexturePackManager.hpp"
+#include "Utils.hpp"
 #include <Rendering/Rendering.hpp>
 #include <algorithm>
 #include <contrib/minizip/unzip.h>
@@ -13,25 +14,21 @@ TexturePackManager::TexturePackManager() {
 }
 TexturePackManager::~TexturePackManager() {}
 auto TexturePackManager::load_texture(std::string filename, u32 magFilter,
-                                      u32 minFilter, bool repeat, bool flip)
-    -> u32 {
+                                      u32 minFilter, bool repeat, bool flip,
+                                      bool vram) -> u32 {
 
     for (int i = layers.size() - 1; i >= 0; i--) {
         auto &l = layers[i];
 
-#if BUILD_PLAT == BUILD_VITA
         std::string path =
-            "ux0:/data/CrossCraft-Classic/texturepacks/" + l + "/" + filename;
-#else
-        std::string path = "./texturepacks/" + l + "/" + filename;
-#endif
+            PLATFORM_FILE_PREFIX + "texturepacks/" + l + "/" + filename;
         std::fstream file(path);
 
         if (file.is_open()) {
             file.close();
 
             return Rendering::TextureManager::get().load_texture(
-                path, magFilter, minFilter, repeat, flip);
+                path, magFilter, minFilter, repeat, flip, vram);
         }
     }
 
@@ -54,7 +51,6 @@ auto TexturePackManager::scan_folder(std::string path) -> void {
             auto filename = entry.path().filename().string();
 
             if (filename.find(".zip") != std::string::npos) {
-                SC_APP_INFO("EXTRACT");
                 extract_zip(path + filename);
                 path_names.push_back(entry.path().filename().string().substr(
                     0, filename.find(".zip")));
@@ -65,10 +61,6 @@ auto TexturePackManager::scan_folder(std::string path) -> void {
     std::sort(path_names.begin(), path_names.end());
     path_names.erase(std::unique(path_names.begin(), path_names.end()),
                      path_names.end());
-
-    SC_APP_INFO("TEXTURE PACK INFO: ");
-    for (auto &str : path_names)
-        SC_APP_INFO("Texture Pack Found: {}", str);
 }
 
 auto TexturePackManager::extract_zip(std::string path) -> int {
@@ -120,6 +112,11 @@ auto TexturePackManager::extract_zip(std::string path) -> int {
 
     unzClose(zF);
 
+#if !PSP
+    std::filesystem::remove(path);
+#else
+    sceIoRemove(path.c_str());
+#endif
     return 0;
 }
 } // namespace CrossCraft

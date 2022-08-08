@@ -24,13 +24,25 @@
 #include <vector>
 namespace CrossCraft {
 
-inline auto validate_ivec3(glm::ivec3 ivec) -> bool {
-    return ivec.x >= 0 && ivec.x < 256 && ivec.y >= 0 && ivec.y < 256 &&
-           ivec.z >= 0 && ivec.z < 256;
+struct LayerMeta {
+    bool is_empty;
+    bool is_full;
+};
+
+struct ChunkMeta {
+    bool is_empty;
+    bool is_full;
+
+    LayerMeta layers[16];
+};
+
+inline auto validate_ivec3(glm::ivec3 ivec, glm::vec3 size) -> bool {
+    return ivec.x >= 0 && ivec.x < size.x && ivec.y >= 0 && ivec.y < size.y &&
+           ivec.z >= 0 && ivec.z < size.z;
 }
 
 class Player;
-
+class SelectionBox;
 typedef uint8_t block_t;
 class ChunkStack;
 
@@ -53,8 +65,6 @@ class World {
      */
     ~World();
 
-    auto load_world() -> bool;
-
     /**
      * @brief Update (checks chunks, run chunk updates, tick updates);
      *
@@ -76,7 +86,12 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    auto getIdx(int x, int y, int z)->uint32_t const;
+    inline uint32_t getIdx(int x, int y, int z) {
+        if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
+            z >= world_size.z)
+            return 0;
+        return (y * world_size.z * world_size.x) + (z * world_size.x) + x;
+    }
 
     /**
      * @brief Get a World Light Index
@@ -86,7 +101,13 @@ class World {
      * @param z Position
      * @return uint32_t block_t* worldData
      */
-    auto getIdxl(int x, int y, int z)->uint32_t const;
+    inline uint32_t getIdxl(int x, int y, int z) {
+        if (x < 0 || x >= world_size.x || y >= world_size.y || y < 0 || z < 0 ||
+            z >= world_size.z)
+            return 0;
+        return ((y / 16) * world_size.z * world_size.x) + (z * world_size.x) +
+               x;
+    }
 
     block_t *worldData;
     uint16_t *lightData;
@@ -110,6 +131,8 @@ class World {
      */
     auto update_lighting(int x, int z) -> void;
 
+    auto generate_meta() -> void;
+
     /**
      * @brief Updates nearby block states
      *
@@ -124,9 +147,9 @@ class World {
     auto add_update(glm::ivec3 ivec) -> void;
 
     auto spawn() -> void;
-    static auto save(std::any p) -> void;
 
     std::map<int, ChunkStack *> chunks;
+    ChunkMeta *chunksMeta;
 
     auto set_block(short x, short y, short z, uint8_t mode, uint8_t block)
         -> void;
@@ -145,22 +168,20 @@ class World {
 
     glm::ivec2 pchunk_pos;
 
+    ScopePtr<SelectionBox> sbox;
     ScopePtr<ParticleSystem> psystem;
+
     unsigned int terrain_atlas;
     float *hmap;
     float tick_counter;
 
     float place_icd, break_icd;
+    float chunk_generate_icd;
 
-    uint16_t idx_counter;
-    std::vector<Rendering::Vertex> m_verts;
-    std::vector<uint16_t> m_index;
-    Rendering::Mesh blockMesh;
+    std::map<float, glm::ivec2> to_generate;
 
     auto add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
                           uint32_t lightVal, glm::vec3 mypos) -> void;
-
-    auto draw_selection() -> void;
 
     friend class DigAction;
     friend class PlaceAction;

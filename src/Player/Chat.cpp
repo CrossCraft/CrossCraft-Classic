@@ -5,7 +5,7 @@ namespace CrossCraft {
 
 Chat::Chat() { data.clear(); }
 
-void Chat::add_message(std::string str) { data.push_back({str, 5.0f}); }
+void Chat::add_message(std::string str) { data.push_back({str, 10.0f}); }
 
 void Chat::update(double dt) {
     std::vector<int> removal;
@@ -20,6 +20,7 @@ void Chat::update(double dt) {
     }
 
     for (auto &id : removal) {
+        if(id < data.size())
         data.erase(data.begin() + id);
     }
 }

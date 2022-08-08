@@ -1,30 +1,124 @@
 #include "Gamestate.hpp"
-#include "World/DigAction.hpp"
+
+#include "Rendering/ShaderManager.hpp"
+#include "TexturePackManager.hpp"
+#include "Utils.hpp"
 #include "World/Generation/ClassicGenerator.hpp"
 #include "World/Generation/CrossCraftGenerator.hpp"
-#include "World/PlaceAction.hpp"
-#include <Stardust-Celeste.hpp>
-#include <Utilities/Controllers/KeyboardController.hpp>
-#include <Utilities/Controllers/MouseController.hpp>
-#include <Utilities/Controllers/PSPController.hpp>
-#include <Utilities/Controllers/VitaController.hpp>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <stdio.h>
+#include "World/SaveData.hpp"
 
 namespace CrossCraft {
-
 using namespace Stardust_Celeste::Utilities;
 
 GameState::~GameState() { on_cleanup(); }
 
+#if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX
+const std::string vert_source = R"(
+    #version 400
+    layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec4 aCol;
+    layout (location = 2) in vec2 aTex;
+
+    layout (std140) uniform Matrices {
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+    };
+    
+    out vec2 uv;
+    out vec4 color;
+    out vec3 position;
+
+    void main() {
+        gl_Position = proj * view * model * vec4(aPos, 1.0);
+        position = gl_Position.xyz;
+        uv = aTex;
+        color = aCol;
+    }
+)";
+
+const std::string frag_source = R"(
+    #version 400
+    uniform sampler2D tex;
+    in vec2 uv;
+    in vec4 color;
+    in vec3 position;
+
+    out vec4 FragColor;
+
+    const vec3 fogColor = vec3(0.59765f, 0.796875, 1.0f);
+    const float density = 0.0005f;
+
+    void main() {
+        vec4 texColor = texture(tex, uv);
+        texColor *= vec4(1.0f / 255.0f) * color;
+
+        float dist = abs(position.z);
+        const float fogMax = (8.0f * 16.0f * 0.8);
+        const float fogMin = (8.0f * 16.0f * 0.2);
+        float fogFactor = (fogMax - dist) / (fogMax - fogMin);
+        fogFactor = clamp(fogFactor, 0.0f, 1.0f);
+
+        FragColor = vec4(mix(fogColor.rgb, texColor.rgb, fogFactor), texColor.a); 
+
+        if(FragColor.a < 0.1f)
+            discard;
+   }
+)";
+#elif BUILD_PLAT == BUILD_VITA
+const std::string vert_source =
+    R"(
+    void main ( float3 position, float4 color, float2 uv,
+                float2 out vTexcoord : TEXCOORD0, 
+                float4 out vPosition : POSITION, 
+                float4 out vColor : COLOR, 
+                uniform float4x4 proj, 
+                uniform float4x4 view, 
+                uniform float4x4 model)
+    {
+        vPosition = mul(mul(mul(float4(position, 1.f), model), view), proj);
+        vTexcoord = uv;
+        vColor = color;
+    }
+)";
+
+const std::string frag_source =
+    R"(
+    float4 main(float2 vTexcoord : TEXCOORD0, float4 vColor : COLOR0, float4 coords : WPOS, uniform sampler2D tex) {
+
+        float4 texColor = tex2D(tex, vTexcoord);
+        texColor *= vColor;
+        texColor = clamp(texColor, 0.0f, 1.0f);
+
+        float dist = coords.z / coords.w;
+
+        float fogMax = (4.0f * 16.0f * 0.8f);
+        float fogMin = (4.0f * 16.0f * 0.2f);
+        float fogFactor = (fogMax - dist) / (fogMax - fogMin);
+        fogFactor = clamp(fogFactor, 0.0f, 1.0f);
+    
+        float3 fogColor = float3(0.59765f, 0.796875, 1.0f);
+        texColor.rgb = lerp(fogColor.rgb, texColor.rgb, fogFactor);
+
+        if(texColor.a < 0.1f)
+            discard;
+
+        return texColor;
+    }
+)";
+#endif
+
 void GameState::on_start() {
+    // Set Color
+    Rendering::RenderContext::get().set_color(
+        Rendering::Color{0x99, 0xCC, 0xFF, 0xFF});
 
-    Rendering::Color clearcol;
-    clearcol.color = 0xFFFFD597;
-
-    Rendering::RenderContext::get().set_color(clearcol);
+#if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX ||                \
+    BUILD_PLAT == BUILD_VITA
+    auto shad =
+        Rendering::ShaderManager::get().load_shader(vert_source, frag_source);
+    Rendering::ShaderManager::get().bind_shader(shad);
+#endif
 
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
@@ -33,35 +127,26 @@ void GameState::on_start() {
     world->cfg = Config::loadConfig();
 
     if (forced_mp) {
-#if PSP
+        // Connect to Multiplayer
+#if BUILD_PLAT == BUILD_PSP
         Network::NetworkDriver::get().initGUI();
-#elif BUILD_PLAT == BUILD_VITA
-        Network::NetworkDriver::get().init();
 #endif
-        SC_APP_INFO("{}", world->cfg.username);
-        SC_APP_INFO("{}", world->cfg.ip);
-        client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip);
+        client = create_scopeptr<MP::Client>(world.get(), world->cfg.ip,
+                                             world->cfg.port);
         world->client = client.get();
         world->player->client_ref = client.get();
     } else {
-#if BUILD_PLAT != BUILD_VITA
-        FILE *fptr = fopen("save.ccc", "r");
-#else
-        FILE *fptr = fopen("ux0:/data/CrossCraft-Classic/save.ccc", "r");
-#endif
-        if (fptr) {
-            if (!world->load_world())
-                if (world->cfg.compat)
-                    ClassicGenerator::generate(world.get());
-                else
-                    CrossCraftGenerator::generate(world.get());
-            fclose(fptr);
-        } else {
+        // Try Load Save -- if fails, do generation
+
+        FILE *fptr = fopen((PLATFORM_FILE_PREFIX + "save.ccc").c_str(), "r");
+        if (!fptr || !SaveData::load_world(world.get())) {
             if (world->cfg.compat)
                 ClassicGenerator::generate(world.get());
             else
                 CrossCraftGenerator::generate(world.get());
         }
+        if (fptr != nullptr)
+            fclose(fptr);
 
         world->spawn();
     }
@@ -93,251 +178,20 @@ void GameState::quit(std::any d) {
 }
 
 void GameState::on_update(Core::Application *app, double dt) {
-    if (client.get() != nullptr) {
+    if (client.get() != nullptr)
         client->update(dt);
 
-        if (client->is_ready) {
-            // Update the user input
-            Utilities::Input::update();
-
-            // Update the world
-            world->update(dt);
-        }
-    } else {
-        // Update the user input
-        Utilities::Input::update();
-
-        // Update the world
+    if (client.get() == nullptr || client->is_ready) {
+        Input::update();
         world->update(dt);
     }
 }
 void GameState::on_draw(Core::Application *app, double dt) {
-    if (client.get() != nullptr) {
+    if (client.get() != nullptr)
         client->draw();
 
-        if (client->is_ready) {
-            world->draw();
-        }
-    } else {
+    if (client.get() == nullptr || client->is_ready)
         world->draw();
-    }
+
 }
-
-/* Ugly Key-Binding Function */
-
-void GameState::bind_controls() {
-    //
-    // PSP Face Buttons: Release
-    //
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Triangle, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Cross, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Square, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Circle, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Triangle, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Cross, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Square, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Circle, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-
-    //
-    // PSP Face Buttons: Press/Hold
-    //
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Triangle, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_forward, world->player.get()});
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Cross, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_backward, world->player.get()});
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Square, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_left, world->player.get()});
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Circle, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_right, world->player.get()});
-
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Triangle, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_forward, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Cross, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_backward, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Square, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_left, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Circle, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_right, world->player.get()});
-
-    //
-    // PSP Directional Buttons: Press/Hold
-    //
-    psp_controller->add_command({(int)Input::PSPButtons::Up, KeyFlag::Held},
-                                {Player::move_up, world->player.get()});
-    psp_controller->add_command({(int)Input::PSPButtons::Up, KeyFlag::Press},
-                                {Player::press_up, world->player.get()});
-    psp_controller->add_command({(int)Input::PSPButtons::Down, KeyFlag::Press},
-                                {Player::press_down, world->player.get()});
-    psp_controller->add_command({(int)Input::PSPButtons::Left, KeyFlag::Press},
-                                {Player::press_left, world->player.get()});
-    psp_controller->add_command({(int)Input::PSPButtons::Right, KeyFlag::Press},
-                                {Player::press_right, world->player.get()});
-
-    vita_controller->add_command({(int)Input::VitaButtons::Up, KeyFlag::Held},
-                                 {Player::move_up, world->player.get()});
-    vita_controller->add_command({(int)Input::VitaButtons::Up, KeyFlag::Press},
-                                 {Player::press_up, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Down, KeyFlag::Press},
-        {Player::press_down, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Left, KeyFlag::Press},
-        {Player::press_left, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Right, KeyFlag::Press},
-        {Player::press_right, world->player.get()});
-
-    //
-    // PSP Start/Select: Press
-    //
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::Select, KeyFlag::Press},
-        {Player::toggle_inv, world->player.get()});
-    psp_controller->add_command({(int)Input::PSPButtons::Start, KeyFlag::Press},
-                                {World::save, world.get()});
-    psp_controller->add_command({(int)Input::PSPButtons::Down, KeyFlag::Press},
-                                {Player::psp_chat, world->player.get()});
-
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Select, KeyFlag::Press},
-        {Player::toggle_inv, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Start, KeyFlag::Press},
-        {World::save, world.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Down, KeyFlag::Press},
-        {Player::psp_chat, world->player.get()});
-
-    //
-    // PSP Triggers: Press/Hold
-    //
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::RTrigger, KeyFlag::Press | KeyFlag::Held},
-        {DigAction::dig, world.get()});
-    psp_controller->add_command(
-        {(int)Input::PSPButtons::LTrigger, KeyFlag::Press | KeyFlag::Held},
-        {PlaceAction::place, world.get()});
-
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::RTrigger, KeyFlag::Press | KeyFlag::Held},
-        {DigAction::dig, world.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::LTrigger, KeyFlag::Press | KeyFlag::Held},
-        {PlaceAction::place, world.get()});
-
-    key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
-                                {World::save, world.get()});
-
-    key_controller->add_command({(int)Input::Keys::W, KeyFlag::Release},
-                                {Player::move_reset, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::S, KeyFlag::Release},
-                                {Player::move_reset, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::A, KeyFlag::Release},
-                                {Player::move_reset, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::D, KeyFlag::Release},
-                                {Player::move_reset, world->player.get()});
-
-    key_controller->add_command(
-        {(int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_forward, world->player.get()});
-    key_controller->add_command(
-        {(int)Input::Keys::S, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_backward, world->player.get()});
-    key_controller->add_command(
-        {(int)Input::Keys::A, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_left, world->player.get()});
-    key_controller->add_command(
-        {(int)Input::Keys::D, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_right, world->player.get()});
-
-    key_controller->add_command(
-        {(int)Input::Keys::R, KeyFlag::Press | KeyFlag::Held},
-        {Player::respawn, RespawnRequest{world->player.get(), world.get()}});
-
-    key_controller->add_command(
-        {(int)Input::Keys::Space, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_up, world->player.get()});
-    key_controller->add_command(
-        {(int)Input::Keys::LShift, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_down, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::B, KeyFlag::Press},
-                                {Player::toggle_inv, world->player.get()});
-
-    key_controller->add_command({(int)Input::Keys::Enter, KeyFlag::Press},
-                                {Player::submit_chat, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::T, KeyFlag::Press},
-                                {Player::enter_chat, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::Backspace, KeyFlag::Press},
-                                {Player::delete_chat, world->player.get()});
-
-    mouse_controller->add_command(
-        {(int)Input::MouseButtons::Left, KeyFlag::Press | KeyFlag::Held},
-        {DigAction::dig, world.get()});
-    mouse_controller->add_command(
-        {(int)Input::MouseButtons::Right, KeyFlag::Press | KeyFlag::Held},
-        {PlaceAction::place, world.get()});
-
-    key_controller->add_command(
-        {(int)Input::Keys::Num1, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 0}});
-    key_controller->add_command(
-        {(int)Input::Keys::Num2, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 1}});
-    key_controller->add_command(
-        {(int)Input::Keys::Num3, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 2}});
-    key_controller->add_command(
-        {(int)Input::Keys::Num4, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 3}});
-    key_controller->add_command(
-        {(int)Input::Keys::Num5, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 4}});
-    key_controller->add_command(
-        {(int)Input::Keys::Num6, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 5}});
-    key_controller->add_command(
-        {(int)Input::Keys::Num7, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 6}});
-    key_controller->add_command(
-        {(int)Input::Keys::Num8, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 7}});
-    key_controller->add_command(
-        {(int)Input::Keys::Num9, KeyFlag::Press | KeyFlag::Held},
-        {Player::change_selector, SelData{world->player.get(), 8}});
-
-    Input::add_controller(psp_controller);
-    Input::add_controller(key_controller);
-    Input::add_controller(mouse_controller);
-    Input::add_controller(vita_controller);
-
-    Input::set_differential_mode("Mouse", true);
-    Input::set_differential_mode("PSP", true);
-    Input::set_differential_mode("Vita", true);
-}
-
 } // namespace CrossCraft

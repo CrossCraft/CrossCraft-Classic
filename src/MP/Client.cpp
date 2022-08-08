@@ -2,13 +2,17 @@
 #include "../World/World.hpp"
 #include "InPackets.hpp"
 #include "OutPackets.hpp"
+
+#include "../TexturePackManager.hpp"
 #include <thread>
 #include <zlib.h>
+#include <string>
 
 namespace CrossCraft::MP {
 
 Client::Client(World *wrld, std::string ip, u16 port) {
     update_timer = 0.0f;
+    disconnected = false;
     this->wrld = wrld;
     SC_APP_INFO("Connecting to: [" + ip + "]@" + std::to_string(port));
 
@@ -18,27 +22,24 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     name.sin_family = AF_INET;
     name.sin_port = htons(port);
 
-    inet_pton(AF_INET, ip.c_str(), &name.sin_addr.s_addr);
+    struct hostent *he = gethostbyname(ip.c_str());
+    char *addr = inet_ntoa(*(struct in_addr *)he->h_addr_list[0]);
+
+    inet_pton(AF_INET, addr, &name.sin_addr.s_addr);
     bool b =
         (::connect(my_socket, (struct sockaddr *)&name, sizeof(name)) >= 0);
 
 #ifdef _WIN32
     unsigned long mode = (false) ? 0 : 1;
     ioctlsocket(my_socket, FIONBIO, &mode);
-#elif BUILD_PLAT == BUILD_VITA
-    int flag = 1;
-    sceNetSetsockopt(my_socket, SCE_NET_IPPROTO_TCP, SCE_NET_TCP_NODELAY,
-                     (char *)&flag, sizeof(int));
-    fcntl(my_socket, F_SETFL, SCE_O_NBLOCK);
-#else
-    int flags = fcntl(my_socket, F_GETFL, 0);
-
-    flags = (false) ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
-    fcntl(my_socket, F_SETFL, flags);
 #endif
+
+    int flag = 1;
+    setsockopt(my_socket, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
+
     if (!b) {
-        SC_APP_ERROR("Failed to open a connection! (Is the server open?)");
-        throw std::runtime_error("Fail!");
+        disconnected = true;
+        disconnectReason = "Couldn't contact server!";
     }
     is_ready = false;
     connected = true;
@@ -51,6 +52,7 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     memset(ptr->Username.contents, 0x20, STRING_LENGTH);
     strcpy((char *)ptr->Username.contents, wrld->cfg.username.c_str());
     memset(ptr->VerificationKey.contents, 0x20, STRING_LENGTH);
+    strcpy((char *)ptr->VerificationKey.contents, wrld->cfg.key.c_str());
     ptr->Unused = 0x00;
 
     packetsOut.push_back(Outgoing::createOutgoingPacket(ptr.get()));
@@ -301,6 +303,12 @@ Client::Client(World *wrld, std::string ip, u16 port) {
 
     mesh.add_data(mesh_data.data(), mesh_data.size(), mesh_indices.data(),
                   mesh_indices.size());
+
+    font_texture = TexturePackManager::get().load_texture(
+        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, false);
+    fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
+        font_texture, glm::vec2(16, 16));
 }
 Client::~Client() {}
 
@@ -318,6 +326,10 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         SC_APP_INFO("Connecting To Server: {}", data2->ServerName.contents);
         SC_APP_INFO("MOTD: {}", data2->MOTD.contents);
 
+        break;
+    }
+
+    case Incoming::ePing: {
         break;
     }
 
@@ -359,9 +371,13 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
             throw std::runtime_error("INVALID START!");
         }
 
+#ifdef PSP
         char *outBuffer = new char[256 * 64 * 256 + 4];
-
         strm.avail_out = 256 * 64 * 256 + 4;
+#else
+        char *outBuffer = new char[512 * 64 * 512 + 4];
+        strm.avail_out = 512 * 64 * 512 + 4;
+#endif
         strm.next_out = (Bytef *)outBuffer;
 
         ret = inflate(&strm, Z_FINISH);
@@ -379,9 +395,21 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
 
         SC_APP_INFO("Decompressed {} bytes. Expected {}", len, expected);
 
-        for (auto x = 0; x < 256; x++)
-            for (auto y = 0; y < 64; y++)
-                for (auto z = 0; z < 256; z++) {
+        wrld->worldData = (block_t *)realloc(
+            wrld->worldData,
+            wrld->world_size.x * wrld->world_size.y * wrld->world_size.z);
+        wrld->lightData = (uint16_t *)realloc(
+            wrld->lightData, wrld->world_size.x *
+                                 (wrld->world_size.y / 16 + 1) *
+                                 wrld->world_size.z * sizeof(uint16_t));
+        wrld->chunksMeta = (ChunkMeta *)realloc(
+            wrld->chunksMeta, wrld->world_size.x / 16 *
+                                  (wrld->world_size.y / 16 + 1) *
+                                  wrld->world_size.z / 16 * sizeof(ChunkMeta));
+
+        for (auto x = 0; x < wrld->world_size.x; x++)
+            for (auto y = 0; y < wrld->world_size.y; y++)
+                for (auto z = 0; z < wrld->world_size.z; z++) {
                     auto idx_source = (y * data2->XSize * data2->ZSize) +
                                       (z * data2->XSize) + x + 4;
                     auto idx_destiny = wrld->getIdx(x, y, z);
@@ -400,7 +428,110 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
             }
         }
 
+        wrld->generate_meta();
+
         is_ready = true;
+
+        break;
+    }
+
+    case Incoming::eSetBlock: {
+        auto data2 = reinterpret_cast<Incoming::SetBlock*>(data.get());
+
+        wrld->worldData[wrld->getIdx(data2->X, data2->Y, data2->Z)] =
+            data2->BlockType;
+
+        uint16_t x = data2->X / 16;
+        uint16_t y = data2->Z / 16;
+        uint32_t id = x << 16 | (y & 0x00FF);
+
+        wrld->update_lighting(data2->X, data2->Z);
+
+        if (wrld->chunks.find(id) != wrld->chunks.end())
+            wrld->chunks[id]->generate(wrld);
+
+        wrld->update_surroundings(data2->X, data2->Z);
+
+        break;
+    }
+
+    case Incoming::eSpawnPlayer: {
+        auto data2 = reinterpret_cast<Incoming::SpawnPlayer*>(data.get());
+
+        if (data2->PlayerID == -1) {
+            wrld->player->pos = { (float)data2->X / 32.0f,
+                                 (float)data2->Y / 32.0f,
+                                 (float)data2->Z / 32.0f };
+            wrld->player->rot = { (float)data2->Pitch / 256.0f * 360.0f,
+                                 (float)data2->Yaw / 256.0f * 360.0f };
+        }
+        else {
+            std::string user = std::string((char*)data2->PlayerName.contents);
+            user = user.substr(0, user.find_first_of(0x20));
+            player_rep.emplace(data2->PlayerID,
+                PlayerInfo{ user, data2->X, data2->Y, data2->Z,
+                           data2->Yaw, data2->Pitch });
+        }
+
+        break;
+    }
+
+    case Incoming::ePlayerTeleport: {
+        auto data2 = reinterpret_cast<Incoming::PlayerTeleport*>(data.get());
+
+        if (data2->PlayerID == -1) {
+            wrld->player->pos = { (float)data2->X / 32.0f,
+                                 (float)data2->Y / 32.0f,
+                                 (float)data2->Z / 32.0f };
+            wrld->player->rot = { (float)data2->Pitch / 256.0f * 360.0f,
+                                 (float)data2->Yaw / 256.0f * 360.0f };
+        }
+        else {
+            if (player_rep.find(data2->PlayerID) != player_rep.end()) {
+                player_rep[data2->PlayerID].X = data2->X;
+                player_rep[data2->PlayerID].Y = data2->Y;
+                player_rep[data2->PlayerID].Z = data2->Z;
+                player_rep[data2->PlayerID].Yaw = data2->Yaw;
+                player_rep[data2->PlayerID].Pitch = data2->Pitch;
+            }
+        }
+
+        break;
+    }
+
+    case Incoming::ePlayerUpdate: {
+
+        auto data2 = reinterpret_cast<Incoming::PlayerUpdate*>(data.get());
+        if (player_rep.find(data2->PlayerID) != player_rep.end()) {
+             player_rep[data2->PlayerID].X += data2->DX;
+             player_rep[data2->PlayerID].Y += data2->DY;
+             player_rep[data2->PlayerID].Z += data2->DZ;
+             player_rep[data2->PlayerID].Yaw = data2->Yaw;
+             player_rep[data2->PlayerID].Pitch = data2->Pitch;
+         }
+
+        break;
+    }
+
+    case Incoming::ePositionUpdate: {
+
+        auto data2 = reinterpret_cast<Incoming::PositionUpdate*>(data.get());
+        if (player_rep.find(data2->PlayerID) != player_rep.end()) {
+            player_rep[data2->PlayerID].X += data2->DX;
+            player_rep[data2->PlayerID].Y += data2->DY;
+            player_rep[data2->PlayerID].Z += data2->DZ;
+        }
+
+        break;
+    }
+
+    case Incoming::eOrientationUpdate: {
+
+        auto data2 = reinterpret_cast<Incoming::OrientationUpdate*>(data.get());
+        if (player_rep.find(data2->PlayerID) != player_rep.end()) {
+            player_rep[data2->PlayerID].Yaw = data2->Yaw;
+            player_rep[data2->PlayerID].Pitch = data2->Pitch;
+        }
 
         break;
     }
@@ -423,67 +554,20 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
         break;
     }
 
-    case Incoming::eSpawnPlayer: {
-        auto data2 = reinterpret_cast<Incoming::SpawnPlayer *>(data.get());
 
-        if (data2->PlayerID == -1) {
-            wrld->player->pos = {(float)data2->X / 32.0f,
-                                 (float)data2->Y / 32.0f,
-                                 (float)data2->Z / 32.0f};
-            wrld->player->rot = {(float)data2->Pitch / 256.0f * 360.0f,
-                                 (float)data2->Yaw / 256.0f * 360.0f};
-        } else {
-            player_rep.emplace(data2->PlayerID,
-                               PlayerInfo{data2->X, data2->Y, data2->Z,
-                                          data2->Yaw, data2->Pitch});
-        }
+    case Incoming::eDisconnect: {
+        auto data2 = reinterpret_cast<Incoming::Disconnect*>(data.get());
+        disconnected = true;
+        disconnectReason = std::string((char*)data2->Reason.contents);
 
+        std::size_t found = disconnectReason.find("  ");
+        disconnectReason = disconnectReason.substr(0, found);
+        is_ready = true;
         break;
     }
 
-    case Incoming::ePing: {
-        break;
-    }
-
-    case Incoming::eSetBlock: {
-        auto data2 = reinterpret_cast<Incoming::SetBlock *>(data.get());
-
-        wrld->worldData[wrld->getIdx(data2->X, data2->Y, data2->Z)] =
-            data2->BlockType;
-
-        uint16_t x = data2->X / 16;
-        uint16_t y = data2->Z / 16;
-        uint32_t id = x << 16 | (y & 0x00FF);
-
-        wrld->update_lighting(data2->X, data2->Z);
-
-        if (wrld->chunks.find(id) != wrld->chunks.end())
-            wrld->chunks[id]->generate(wrld);
-
-        wrld->update_surroundings(data2->X, data2->Z);
-
-        break;
-    }
-
-    case Incoming::ePlayerTeleport: {
-        auto data2 = reinterpret_cast<Incoming::PlayerTeleport *>(data.get());
-
-        if (data2->PlayerID == -1) {
-            wrld->player->pos = {(float)data2->X / 32.0f,
-                                 (float)data2->Y / 32.0f,
-                                 (float)data2->Z / 32.0f};
-            wrld->player->rot = {(float)data2->Pitch / 256.0f * 360.0f,
-                                 (float)data2->Yaw / 256.0f * 360.0f};
-        } else {
-            if (player_rep.find(data2->PlayerID) != player_rep.end()) {
-                player_rep[data2->PlayerID].X = data2->X;
-                player_rep[data2->PlayerID].Y = data2->Y;
-                player_rep[data2->PlayerID].Z = data2->Z;
-                player_rep[data2->PlayerID].Yaw = data2->Yaw;
-                player_rep[data2->PlayerID].Pitch = data2->Pitch;
-            }
-        }
-
+    case Incoming::eUpdateUserType: {
+        // We don't care
         break;
     }
 
@@ -514,11 +598,14 @@ void Client::update(double dt) {
         ptr->Yaw = (unsigned char)(wrld->player->rot.y / 360.0f * 255.0f);
         packetsOut.push_back(Outgoing::createOutgoingPacket(ptr.get()));
     }
-    send();
+    if (is_ready)
+        send();
 }
 
-void Client::draw() {
 
+template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
+
+void Client::draw() {
     for (auto &[id, pinfo] : player_rep) {
         Rendering::RenderContext::get().matrix_clear();
         glm::vec3 entitypos = {(float)pinfo.X / 32.0f - 0.3f,
@@ -532,6 +619,7 @@ void Client::draw() {
         Rendering::RenderContext::get().matrix_translate(entitypos);
 
         Rendering::RenderContext::get().matrix_scale({0.6, 1.8, 0.6});
+        Rendering::RenderContext::get().matrix_rotate({ 0.0f, -wrld->player->rot.y, 0.0f });
 
 #if PSP
         sceGuDisable(GU_TEXTURE_2D);
@@ -546,6 +634,24 @@ void Client::draw() {
         sceGuEnable(GU_TEXTURE_2D);
 #else
         glEnable(GL_TEXTURE_2D);
+#endif
+
+#if PSP
+        sceGuDisable(GU_CULL_FACE);
+#else
+        glDisable(GL_CULL_FACE);
+#endif
+        Rendering::RenderContext::get().matrix_scale({ 1.0f / 0.6, 1.0f / 1.8, 1.0f / 0.6 });
+        Rendering::RenderContext::get().matrix_scale({ 0.05f, 0.05f, 0.05f });
+        fontRenderer->clear();
+            fontRenderer->add_text(pinfo.name, { -fontRenderer->calculate_size(pinfo.name) / 2.0f + 8.0f, 40.0f }, Rendering::Color{ 255, 255, 255, 255 }, 1);
+        fontRenderer->rebuild();
+        fontRenderer->draw();
+
+#if PSP
+        sceGuEnable(GU_CULL_FACE);
+#else
+        glEnable(GL_CULL_FACE);
 #endif
     }
 }
@@ -564,6 +670,9 @@ auto Client::set_block(short x, short y, short z, uint8_t mode, uint8_t block)
 }
 
 void Client::send() {
+    if (!connected)
+        return;
+
     for (auto &p : packetsOut) {
 
         int res = ::send(my_socket, p->m_Buffer,
@@ -637,13 +746,12 @@ auto get_len(Byte type) -> int {
 
 void Client::receive() {
     Byte newByte;
-    int res =
-#if BUILD_PLAT != BUILD_VITA
-        ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1, MSG_PEEK);
-#else
-        ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1,
-               SCE_NET_MSG_PEEK);
+    int res = ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1,
+                     MSG_PEEK
+#if BUILD_PLAT != BUILD_WINDOWS
+                         | MSG_DONTWAIT
 #endif
+    );
     if (res <= 0)
         return;
 
@@ -655,10 +763,22 @@ void Client::receive() {
 
     for (int i = 0; i < len; i++) {
         Byte b;
+#if BUILD_PLAT == BUILD_WINDOWS
+        int result = ::recv(my_socket, reinterpret_cast<char *>(&b), 1, 0);
+        if (result != 1) {
+            i--;
+            continue;
+        }
+#else
         ::recv(my_socket, reinterpret_cast<char *>(&b), 1, 0);
+#endif
 
         byte_buffer->WriteU8(b);
     }
+
+#if PSP
+    sceKernelDcacheWritebackInvalidateAll();
+#endif
 
     packetsIn.push_back(byte_buffer);
 }

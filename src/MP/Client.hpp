@@ -3,6 +3,11 @@
 #include "Rendering/Rendering.hpp"
 #include "Utility.hpp"
 #include <map>
+#include <Graphics/2D/FontRenderer.hpp>
+
+#if BUILD_PLAT != BUILD_WINDOWS
+#include <netdb.h>
+#endif
 
 #define DEFAULT_PORT 25565
 
@@ -15,6 +20,7 @@ namespace CrossCraft::MP {
 using namespace Stardust_Celeste;
 
 struct PlayerInfo {
+    std::string name;
     short X;
     short Y;
     short Z;
@@ -42,13 +48,18 @@ class Client {
     World *wrld;
     bool is_ready;
 
+    std::map<uint8_t, PlayerInfo> player_rep;
+
+    bool disconnected;
+    std::string disconnectReason;
   private:
+    u32 font_texture;
+    ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
     ScopePtr<Network::ByteBuffer> ringbuffer;
     int my_socket;
     std::vector<RefPtr<Network::ByteBuffer>> packetsIn;
     bool connected;
 
-    std::map<uint8_t, PlayerInfo> player_rep;
 
     void process_packet(RefPtr<Network::ByteBuffer> packet);
     Rendering::Mesh mesh;

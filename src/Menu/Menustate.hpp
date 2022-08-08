@@ -8,13 +8,15 @@
 
 using namespace Stardust_Celeste;
 
-namespace CrossCraft {
-using namespace Stardust_Celeste;
-/**
+namespace CrossCraft
+{
+  using namespace Stardust_Celeste;
+  /**
  * @brief Game State Class
  *
  */
-class MenuState : public Core::ApplicationState {
+  class MenuState : public Core::ApplicationState
+  {
   public:
     MenuState()
         : key_controller(nullptr), psp_controller(nullptr),
@@ -43,18 +45,16 @@ class MenuState : public Core::ApplicationState {
     Utilities::Controller *mouse_controller;
 
     uint32_t bg_texture;
-    ScopePtr<Graphics::G2D::Sprite> bg_tile;
-
     uint32_t logo_texture;
-    ScopePtr<Graphics::G2D::Sprite> logo_sprite;
-
     uint32_t gui_tex;
+    uint32_t font_texture;
 
+    ScopePtr<Graphics::G2D::Sprite> bg_tile;
+    ScopePtr<Graphics::G2D::Sprite> logo_sprite;
     ScopePtr<Graphics::G2D::Sprite> unsel_sprite;
     ScopePtr<Graphics::G2D::Sprite> sel_sprite;
     ScopePtr<Graphics::G2D::Sprite> dis_sprite;
 
-    uint32_t font_texture;
     ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
     ScopePtr<Graphics::G2D::FontRenderer> splashRenderer;
 
@@ -67,6 +67,6 @@ class MenuState : public Core::ApplicationState {
     bool startSP;
 
     bool textureMenu;
-};
+  };
 
 } // namespace CrossCraft

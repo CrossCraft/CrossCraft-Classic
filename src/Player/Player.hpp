@@ -14,17 +14,22 @@
 #include "../UI/UserInterface.hpp"
 #include "../World/World.hpp"
 #include "AABB.hpp"
+#include "BlockRep.hpp"
 #include "Chat.hpp"
 #include "Graphics/2D/FontRenderer.hpp"
+#include "PauseMenu.hpp"
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
+#include <Rendering/Primitive/Rectangle.hpp>
 #include <any>
 #include <glm.hpp>
+
 using namespace Stardust_Celeste;
 
 namespace CrossCraft {
 
 class World;
+class BlockRep;
 
 /**
  * @brief Player controller object
@@ -55,7 +60,7 @@ class Player {
      * @brief Draw the player UI
      *
      */
-    auto draw() -> void;
+    auto draw(World *wrld) -> void;
 
     auto spawn(World *wrld) -> void;
 
@@ -95,9 +100,15 @@ class Player {
 
     static auto toggle_inv(std::any p) -> void;
     static auto enter_chat(std::any p) -> void;
+    static auto enter_chat_slash(std::any p) -> void;
     static auto submit_chat(std::any p) -> void;
     static auto delete_chat(std::any p) -> void;
-    static auto psp_chat(std::any p) -> void;
+    auto psp_chat() -> void;
+
+    static auto tab_start(std::any p) -> void;
+    static auto tab_end(std::any p) -> void;
+
+    static auto pause(std::any p) -> void;
 
     int32_t selectorIDX;
     uint8_t itemSelections[9];
@@ -110,7 +121,7 @@ class Player {
 
     int in_cursor_x;
     int in_cursor_y;
-
+    bool in_tab;
     glm::vec3 pos;
     glm::vec2 rot;
     ScopePtr<Chat> chat;
@@ -118,18 +129,18 @@ class Player {
 
     Rendering::Camera cam;
 
+    glm::mat4 projmat, viewmat;
+
+    ScopePtr<PauseMenu> pauseMenu;
+    bool in_pause;
+
+    World *wrldRef;
+
   private:
-    auto rotate(float dt, float sense) -> void;
+
+      const float playerSpeed = 4.3f;
+      auto rotate(float dt, float sense) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;
-
-    auto setup_model(uint8_t type) -> void;
-
-    auto add_face_to_mesh(std::array<float, 12> data, std::array<float, 8> uv,
-                          uint32_t lightVal, glm::vec3 pos, uint8_t type)
-        -> void;
-
-    auto drawBlk(uint8_t type, int x, int y, float scale) -> void;
-    auto drawBlkHand(uint8_t type) -> void;
 
     glm::vec3 vel;
 
@@ -144,23 +155,22 @@ class Player {
     ScopePtr<Graphics::G2D::Sprite> overlay;
     uint32_t gui_texture, water_texture, overlay_texture, font_texture;
 
+    ScopePtr<BlockRep> blockRep;
+
+    bool hasDir;
     AABB model;
 
     bool is_falling, is_underwater, is_head_water, water_cutoff;
     bool on_ground, jumping;
 
-    // Block Drawing
-
-#if BUILD_PLAT != BUILD_VITA
-    uint16_t idx_counter[50];
-    std::vector<Rendering::Vertex> m_verts[50];
-    std::vector<uint16_t> m_index[50];
-    Rendering::Mesh blockMesh[50];
-#else
-    ScopePtr<Graphics::G2D::Sprite> blockRep[50];
-#endif
-
+    ScopePtr<Rendering::Primitive::Rectangle> background_rectangle;
     ScopePtr<UserInterface> playerHUD;
+
+    bool in_inv_delta, in_chat_delta;
+    glm::ivec3 prev_ipos;
+    int chat_size;
+    int chat_text_size;
+    int selector_block_prev, selector_idx_prev;
 
     float fps_timer;
     int fps_count;

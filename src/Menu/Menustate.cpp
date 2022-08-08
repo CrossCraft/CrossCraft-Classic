@@ -1,5 +1,6 @@
 #include "Menustate.hpp"
 #include "../Gamestate.hpp"
+#include "../UI/TextHelper.hpp"
 #include <Utilities/Controllers/KeyboardController.hpp>
 #include <Utilities/Controllers/MouseController.hpp>
 #include <Utilities/Controllers/PSPController.hpp>
@@ -30,23 +31,9 @@ const auto shadow = Rendering::Color{63, 63, 63, 255};
 MenuState::~MenuState() { on_cleanup(); }
 
 void MenuState::on_start() {
-#if BUILD_PLAT == BUILD_VITA
-    sceIoMkdir("ux0:/data/CrossCraft-Classic", 0777);
-    sceIoMkdir("ux0:/data/CrossCraft-Classic/texturepacks", 0777);
-
-    {
-        std::ifstream src("app0:/texturepacks/default.zip", std::ios::binary);
-        std::ofstream dst(
-            "ux0:/data/CrossCraft-Classic/texturepacks/default.zip",
-            std::ios::binary);
-        dst << src.rdbuf();
-    }
-
-    TexturePackManager::get().scan_folder(
-        "ux0:/data/CrossCraft-Classic/texturepacks/");
-#else
-    TexturePackManager::get().scan_folder("./texturepacks/");
-#endif
+    createDirs();
+    TexturePackManager::get().scan_folder(PLATFORM_FILE_PREFIX +
+                                          "texturepacks/");
     textureMenu = false;
 
     // Make new controllers
@@ -66,22 +53,26 @@ void MenuState::on_start() {
         "assets/dirt.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST, false,
         true);
 
-    bg_tile = create_scopeptr<Graphics::G2D::Sprite>(
-        bg_texture, Rendering::Rectangle{{0, 0}, {32, 32}},
-        Rendering::Color{127, 127, 127, 255});
-
     logo_texture = TexturePackManager::get().load_texture(
         "assets/menu/logo.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
 
-    logo_sprite = create_scopeptr<Graphics::G2D::Sprite>(
-        logo_texture, Rendering::Rectangle{{-16, 272 - 72}, {512, 64}});
-
-    logo_sprite->set_layer(-1);
-
     gui_tex = TexturePackManager::get().load_texture(
         "assets/gui/gui.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         false, true);
+
+    font_texture = TexturePackManager::get().load_texture(
+        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, false);
+
+    bg_tile = create_scopeptr<Graphics::G2D::Sprite>(
+        bg_texture, Rendering::Rectangle{{0, 0}, {32, 32}},
+        Rendering::Color{80, 80, 80, 255});
+
+    logo_sprite = create_scopeptr<Graphics::G2D::Sprite>(
+        logo_texture, Rendering::Rectangle{{-16, 272 - 87}, {512, 64}});
+
+    logo_sprite->set_layer(-1);
 
     unsel_sprite = create_scopeptr<Graphics::G2D::Sprite>(
         gui_tex, Rendering::Rectangle{{140, 144}, {200, 20}},
@@ -102,10 +93,6 @@ void MenuState::on_start() {
                              {200.0f / 256.0f, 20.0f / 256.0f}});
     dis_sprite->set_layer(-1);
 
-    font_texture = TexturePackManager::get().load_texture(
-        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
-        false, false);
-
     fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
         font_texture, glm::vec2(16, 16));
     splashRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
@@ -124,6 +111,8 @@ void MenuState::on_cleanup() {
     delete psp_controller;
     delete key_controller;
     delete mouse_controller;
+    delete vita_controller;
+
     Input::clear_controller();
 
     Rendering::TextureManager::get().delete_texture(gui_tex);
@@ -152,8 +141,8 @@ void MenuState::on_update(Core::Application *app, double dt) {
     }
     Utilities::Input::update();
 
-    scaleTimer += dt;
-    scaleFactor = 1.0f - (sinf(scaleTimer * 3.14159f) * 0.3f);
+    scaleTimer += dt * 4.6;
+    scaleFactor = 1.75f - (sinf(scaleTimer * 3.14159f) * 0.03f);
 
 #if BUILD_PC
     selIdx = -1;
@@ -162,16 +151,16 @@ void MenuState::on_update(Core::Application *app, double dt) {
 
     if (!textureMenu) {
         if (cX >= 140.0f && cX <= 340.0f) {
-            if (cY >= 144 && cY <= 164) {
+            if (cY >= 127 && cY <= 147) {
                 selIdx = 0;
             }
-            if (cY >= 116 && cY <= 136) {
+            if (cY >= 105 && cY <= 125) {
                 selIdx = 1;
             }
-            if (cY >= 88 && cY <= 108) {
+            if (cY >= 80 && cY <= 100) {
                 selIdx = 2;
             }
-            if (cY >= 60 && cY <= 80) {
+            if (cY >= 56 && cY <= 76) {
                 selIdx = 3;
             }
         }
@@ -217,59 +206,131 @@ void MenuState::on_draw(Core::Application *app, double dt) {
     fontRenderer->clear();
     splashRenderer->clear();
     if (!textureMenu) {
-        fontRenderer->add_text(
-            "Singleplayer",
-            {241 - fontRenderer->calculate_size("Singleplayer") / 2, 149},
-            shadow, -19);
-        fontRenderer->add_text(
-            "Multiplayer",
-            {241 - fontRenderer->calculate_size("Multiplayer") / 2, 149 - 28},
-            shadow, -19);
-        fontRenderer->add_text(
-            "Texture Packs",
-            {241 - fontRenderer->calculate_size("Texture Packs") / 2,
-             149 - 28 * 2},
-            shadow, -19);
-        fontRenderer->add_text(
-            "Quit Game",
-            {241 - fontRenderer->calculate_size("Quit Game") / 2, 149 - 28 * 3},
-            shadow, -19);
+        // Singleplayer
+        if (selIdx != 0) {
+            fontRenderer->add_text(
+                "Singleplayer",
+                {241 - fontRenderer->calculate_size("Singleplayer") / 2, 134},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Singleplayer",
+                {240 - fontRenderer->calculate_size("Singleplayer") / 2, 135},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Singleplayer",
+                {241 - fontRenderer->calculate_size("Singleplayer") / 2, 134},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Singleplayer",
+                {240 - fontRenderer->calculate_size("Singleplayer") / 2, 135},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
+
+        // Multiplayer
+        if (selIdx != 1) {
+            fontRenderer->add_text(
+                "Multiplayer",
+                {241 - fontRenderer->calculate_size("Multiplayer") / 2, 134 - 24},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Multiplayer",
+                {240 - fontRenderer->calculate_size("Multiplayer") / 2, 135 - 24},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Multiplayer",
+                {241 - fontRenderer->calculate_size("Multiplayer") / 2, 134 - 24},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Multiplayer",
+                {240 - fontRenderer->calculate_size("Multiplayer") / 2, 135 - 24},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
+
+        // Texture Packs
+        if (selIdx != 2) {
+            fontRenderer->add_text(
+                "Texture Packs",
+                {241 - fontRenderer->calculate_size("Texture Packs") / 2,
+                134 - 24 * 2},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Texture Packs",
+                {240 - fontRenderer->calculate_size("Texture Packs") / 2,
+                135 - 24 * 2},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Texture Packs",
+                {241 - fontRenderer->calculate_size("Texture Packs") / 2,
+                134 - 24 * 2},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Texture Packs",
+                {240 - fontRenderer->calculate_size("Texture Packs") / 2,
+                135 - 24 * 2},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
+
+        // Quit Game
+        if (selIdx != 3) {
+            fontRenderer->add_text(
+                "Quit Game",
+                {241 - fontRenderer->calculate_size("Quit Game") / 2, 134 - 24 * 3},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Quit Game",
+                {240 - fontRenderer->calculate_size("Quit Game") / 2, 135 - 24 * 3},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Quit Game",
+                {241 - fontRenderer->calculate_size("Quit Game") / 2, 134 - 24 * 3},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Quit Game",
+                {240 - fontRenderer->calculate_size("Quit Game") / 2, 135 - 24 * 3},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
+
+        fontRenderer->add_text("CrossCraft Classic 1.1 (0.30)", {3, 272 - 11},
+                               Rendering::Color{21, 21, 21, 255}, -19);
+        fontRenderer->add_text("CrossCraft Classic 1.1 (0.30)", {2, 272 - 10},
+                               Rendering::Color{85, 85, 85, 255}, -20);
 
         fontRenderer->add_text(
-            "Singleplayer",
-            {240 - fontRenderer->calculate_size("Singleplayer") / 2, 150},
-            white, -20);
+            "Copyleft CrossCraft Team. Made with <3!",
+            {478 - fontRenderer->calculate_size(
+                       "Copyleft CrossCraft Team. Made with <3!"),
+             2},
+            Rendering::Color{63, 63, 63, 255}, -19);
         fontRenderer->add_text(
-            "Multiplayer",
-            {240 - fontRenderer->calculate_size("Multiplayer") / 2, 150 - 28},
-            white, -20);
-        fontRenderer->add_text(
-            "Texture Packs",
-            {240 - fontRenderer->calculate_size("Texture Packs") / 2,
-             150 - 28 * 2},
-            white, -20);
-        fontRenderer->add_text(
-            "Quit Game",
-            {240 - fontRenderer->calculate_size("Quit Game") / 2, 150 - 28 * 3},
-            white, -20);
+            "Copyleft CrossCraft Team. Made with <3!",
+            {477 - fontRenderer->calculate_size(
+                       "Copyleft CrossCraft Team. Made with <3!"),
+             3},
+            Rendering::Color{255, 255, 255, 255}, -19);
 
+        // Splash text uses pure yellow instead of registered yellow for..
+        // some reason..
         splashRenderer->add_text("Classic!", {1, -1},
-                                 Rendering::Color{63, 63, 21, 255}, -10);
+                                 CC_TEXT_COLOR_SPLASH_FRONT, -10);
 
         splashRenderer->add_text("Classic!", {0, 0},
-                                 Rendering::Color{255, 255, 85, 255}, -11);
+                                 CC_TEXT_COLOR_SPLASH_BACK, -11);
 
         logo_sprite->draw();
 
         for (int i = 0; i < 4; i++) {
-            Rendering::RenderContext::get().matrix_translate({0, -i * 28, 0});
+            Rendering::RenderContext::get().matrix_translate(
+                {0, (-i * 24) - 15, 0});
             if (selIdx == i)
                 sel_sprite->draw();
             else
                 unsel_sprite->draw();
             Rendering::RenderContext::get().matrix_clear();
         }
-
     } else {
         Rendering::RenderContext::get().matrix_translate({0, -128, 0});
         if (selIdx == 0)
@@ -289,7 +350,7 @@ void MenuState::on_draw(Core::Application *app, double dt) {
             white, -20);
 
         for (int i = 0; i < 6; i++) {
-
+            bool do_not_select;
             if (TexturePackManager::get().path_names.size() > i) {
                 auto name = TexturePackManager::get().path_names[i];
 
@@ -301,7 +362,9 @@ void MenuState::on_draw(Core::Application *app, double dt) {
                     Rendering::RenderContext::get().matrix_translate(
                         {0, -50, 0});
                     dis_sprite->draw();
+                    do_not_select = true;
                 } else {
+                    do_not_select = false;
                     if (selIdx == i + 1) {
                         sel_sprite->draw();
                     } else {
@@ -311,29 +374,51 @@ void MenuState::on_draw(Core::Application *app, double dt) {
 
                 Rendering::RenderContext::get().matrix_clear();
 
-                fontRenderer->add_text(
-                    name,
-                    {241 - fontRenderer->calculate_size(name) / 2,
-                     200 - i * 24},
-                    shadow, -19);
-
-                fontRenderer->add_text(
-                    name,
-                    {240 - fontRenderer->calculate_size(name) / 2,
-                     200 - i * 24},
-                    white, -20);
+                if (selIdx != i + 1 || do_not_select == true) {
+                    fontRenderer->add_text(
+                        name,
+                        {241 - fontRenderer->calculate_size(name) / 2,
+                        200 - i * 24},
+                        shadow, -19);
+                    fontRenderer->add_text(
+                        name,
+                        {240 - fontRenderer->calculate_size(name) / 2,
+                        200 - i * 24},
+                        white, -20);
+                } else {
+                    fontRenderer->add_text(
+                        name,
+                        {241 - fontRenderer->calculate_size(name) / 2,
+                        200 - i * 24},
+                        CC_TEXT_COLOR_SELECT_BACK, -19);
+                    fontRenderer->add_text(
+                        name,
+                        {240 - fontRenderer->calculate_size(name) / 2,
+                        200 - i * 24},
+                        CC_TEXT_COLOR_SELECT_FRONT, -20);
+                }
             }
         }
 
-        fontRenderer->add_text(
-            "Back",
-            {241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
-            shadow, -19);
-
-        fontRenderer->add_text(
-            "Back",
-            {240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
-            white, -20);
+        if (selIdx != 0) {
+            fontRenderer->add_text(
+                "Back",
+                {241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Back",
+                {240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Back",
+                {241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Back",
+                {240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
     }
     fontRenderer->rebuild();
     splashRenderer->rebuild();
@@ -341,10 +426,10 @@ void MenuState::on_draw(Core::Application *app, double dt) {
     fontRenderer->draw();
 
     if (!textureMenu) {
-        Rendering::RenderContext::get().matrix_rotate({0, 0, 30.0f});
-        Rendering::RenderContext::get().matrix_translate({400, 16, 0});
+        Rendering::RenderContext::get().matrix_rotate({0, 0, 22.0f});
+        Rendering::RenderContext::get().matrix_translate({360, 50, 0});
         Rendering::RenderContext::get().matrix_scale(
-            {scaleFactor, scaleFactor, 1.0f});
+            {scaleFactor, scaleFactor, 1.75f});
         splashRenderer->draw();
         Rendering::RenderContext::get().matrix_clear();
     }
@@ -352,7 +437,7 @@ void MenuState::on_draw(Core::Application *app, double dt) {
 #if PSP
     sceKernelDcacheWritebackInvalidateAll();
     sceGuDisable(GU_DEPTH_TEST);
-#elif BUILD_PLAT == BUILD_VITA
+#else
     glDisable(GL_DEPTH_TEST);
 #endif
 }
@@ -368,10 +453,8 @@ void MenuState::trigger(std::any m) {
             mstate->startMP = true;
         }
         if (mstate->selIdx == 2) {
-#ifndef PSP
             mstate->textureMenu = true;
             mstate->selIdx = 0;
-#endif
         }
         if (mstate->selIdx == 3) {
             mstate->shouldQuit = true;
@@ -379,12 +462,47 @@ void MenuState::trigger(std::any m) {
     } else {
         if (mstate->selIdx == 0) {
             mstate->textureMenu = false;
-        } else {
+        } else if (mstate->selIdx != -1) {
             auto name =
                 TexturePackManager::get().path_names[mstate->selIdx - 1];
             auto &vec = TexturePackManager::get().layers;
             if (std::find(vec.begin(), vec.end(), name) == vec.end()) {
                 vec.push_back(name);
+
+                Rendering::TextureManager::get().delete_texture(
+                    mstate->bg_texture);
+                Rendering::TextureManager::get().delete_texture(
+                    mstate->logo_texture);
+                Rendering::TextureManager::get().delete_texture(
+                    mstate->gui_tex);
+                Rendering::TextureManager::get().delete_texture(
+                    mstate->font_texture);
+
+                mstate->bg_texture = TexturePackManager::get().load_texture(
+                    "assets/dirt.png", SC_TEX_FILTER_NEAREST,
+                    SC_TEX_FILTER_NEAREST, false, true);
+
+                mstate->logo_texture = TexturePackManager::get().load_texture(
+                    "assets/menu/logo.png", SC_TEX_FILTER_NEAREST,
+                    SC_TEX_FILTER_NEAREST, false, true);
+
+                mstate->gui_tex = TexturePackManager::get().load_texture(
+                    "assets/gui/gui.png", SC_TEX_FILTER_NEAREST,
+                    SC_TEX_FILTER_NEAREST, false, true);
+
+                mstate->font_texture = TexturePackManager::get().load_texture(
+                    "assets/default.png", SC_TEX_FILTER_NEAREST,
+                    SC_TEX_FILTER_NEAREST, false, false);
+
+                mstate->bg_tile->texture = mstate->bg_texture;
+                mstate->logo_sprite->texture = mstate->logo_texture;
+                mstate->unsel_sprite->texture = mstate->gui_tex;
+                mstate->sel_sprite->texture = mstate->gui_tex;
+                mstate->dis_sprite->texture = mstate->gui_tex;
+
+                mstate->fontRenderer->texture = mstate->font_texture;
+                mstate->splashRenderer->texture = mstate->font_texture;
+
             } else {
                 if (name != "default")
                     vec.erase(std::find(vec.begin(), vec.end(), name));

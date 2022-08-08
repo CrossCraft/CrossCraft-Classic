@@ -1,54 +1,105 @@
-/**
- * @file Gamestate.hpp
- * @author Nathan Bourgeois (iridescentrosesfall@gmail.com)
- * @brief Current Game State
- * @version 0.1
- * @date 2022-01-12
- *
- * @copyright Copyright (c) 2022
- *
- */
-#include "Config.hpp"
-#include "MP/Client.hpp"
-#include "TexturePackManager.hpp"
-#include "World/World.hpp"
+#include <Stardust-Celeste.hpp>
 #include <Core/Application.hpp>
 #include <Utilities/Input.hpp>
 
+#include <Utilities/Controllers/KeyboardController.hpp>
+#include <Utilities/Controllers/MouseController.hpp>
+#include <Utilities/Controllers/PSPController.hpp>
+#include <Utilities/Controllers/VitaController.hpp>
+
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+
+#include "World/World.hpp"
+#include "MP/Client.hpp"
+#include "Config.hpp"
+
 using namespace Stardust_Celeste;
 
-namespace CrossCraft {
+namespace CrossCraft
+{
 
-/**
- * @brief Game State Class
- *
- */
-class GameState : public Core::ApplicationState {
-  public:
-    GameState(bool forceMP = false)
-        : config(), key_controller(nullptr), psp_controller(nullptr),
-          mouse_controller(nullptr), forced_mp(forceMP){};
-    ~GameState();
+    /**
+     * @brief Main Game State
+     * 
+     */
+    class GameState : public Core::ApplicationState
+    {
+    public:
+        /**
+         * @brief Construct a new Game State object
+         * 
+         * @param forceMP Forced Multiplayer (MP Connect)
+         */
+        GameState(bool forceMP = false)
+            : key_controller(nullptr), psp_controller(nullptr),
+              mouse_controller(nullptr), forced_mp(forceMP){};
 
-    void on_start();
-    void on_cleanup();
+        /**
+         * @brief Destroy the Game State object
+         * 
+         */
+        ~GameState();
 
-    void bind_controls();
+        /**
+         * @brief On Start initialization
+         * 
+         */
+        void on_start();
 
-    void on_update(Core::Application *app, double dt);
-    void on_draw(Core::Application *app, double dt);
+        /**
+         * @brief On Cleanup deinitialization
+         * 
+         */
+        void on_cleanup();
 
-    static void quit(std::any d);
+        /**
+         * @brief Bind Controls
+         * 
+         */
+        void bind_controls();
 
-  private:
-    ScopePtr<MP::Client> client;
-    ScopePtr<World> world;
-    Utilities::Controller *psp_controller;
-    Utilities::Controller *vita_controller;
-    Utilities::Controller *key_controller;
-    Utilities::Controller *mouse_controller;
-    Config config;
-    bool forced_mp;
-};
+        /**
+         * @brief On Update Events
+         * 
+         * @param app Reference to our Application
+         * @param dt Delta Time
+         */
+        void on_update(Core::Application *app, double dt);
+        void on_draw(Core::Application *app, double dt);
+
+    private:
+        /**
+         * @brief Quit Command to Bind
+         * 
+         * @param d 
+         */
+        static void quit(std::any d);
+
+        /**
+         * @brief Multiplayer Client if Needed
+         * 
+         */
+        ScopePtr<MP::Client> client;
+
+        /**
+         * @brief Game World
+         * 
+         */
+        ScopePtr<World> world;
+
+        bool forced_mp;
+
+        /**
+         * @brief Game Controllers
+         * 
+         */
+        Utilities::Controller *psp_controller;
+        Utilities::Controller *vita_controller;
+        Utilities::Controller *key_controller;
+        Utilities::Controller *mouse_controller;
+    };
 
 } // namespace CrossCraft
