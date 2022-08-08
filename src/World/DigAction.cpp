@@ -1,4 +1,5 @@
 #include "DigAction.hpp"
+#include "SaveData.hpp"
 #include <Utilities/Input.hpp>
 #include <gtx/rotate_vector.hpp>
 
@@ -53,6 +54,18 @@ auto DigAction::dig(std::any d) -> void {
         doInventory(w);
         return;
     }
+
+#if BUILD_PC
+    if (w->player->in_pause) {
+        if (w->player->pauseMenu->selIdx == 0) {
+            w->player->in_pause = false;
+        } else if (w->player->pauseMenu->selIdx == 1) {
+            SaveData::save(w);
+        } else if (w->player->pauseMenu->selIdx == 2) {
+            exit(0);
+        }
+    }
+#endif
 
     // Create a default vector of the player facing
     auto default_vec = glm::vec3(0, 0, 1);

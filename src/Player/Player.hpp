@@ -17,11 +17,13 @@
 #include "BlockRep.hpp"
 #include "Chat.hpp"
 #include "Graphics/2D/FontRenderer.hpp"
+#include "PauseMenu.hpp"
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
 #include <Rendering/Primitive/Rectangle.hpp>
 #include <any>
 #include <glm.hpp>
+
 using namespace Stardust_Celeste;
 
 namespace CrossCraft {
@@ -106,6 +108,8 @@ class Player {
     static auto tab_start(std::any p) -> void;
     static auto tab_end(std::any p) -> void;
 
+    static auto pause(std::any p) -> void;
+
     int32_t selectorIDX;
     uint8_t itemSelections[9];
 
@@ -126,6 +130,9 @@ class Player {
     Rendering::Camera cam;
 
     glm::mat4 projmat, viewmat;
+
+    ScopePtr<PauseMenu> pauseMenu;
+    bool in_pause;
 
   private:
     auto rotate(float dt, float sense) -> void;

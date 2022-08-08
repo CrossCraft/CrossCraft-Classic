@@ -285,8 +285,8 @@ void World::draw() {
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
 #if BUILD_PLAT == BUILD_PSP
-    sceGuDisable(GU_BLEND);
-    sceGuDisable(GU_ALPHA_TEST);
+    sceGuEnable(GU_BLEND);
+    sceGuEnable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
     sceGuEnable(GU_DEPTH_TEST);
     sceGuFog(0.2f * 2.5f * 16.0f, 0.8f * 2.5f * 16.0f, 0x00FFCC99);
@@ -316,10 +316,7 @@ void World::draw() {
     chunk_reverse_sorted.insert(chunk_sorted.begin(), chunk_sorted.end());
     chunk_sorted.clear();
 
-#if BUILD_PLAT == BUILD_PSP
-    sceGuEnable(GU_BLEND);
-    sceGuEnable(GU_ALPHA_TEST);
-#elif BUILD_PLAT == BUILD_VITA
+#if BUILD_PLAT == BUILD_VITA
     glEnable(GL_BLEND);
 #endif
 

@@ -130,7 +130,7 @@ void GameState::bind_controls() {
         {PlaceAction::place, world.get()});
 
     key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
-                                {SaveData::save, world.get()});
+                                {Player::pause, world->player.get()});
 
     key_controller->add_command({(int)Input::Keys::W, KeyFlag::Release},
                                 {Player::move_reset, world->player.get()});
@@ -212,11 +212,11 @@ void GameState::bind_controls() {
         {(int)Input::Keys::Num9, KeyFlag::Press | KeyFlag::Held},
         {Player::change_selector, SelData{world->player.get(), 8}});
 
-
-    key_controller->add_command({ (int)Input::Keys::Tab, KeyFlag::Release },
-        { Player::tab_end, world->player.get() });
-    key_controller->add_command({ (int)Input::Keys::Tab, KeyFlag::Press | KeyFlag::Held },
-        { Player::tab_start, world->player.get() });
+    key_controller->add_command({(int)Input::Keys::Tab, KeyFlag::Release},
+                                {Player::tab_end, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::Tab, KeyFlag::Press | KeyFlag::Held},
+        {Player::tab_start, world->player.get()});
 
     Input::add_controller(psp_controller);
     Input::add_controller(key_controller);

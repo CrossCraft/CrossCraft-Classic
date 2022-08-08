@@ -90,6 +90,7 @@ Player::Player()
     in_chat_delta = true;
     client_ref = nullptr;
     chat_text = "";
+    in_pause = false;
 
     hasDir = false;
 
@@ -142,6 +143,7 @@ Player::Player()
 
     chat = create_scopeptr<Chat>();
     blockRep = create_scopeptr<BlockRep>();
+    pauseMenu = create_scopeptr<PauseMenu>();
 
     fps_count = 0;
     fps_timer = 0.0f;
@@ -291,8 +293,10 @@ void Player::update(float dt, World *wrld) {
     }
 
     chat->update(dt);
+
     hasDir = false;
-    rotate(dt, wrld->cfg.sense);
+    if (!in_pause)
+        rotate(dt, wrld->cfg.sense);
     jump_icd -= dt;
 
     // Update position
@@ -378,6 +382,10 @@ void Player::update(float dt, World *wrld) {
     viewmat = glm::rotate(viewmat, DEGTORAD(rot.x), {1, 0, 0});
     viewmat = glm::rotate(viewmat, DEGTORAD(rot.y), {0, 1, 0});
     viewmat = glm::translate(viewmat, -pos);
+
+    if (in_pause) {
+        pauseMenu->update();
+    }
 }
 
 auto Player::draw(World *wrld) -> void {
@@ -394,25 +402,27 @@ auto Player::draw(World *wrld) -> void {
     auto ipos = glm::ivec3(static_cast<int>(pos.x), static_cast<int>(pos.y),
                            static_cast<int>(pos.z));
 
-    bool change =
-        in_inv_delta != in_inventory || in_chat_delta != in_chat ||
-        fps_count == 0 || prev_ipos != ipos || chat_size != chat->data.size() ||
-        selector_block_prev != selectedBlock ||
-        selector_idx_prev != selectorIDX || chat_text_size != chat_text.size() || in_tab || (wrld->client != nullptr && wrld->client->disconnected);
+    bool change = in_inv_delta != in_inventory || in_chat_delta != in_chat ||
+                  fps_count == 0 || prev_ipos != ipos ||
+                  chat_size != chat->data.size() ||
+                  selector_block_prev != selectedBlock ||
+                  selector_idx_prev != selectorIDX ||
+                  chat_text_size != chat_text.size() || in_tab ||
+                  (wrld->client != nullptr && wrld->client->disconnected);
 
     if (change)
         playerHUD->clear();
 
-
     if (change) {
         if (wrld->client != nullptr) {
             if (wrld->client->disconnected) {
-                playerHUD->draw_text(wrld->client->disconnectReason, CC_TEXT_COLOR_WHITE,
-                    CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_CENTER, 0, 0, CC_TEXT_BG_NONE);
+                playerHUD->draw_text(wrld->client->disconnectReason,
+                                     CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_CENTER,
+                                     CC_TEXT_ALIGN_CENTER, 0, 0,
+                                     CC_TEXT_BG_NONE);
             }
         }
     }
-
 
     if (is_head_water) {
         water->draw();
@@ -441,25 +451,26 @@ auto Player::draw(World *wrld) -> void {
 
     if (change && in_tab && client_ref != nullptr) {
         std::vector<std::string> names;
-        for (auto& [key, val] : client_ref->player_rep) {
+        for (auto &[key, val] : client_ref->player_rep) {
             names.push_back(val.name);
         }
 
         for (int i = 0; i < names.size(); i++) {
             playerHUD->draw_text(names[i], CC_TEXT_COLOR_WHITE,
-                CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_CENTER, (i % 3) * 20 - 20,
-                (-i / 3) + 10, CC_TEXT_BG_NONE);
+                                 CC_TEXT_ALIGN_CENTER, CC_TEXT_ALIGN_CENTER,
+                                 (i % 3) * 20 - 20, (-i / 3) + 10,
+                                 CC_TEXT_BG_NONE);
         }
     }
 
     if (in_inventory || in_tab) {
         if (in_tab) {
-            Rendering::RenderContext::get().matrix_scale({ 1.25f, 1.25f, 1.25f });
-            Rendering::RenderContext::get().matrix_translate({ -46.0f, -20.875f, 0.0f });
+            Rendering::RenderContext::get().matrix_scale({1.25f, 1.25f, 1.25f});
+            Rendering::RenderContext::get().matrix_translate(
+                {-46.0f, -20.875f, 0.0f});
             background_rectangle->draw();
             Rendering::RenderContext::get().matrix_clear();
-        }
-        else {
+        } else {
             background_rectangle->draw();
         }
     } else {
@@ -502,7 +513,6 @@ auto Player::draw(World *wrld) -> void {
     if (in_chat && change) {
         playerHUD->draw_text("> " + chat_text, CC_TEXT_COLOR_WHITE,
                              CC_TEXT_ALIGN_LEFT, CC_TEXT_ALIGN_BOTTOM, 0, 0, 5);
-
     }
 
     chat_text_size = chat_text.size();
@@ -513,7 +523,6 @@ auto Player::draw(World *wrld) -> void {
 
     playerHUD->end2D();
 
-
     if (wrld->client == nullptr || !wrld->client->disconnected) {
         for (int i = 0; i < 9; i++)
             blockRep->drawBlk(itemSelections[i], i, 0, 9.0f);
@@ -521,12 +530,16 @@ auto Player::draw(World *wrld) -> void {
             for (int i = 0; i < 42; i++) {
                 if (i == selectedBlock)
                     blockRep->drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
-                        13.0f);
+                                      13.0f);
                 else
                     blockRep->drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
-                        9.0f);
+                                      9.0f);
             }
         }
+    }
+
+    if (in_pause) {
+        pauseMenu->draw();
     }
 }
 

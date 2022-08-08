@@ -49,7 +49,8 @@ void character_callback(GLFWwindow *window, unsigned int codepoint) {
 
 auto Player::tab_start(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    p->in_tab = true;
+    if (!p->in_pause)
+        p->in_tab = true;
 }
 auto Player::tab_end(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
@@ -59,7 +60,7 @@ auto Player::tab_end(std::any d) -> void {
 auto Player::enter_chat(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
 
-    if (!p->in_inventory && chat_text.size() == 0) {
+    if (!p->in_inventory && chat_text.size() == 0 && !p->in_pause) {
         if (p->in_chat) {
             chat_text = "";
         }
@@ -82,7 +83,7 @@ auto Player::enter_chat(std::any d) -> void {
 auto Player::enter_chat_slash(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
 
-    if (!p->in_inventory && chat_text.size() == 0) {
+    if (!p->in_inventory && chat_text.size() == 0 && !p->in_pause) {
         if (p->in_chat) {
             chat_text = "";
         }
@@ -148,7 +149,7 @@ auto Player::move_reset(std::any d) -> void {
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
-        !p->in_chat) {
+        !p->in_chat && !p->in_pause) {
 
         if (!p->hasDir) {
             p->vel.x = -sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
@@ -161,7 +162,7 @@ auto Player::move_forward(std::any d) -> void {
 auto Player::move_backward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
-        !p->in_chat) {
+        !p->in_chat && !p->in_pause) {
 
         if (!p->hasDir) {
             p->vel.x = sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
@@ -174,7 +175,7 @@ auto Player::move_backward(std::any d) -> void {
 auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
-        !p->in_chat) {
+        !p->in_chat && !p->in_pause) {
 
         if (!p->hasDir) {
             p->vel.x = -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
@@ -196,7 +197,7 @@ auto Player::respawn(std::any d) -> void {
 auto Player::move_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
-        !p->in_chat) {
+        !p->in_chat && !p->in_pause) {
 
         if (!p->hasDir) {
             p->vel.x = sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
@@ -210,7 +211,7 @@ auto Player::move_right(std::any d) -> void {
 
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && !p->in_chat) {
+    if (!p->in_inventory && !p->in_chat && !p->in_pause) {
         if (!p->jumping && p->jump_icd < 0.0f && !p->is_underwater &&
             !p->is_falling) {
             p->vel.y = 8.4f;
@@ -287,9 +288,21 @@ auto Player::press_right(std::any d) -> void {
 auto Player::change_selector(std::any d) -> void {
 
     auto s = std::any_cast<SelData>(d);
-    if (!s.player->in_chat) {
+    if (!s.player->in_chat && !s.player->in_pause) {
         s.player->selectorIDX = s.selIDX;
         s.player->selector->set_position({148 + 20 * s.player->selectorIDX, 0});
+    }
+}
+
+auto Player::pause(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+
+    if (p->in_pause) {
+        p->pauseMenu->exit();
+        p->in_pause = false;
+    } else {
+        p->pauseMenu->enter();
+        p->in_pause = true;
     }
 }
 
@@ -315,7 +328,7 @@ auto Player::dec_selector(std::any d) -> void {
 
 auto Player::toggle_inv(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_chat) {
+    if (!p->in_chat && !p->in_pause) {
         p->in_inventory = !p->in_inventory;
 
 #if BUILD_PC
