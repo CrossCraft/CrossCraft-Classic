@@ -134,6 +134,8 @@ class Player {
     ScopePtr<PauseMenu> pauseMenu;
     bool in_pause;
 
+    World *wrldRef;
+
   private:
     auto rotate(float dt, float sense) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;

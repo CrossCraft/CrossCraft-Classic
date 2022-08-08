@@ -103,14 +103,14 @@ void GameState::bind_controls() {
         {(int)Input::PSPButtons::Select, KeyFlag::Press},
         {Player::toggle_inv, world->player.get()});
     psp_controller->add_command({(int)Input::PSPButtons::Start, KeyFlag::Press},
-                                {SaveData::save, world.get()});
+                                {Player::pause, world->player.get()});
 
     vita_controller->add_command(
         {(int)Input::VitaButtons::Select, KeyFlag::Press},
         {Player::toggle_inv, world->player.get()});
     vita_controller->add_command(
         {(int)Input::VitaButtons::Start, KeyFlag::Press},
-        {SaveData::save, world.get()});
+        {Player::pause, world->player.get()});
 
     //
     // PSP Triggers: Press/Hold

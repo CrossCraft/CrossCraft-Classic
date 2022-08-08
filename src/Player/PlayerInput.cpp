@@ -2,6 +2,7 @@
 #include "../Chunk/ChunkUtil.hpp"
 #include "../MP/OutPackets.hpp"
 #include "../TexturePackManager.hpp"
+#include "../World/SaveData.hpp"
 #include "Player.hpp"
 #include <Platform/Platform.hpp>
 #include <Utilities/Input.hpp>
@@ -169,6 +170,14 @@ auto Player::move_backward(std::any d) -> void {
             p->vel.z = cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
             p->hasDir = true;
         }
+    } else if (p->in_pause) {
+        if (p->pauseMenu->selIdx == 0) {
+            p->in_pause = false;
+        } else if (p->pauseMenu->selIdx == 1) {
+            SaveData::save(p->wrldRef);
+        } else if (p->pauseMenu->selIdx == 2) {
+            exit(0);
+        }
     }
 }
 
@@ -231,13 +240,18 @@ auto Player::move_up(std::any d) -> void {
 
 auto Player::press_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (p->in_inventory && !p->in_chat) {
+    if (p->in_inventory && !p->in_chat && !p->in_pause) {
         p->in_cursor_y -= 1;
         if (p->in_cursor_y <= -1)
             p->in_cursor_y = 4;
 
         if (p->in_cursor_x >= 6 && p->in_cursor_y == 4)
             p->in_cursor_y = 3;
+    } else if (p->in_pause) {
+        p->pauseMenu->selIdx--;
+        if (p->pauseMenu->selIdx < 0) {
+            p->pauseMenu->selIdx = 0;
+        }
     } else {
         move_up(d);
     }
@@ -245,9 +259,14 @@ auto Player::press_up(std::any d) -> void {
 
 auto Player::press_down(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory) {
+    if (!p->in_inventory && !p->in_pause) {
         p->psp_chat();
         p->in_chat = false;
+    } else if (p->in_pause) {
+        p->pauseMenu->selIdx++;
+        if (p->pauseMenu->selIdx > 2) {
+            p->pauseMenu->selIdx = 2;
+        }
     } else if (!p->in_chat && p->in_inventory) {
         p->in_cursor_y += 1;
         if (p->in_cursor_y >= 5)

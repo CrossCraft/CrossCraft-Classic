@@ -99,11 +99,15 @@ auto PauseMenu::enter() -> void {
 #if BUILD_PC
     glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 #endif
+
+    selIdx = 0;
 }
 auto PauseMenu::exit() -> void {
 #if BUILD_PC
     glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 #endif
+
+    selIdx = 0;
 }
 
 auto PauseMenu::draw() -> void {

@@ -36,6 +36,7 @@ World::World(std::shared_ptr<Player> p) {
         "assets/terrain.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
         true, false, true);
     p->terrain_atlas = terrain_atlas;
+    p->wrldRef = this;
 
     NoiseUtil::initialize();
 
@@ -285,8 +286,8 @@ void World::draw() {
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
 #if BUILD_PLAT == BUILD_PSP
-    sceGuEnable(GU_BLEND);
-    sceGuEnable(GU_ALPHA_TEST);
+    sceGuDisable(GU_BLEND);
+    sceGuDisable(GU_ALPHA_TEST);
     sceGuEnable(GU_FOG);
     sceGuEnable(GU_DEPTH_TEST);
     sceGuFog(0.2f * 2.5f * 16.0f, 0.8f * 2.5f * 16.0f, 0x00FFCC99);
@@ -318,6 +319,9 @@ void World::draw() {
 
 #if BUILD_PLAT == BUILD_VITA
     glEnable(GL_BLEND);
+#elif BUILD_PLAT == BUILD_PSP
+    sceGuEnable(GU_BLEND);
+    sceGuEnable(GU_ALPHA_TEST);
 #endif
 
     // Set up texture
