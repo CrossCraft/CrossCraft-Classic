@@ -192,5 +192,6 @@ void GameState::on_draw(Core::Application *app, double dt) {
 
     if (client.get() == nullptr || client->is_ready)
         world->draw();
+
 }
 } // namespace CrossCraft

@@ -2,6 +2,8 @@
 #include "../World/World.hpp"
 #include "InPackets.hpp"
 #include "OutPackets.hpp"
+
+#include "../TexturePackManager.hpp"
 #include <thread>
 #include <zlib.h>
 #include <string>
@@ -301,6 +303,12 @@ Client::Client(World *wrld, std::string ip, u16 port) {
 
     mesh.add_data(mesh_data.data(), mesh_data.size(), mesh_indices.data(),
                   mesh_indices.size());
+
+    font_texture = TexturePackManager::get().load_texture(
+        "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
+        false, false);
+    fontRenderer = create_scopeptr<Graphics::G2D::FontRenderer>(
+        font_texture, glm::vec2(16, 16));
 }
 Client::~Client() {}
 
@@ -594,8 +602,10 @@ void Client::update(double dt) {
         send();
 }
 
-void Client::draw() {
 
+template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
+
+void Client::draw() {
     for (auto &[id, pinfo] : player_rep) {
         Rendering::RenderContext::get().matrix_clear();
         glm::vec3 entitypos = {(float)pinfo.X / 32.0f - 0.3f,
@@ -609,6 +619,7 @@ void Client::draw() {
         Rendering::RenderContext::get().matrix_translate(entitypos);
 
         Rendering::RenderContext::get().matrix_scale({0.6, 1.8, 0.6});
+        Rendering::RenderContext::get().matrix_rotate({ 0.0f, -wrld->player->rot.y, 0.0f });
 
 #if PSP
         sceGuDisable(GU_TEXTURE_2D);
@@ -623,6 +634,24 @@ void Client::draw() {
         sceGuEnable(GU_TEXTURE_2D);
 #else
         glEnable(GL_TEXTURE_2D);
+#endif
+
+#if PSP
+        sceGuDisable(GU_CULL_FACE);
+#else
+        glDisable(GL_CULL_FACE);
+#endif
+        Rendering::RenderContext::get().matrix_scale({ 1.0f / 0.6, 1.0f / 1.8, 1.0f / 0.6 });
+        Rendering::RenderContext::get().matrix_scale({ 0.05f, 0.05f, 0.05f });
+        fontRenderer->clear();
+            fontRenderer->add_text(pinfo.name, { -fontRenderer->calculate_size(pinfo.name) / 2.0f + 8.0f, 40.0f }, Rendering::Color{ 255, 255, 255, 255 }, 1);
+        fontRenderer->rebuild();
+        fontRenderer->draw();
+
+#if PSP
+        sceGuEnable(GU_CULL_FACE);
+#else
+        glEnable(GL_CULL_FACE);
 #endif
     }
 }

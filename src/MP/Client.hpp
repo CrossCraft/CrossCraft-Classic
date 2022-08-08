@@ -3,6 +3,7 @@
 #include "Rendering/Rendering.hpp"
 #include "Utility.hpp"
 #include <map>
+#include <Graphics/2D/FontRenderer.hpp>
 
 #if BUILD_PLAT != BUILD_WINDOWS
 #include <netdb.h>
@@ -52,7 +53,8 @@ class Client {
     bool disconnected;
     std::string disconnectReason;
   private:
-
+    u32 font_texture;
+    ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
     ScopePtr<Network::ByteBuffer> ringbuffer;
     int my_socket;
     std::vector<RefPtr<Network::ByteBuffer>> packetsIn;
