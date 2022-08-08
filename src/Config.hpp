@@ -62,8 +62,9 @@ struct Config {
 
             file2 << "sense:1.50" << std::endl;
             file2 << "compat:0" << std::endl;
-            file2 << "ip:127.0.0.1" << std::endl;
-            file2 << "username:CCC-Client" << std::endl;
+            file2 << "ip:classic.crosscraft.wtf" << std::endl;
+            file2 << "port:25565" << std::endl;
+            file2 << "username:CC-User" << std::endl;
             file2.close();
         }
 
