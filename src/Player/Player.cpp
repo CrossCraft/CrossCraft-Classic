@@ -102,13 +102,15 @@ Player::Player()
         gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
         Rendering::Rectangle{{0, (256.0f - 22.0f) / 256.0f},
                              {182.0f / 256.0f, 22.0f / 256.0f}});
-    item_box->set_position({149, 1});
+    item_box->set_position({149, 5});
     item_box->set_layer(-1);
 
     selector = create_scopeptr<Graphics::G2D::Sprite>(
         gui_texture, Rendering::Rectangle{{148, 0}, {24, 24}},
         Rendering::Rectangle{{0, (256.0f - 22.0f - 24.0f) / 256.0f},
                              {24.0f / 256.0f, 24.0f / 256.0f}});
+
+    selector->set_position({148, 4});
     selector->set_layer(-2);
 
     crosshair = create_scopeptr<Graphics::G2D::Sprite>(
@@ -525,15 +527,15 @@ auto Player::draw(World *wrld) -> void {
 
     if (wrld->client == nullptr || !wrld->client->disconnected) {
         for (int i = 0; i < 9; i++)
-            blockRep->drawBlk(itemSelections[i], i, 0, 9.0f);
+            blockRep->drawBlk(itemSelections[i], i, 0, 4, 9.0f);
         if (in_inventory) {
             for (int i = 0; i < 42; i++) {
                 if (i == selectedBlock)
                     blockRep->drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
-                                      13.0f);
+                                      0, 13.0f);
                 else
                     blockRep->drawBlk(inventorySelection[i], i % 9, 7 - i / 9,
-                                      9.0f);
+                                      0, 9.0f);
             }
         }
     }

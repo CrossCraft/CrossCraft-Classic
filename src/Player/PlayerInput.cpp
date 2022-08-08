@@ -309,7 +309,7 @@ auto Player::change_selector(std::any d) -> void {
     auto s = std::any_cast<SelData>(d);
     if (!s.player->in_chat && !s.player->in_pause) {
         s.player->selectorIDX = s.selIDX;
-        s.player->selector->set_position({148 + 20 * s.player->selectorIDX, 0});
+        s.player->selector->set_position({148 + 20 * s.player->selectorIDX, 4});
     }
 }
 
@@ -332,7 +332,7 @@ auto Player::inc_selector(std::any d) -> void {
     if (p->selectorIDX > 8)
         p->selectorIDX = 0;
 
-    p->selector->set_position({148 + 20 * p->selectorIDX, 0});
+    p->selector->set_position({148 + 20 * p->selectorIDX, 4});
 }
 
 auto Player::dec_selector(std::any d) -> void {
@@ -342,7 +342,7 @@ auto Player::dec_selector(std::any d) -> void {
     if (p->selectorIDX < 0)
         p->selectorIDX = 8;
 
-    p->selector->set_position({148 + 20 * p->selectorIDX, 0});
+    p->selector->set_position({148 + 20 * p->selectorIDX, 4});
 }
 
 auto Player::toggle_inv(std::any d) -> void {
