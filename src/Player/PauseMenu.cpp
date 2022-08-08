@@ -1,5 +1,6 @@
 #include "PauseMenu.hpp"
 #include "../TexturePackManager.hpp"
+#include "../UI/TextHelper.hpp"
 
 #define BUILD_PC (BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX)
 
@@ -48,50 +49,6 @@ PauseMenu::PauseMenu() {
     background_rectangle = create_scopeptr<Rendering::Primitive::Rectangle>(
         Rendering::Rectangle{{0, 0}, {480, 272}}, Rendering::Color{0, 0, 0, 96},
         -3);
-
-    fontRenderer->clear();
-
-    fontRenderer->add_text(
-        "Game Menu", {240 - fontRenderer->calculate_size("Game Menu") / 2, 216},
-        {255, 255, 255, 255}, -11);
-    fontRenderer->add_text(
-        "Game Menu", {241 - fontRenderer->calculate_size("Game Menu") / 2, 216},
-        {63, 63, 63, 255}, -10);
-
-    fontRenderer->add_text(
-        "Back to Game",
-        {240 - fontRenderer->calculate_size("Back to Game") / 2, 160},
-        {255, 255, 255, 255}, -11);
-    fontRenderer->add_text(
-        "Back to Game",
-        {241 - fontRenderer->calculate_size("Back to Game") / 2, 160},
-        {63, 63, 63, 255}, -10);
-
-    fontRenderer->add_text(
-        "Options",
-        {240 - fontRenderer->calculate_size("Options") / 2, 160 - 24},
-        {255, 255, 255, 255}, -11);
-    fontRenderer->add_text(
-        "Options",
-        {241 - fontRenderer->calculate_size("Options") / 2, 160 - 24},
-        {63, 63, 63, 255}, -10);
-
-    fontRenderer->add_text(
-        "Save Game",
-        {240 - fontRenderer->calculate_size("Save Game") / 2, 160 - 48},
-        {255, 255, 255, 255}, -11);
-    fontRenderer->add_text(
-        "Save Game",
-        {241 - fontRenderer->calculate_size("Save Game") / 2, 160 - 48},
-        {63, 63, 63, 255}, -10);
-
-    fontRenderer->add_text(
-        "Quit Game", {240 - fontRenderer->calculate_size("Quit Game") / 2, 64},
-        {255, 255, 255, 255}, -11);
-    fontRenderer->add_text(
-        "Quit Game", {241 - fontRenderer->calculate_size("Quit Game") / 2, 64},
-        {63, 63, 63, 255}, -10);
-    fontRenderer->rebuild();
 }
 PauseMenu::~PauseMenu() {}
 
@@ -104,7 +61,8 @@ auto PauseMenu::enter() -> void {
 }
 auto PauseMenu::exit() -> void {
 #if BUILD_PC
-    glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        Utilities::Input::set_cursor_center();
 #endif
 
     selIdx = 0;
@@ -142,6 +100,82 @@ auto PauseMenu::draw() -> void {
 
     Rendering::RenderContext::get().matrix_clear();
 
+    fontRenderer->clear();
+
+    fontRenderer->add_text(
+        "Game Menu", {240 - fontRenderer->calculate_size("Game Menu") / 2, 216},
+        {255, 255, 255, 255}, -11);
+    fontRenderer->add_text(
+        "Game Menu", {241 - fontRenderer->calculate_size("Game Menu") / 2, 215},
+        {63, 63, 63, 255}, -10);
+
+    if (selIdx != 0) {
+        fontRenderer->add_text(
+            "Back to Game",
+            {240 - fontRenderer->calculate_size("Back to Game") / 2, 160},
+            {255, 255, 255, 255}, -11);
+        fontRenderer->add_text(
+            "Back to Game",
+            {241 - fontRenderer->calculate_size("Back to Game") / 2, 159},
+            {63, 63, 63, 255}, -10);
+    } else {
+        fontRenderer->add_text(
+            "Back to Game",
+            {240 - fontRenderer->calculate_size("Back to Game") / 2, 160},
+            CC_TEXT_COLOR_SELECT_FRONT, -12);
+        fontRenderer->add_text(
+            "Back to Game",
+            {241 - fontRenderer->calculate_size("Back to Game") / 2, 159},
+            CC_TEXT_COLOR_SELECT_BACK, -10);
+    }
+
+    fontRenderer->add_text(
+        "Options",
+        {240 - fontRenderer->calculate_size("Options") / 2, 160 - 24},
+        {255, 255, 255, 255}, -11);
+    fontRenderer->add_text(
+        "Options",
+        {241 - fontRenderer->calculate_size("Options") / 2, 160 - 25},
+        {63, 63, 63, 255}, -10);
+
+    if (selIdx != 1) {
+        fontRenderer->add_text(
+            "Save Game",
+            {240 - fontRenderer->calculate_size("Save Game") / 2, 160 - 48},
+            {255, 255, 255, 255}, -11);
+        fontRenderer->add_text(
+            "Save Game",
+            {241 - fontRenderer->calculate_size("Save Game") / 2, 160 - 49},
+            {63, 63, 63, 255}, -10);
+    } else {
+        fontRenderer->add_text(
+            "Save Game",
+            {240 - fontRenderer->calculate_size("Save Game") / 2, 160 - 48},
+            CC_TEXT_COLOR_SELECT_FRONT, -11);
+        fontRenderer->add_text(
+            "Save Game",
+            {241 - fontRenderer->calculate_size("Save Game") / 2, 160 - 49},
+            CC_TEXT_COLOR_SELECT_BACK, -10);
+    }
+
+    if (selIdx != 2) {
+        fontRenderer->add_text(
+            "Quit Game", {240 - fontRenderer->calculate_size("Quit Game") / 2, 64},
+            {255, 255, 255, 255}, -11);
+        fontRenderer->add_text(
+            "Quit Game", {241 - fontRenderer->calculate_size("Quit Game") / 2, 63},
+            {63, 63, 63, 255}, -10);
+    } else {
+        fontRenderer->add_text(
+            "Quit Game", {240 - fontRenderer->calculate_size("Quit Game") / 2, 64},
+            CC_TEXT_COLOR_SELECT_FRONT, -11);
+        fontRenderer->add_text(
+            "Quit Game", {241 - fontRenderer->calculate_size("Quit Game") / 2, 63},
+            CC_TEXT_COLOR_SELECT_BACK, -10);
+    }
+
+
+    fontRenderer->rebuild();
     fontRenderer->draw();
 }
 auto PauseMenu::update() -> void {

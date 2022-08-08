@@ -1,5 +1,6 @@
 #include "Menustate.hpp"
 #include "../Gamestate.hpp"
+#include "../UI/TextHelper.hpp"
 #include <Utilities/Controllers/KeyboardController.hpp>
 #include <Utilities/Controllers/MouseController.hpp>
 #include <Utilities/Controllers/PSPController.hpp>
@@ -205,41 +206,93 @@ void MenuState::on_draw(Core::Application *app, double dt) {
     fontRenderer->clear();
     splashRenderer->clear();
     if (!textureMenu) {
-        fontRenderer->add_text(
-            "Singleplayer",
-            {241 - fontRenderer->calculate_size("Singleplayer") / 2, 134},
-            shadow, -19);
-        fontRenderer->add_text(
-            "Multiplayer",
-            {241 - fontRenderer->calculate_size("Multiplayer") / 2, 134 - 24},
-            shadow, -19);
-        fontRenderer->add_text(
-            "Texture Packs",
-            {241 - fontRenderer->calculate_size("Texture Packs") / 2,
-             134 - 24 * 2},
-            shadow, -19);
-        fontRenderer->add_text(
-            "Quit Game",
-            {241 - fontRenderer->calculate_size("Quit Game") / 2, 134 - 24 * 3},
-            shadow, -19);
+        // Singleplayer
+        if (selIdx != 0) {
+            fontRenderer->add_text(
+                "Singleplayer",
+                {241 - fontRenderer->calculate_size("Singleplayer") / 2, 134},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Singleplayer",
+                {240 - fontRenderer->calculate_size("Singleplayer") / 2, 135},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Singleplayer",
+                {241 - fontRenderer->calculate_size("Singleplayer") / 2, 134},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Singleplayer",
+                {240 - fontRenderer->calculate_size("Singleplayer") / 2, 135},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
 
-        fontRenderer->add_text(
-            "Singleplayer",
-            {240 - fontRenderer->calculate_size("Singleplayer") / 2, 135},
-            white, -20);
-        fontRenderer->add_text(
-            "Multiplayer",
-            {240 - fontRenderer->calculate_size("Multiplayer") / 2, 135 - 24},
-            white, -20);
-        fontRenderer->add_text(
-            "Texture Packs",
-            {240 - fontRenderer->calculate_size("Texture Packs") / 2,
-             135 - 24 * 2},
-            white, -20);
-        fontRenderer->add_text(
-            "Quit Game",
-            {240 - fontRenderer->calculate_size("Quit Game") / 2, 135 - 24 * 3},
-            white, -20);
+        // Multiplayer
+        if (selIdx != 1) {
+            fontRenderer->add_text(
+                "Multiplayer",
+                {241 - fontRenderer->calculate_size("Multiplayer") / 2, 134 - 24},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Multiplayer",
+                {240 - fontRenderer->calculate_size("Multiplayer") / 2, 135 - 24},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Multiplayer",
+                {241 - fontRenderer->calculate_size("Multiplayer") / 2, 134 - 24},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Multiplayer",
+                {240 - fontRenderer->calculate_size("Multiplayer") / 2, 135 - 24},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
+
+        // Texture Packs
+        if (selIdx != 2) {
+            fontRenderer->add_text(
+                "Texture Packs",
+                {241 - fontRenderer->calculate_size("Texture Packs") / 2,
+                134 - 24 * 2},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Texture Packs",
+                {240 - fontRenderer->calculate_size("Texture Packs") / 2,
+                135 - 24 * 2},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Texture Packs",
+                {241 - fontRenderer->calculate_size("Texture Packs") / 2,
+                134 - 24 * 2},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Texture Packs",
+                {240 - fontRenderer->calculate_size("Texture Packs") / 2,
+                135 - 24 * 2},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
+
+        // Quit Game
+        if (selIdx != 3) {
+            fontRenderer->add_text(
+                "Quit Game",
+                {241 - fontRenderer->calculate_size("Quit Game") / 2, 134 - 24 * 3},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Quit Game",
+                {240 - fontRenderer->calculate_size("Quit Game") / 2, 135 - 24 * 3},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Quit Game",
+                {241 - fontRenderer->calculate_size("Quit Game") / 2, 134 - 24 * 3},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Quit Game",
+                {240 - fontRenderer->calculate_size("Quit Game") / 2, 135 - 24 * 3},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
 
         fontRenderer->add_text("CrossCraft Classic 1.1 (0.30)", {3, 272 - 11},
                                Rendering::Color{21, 21, 21, 255}, -19);
@@ -262,10 +315,10 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         // Splash text uses pure yellow instead of registered yellow for..
         // some reason..
         splashRenderer->add_text("Classic!", {1, -1},
-                                 Rendering::Color{63, 63, 0, 255}, -10);
+                                 CC_TEXT_COLOR_SPLASH_FRONT, -10);
 
         splashRenderer->add_text("Classic!", {0, 0},
-                                 Rendering::Color{255, 255, 0, 255}, -11);
+                                 CC_TEXT_COLOR_SPLASH_BACK, -11);
 
         logo_sprite->draw();
 
@@ -297,7 +350,7 @@ void MenuState::on_draw(Core::Application *app, double dt) {
             white, -20);
 
         for (int i = 0; i < 6; i++) {
-
+            bool do_not_select;
             if (TexturePackManager::get().path_names.size() > i) {
                 auto name = TexturePackManager::get().path_names[i];
 
@@ -309,7 +362,9 @@ void MenuState::on_draw(Core::Application *app, double dt) {
                     Rendering::RenderContext::get().matrix_translate(
                         {0, -50, 0});
                     dis_sprite->draw();
+                    do_not_select = true;
                 } else {
+                    do_not_select = false;
                     if (selIdx == i + 1) {
                         sel_sprite->draw();
                     } else {
@@ -319,29 +374,51 @@ void MenuState::on_draw(Core::Application *app, double dt) {
 
                 Rendering::RenderContext::get().matrix_clear();
 
-                fontRenderer->add_text(
-                    name,
-                    {241 - fontRenderer->calculate_size(name) / 2,
-                     200 - i * 24},
-                    shadow, -19);
-
-                fontRenderer->add_text(
-                    name,
-                    {240 - fontRenderer->calculate_size(name) / 2,
-                     200 - i * 24},
-                    white, -20);
+                if (selIdx != i + 1 || do_not_select == true) {
+                    fontRenderer->add_text(
+                        name,
+                        {241 - fontRenderer->calculate_size(name) / 2,
+                        200 - i * 24},
+                        shadow, -19);
+                    fontRenderer->add_text(
+                        name,
+                        {240 - fontRenderer->calculate_size(name) / 2,
+                        200 - i * 24},
+                        white, -20);
+                } else {
+                    fontRenderer->add_text(
+                        name,
+                        {241 - fontRenderer->calculate_size(name) / 2,
+                        200 - i * 24},
+                        CC_TEXT_COLOR_SELECT_BACK, -19);
+                    fontRenderer->add_text(
+                        name,
+                        {240 - fontRenderer->calculate_size(name) / 2,
+                        200 - i * 24},
+                        CC_TEXT_COLOR_SELECT_FRONT, -20);
+                }
             }
         }
 
-        fontRenderer->add_text(
-            "Back",
-            {241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
-            shadow, -19);
-
-        fontRenderer->add_text(
-            "Back",
-            {240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
-            white, -20);
+        if (selIdx != 0) {
+            fontRenderer->add_text(
+                "Back",
+                {241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                shadow, -19);
+            fontRenderer->add_text(
+                "Back",
+                {240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                white, -20);
+        } else {
+            fontRenderer->add_text(
+                "Back",
+                {241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                CC_TEXT_COLOR_SELECT_BACK, -19);
+            fontRenderer->add_text(
+                "Back",
+                {240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                CC_TEXT_COLOR_SELECT_FRONT, -20);
+        }
     }
     fontRenderer->rebuild();
     splashRenderer->rebuild();
@@ -385,7 +462,7 @@ void MenuState::trigger(std::any m) {
     } else {
         if (mstate->selIdx == 0) {
             mstate->textureMenu = false;
-        } else {
+        } else if (mstate->selIdx != -1) {
             auto name =
                 TexturePackManager::get().path_names[mstate->selIdx - 1];
             auto &vec = TexturePackManager::get().layers;
