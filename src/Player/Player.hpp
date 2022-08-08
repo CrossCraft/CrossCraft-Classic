@@ -137,7 +137,9 @@ class Player {
     World *wrldRef;
 
   private:
-    auto rotate(float dt, float sense) -> void;
+
+      const float playerSpeed = 4.3f;
+      auto rotate(float dt, float sense) -> void;
     auto test_collide(glm::vec3 pos, World *wrld, float dt) -> void;
 
     glm::vec3 vel;

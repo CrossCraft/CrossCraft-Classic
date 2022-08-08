@@ -138,8 +138,6 @@ auto Player::delete_chat(std::any d) -> void {
 }
 
 template <typename T> constexpr T DEGTORAD(T x) { return x / 180.0f * 3.14159; }
-
-const auto playerSpeed = 4.3f;
 auto Player::move_reset(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
 
@@ -149,27 +147,20 @@ auto Player::move_reset(std::any d) -> void {
 
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
+    if (!p->in_inventory &&
         !p->in_chat && !p->in_pause) {
-
-        if (!p->hasDir) {
-            p->vel.x = -sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
-            p->vel.z = -cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
-            p->hasDir = true;
-        }
+            p->vel.x += -sinf(DEGTORAD(-p->rot.y));
+            p->vel.z += -cosf(DEGTORAD(-p->rot.y));
     }
 }
 
 auto Player::move_backward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
+    if (!p->in_inventory &&
         !p->in_chat && !p->in_pause) {
 
-        if (!p->hasDir) {
-            p->vel.x = sinf(DEGTORAD(-p->rot.y)) * playerSpeed;
-            p->vel.z = cosf(DEGTORAD(-p->rot.y)) * playerSpeed;
-            p->hasDir = true;
-        }
+        p->vel.x += sinf(DEGTORAD(-p->rot.y));
+        p->vel.z += cosf(DEGTORAD(-p->rot.y));
     } else if (p->in_pause) {
         if (p->pauseMenu->selIdx == 0) {
             p->in_pause = false;
@@ -183,16 +174,19 @@ auto Player::move_backward(std::any d) -> void {
 
 auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
+    if (!p->in_inventory &&
         !p->in_chat && !p->in_pause) {
+            p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f));
+            p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f));
+    }
+}
 
-        if (!p->hasDir) {
-            p->vel.x = -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-            p->vel.z = -cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-        } else {
-            p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-            p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-        }
+auto Player::move_right(std::any d) -> void {
+    auto p = std::any_cast<Player *>(d);
+    if (!p->in_inventory &&
+        !p->in_chat && !p->in_pause) {
+            p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f));
+            p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f));
     }
 }
 
@@ -203,20 +197,6 @@ auto Player::respawn(std::any d) -> void {
         p.player->spawn(p.wrld);
 }
 
-auto Player::move_right(std::any d) -> void {
-    auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory && (p->is_underwater || !p->is_falling) &&
-        !p->in_chat && !p->in_pause) {
-
-        if (!p->hasDir) {
-            p->vel.x = sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-            p->vel.z = cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-        } else {
-            p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-            p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f)) * playerSpeed;
-        }
-    }
-}
 
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);

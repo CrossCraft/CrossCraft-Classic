@@ -302,6 +302,9 @@ void Player::update(float dt, World *wrld) {
     jump_icd -= dt;
 
     // Update position
+    vel.x *= playerSpeed;
+    vel.z *= playerSpeed;
+
     if (!is_underwater)
         vel.y -= GRAVITY_ACCELERATION * dt;
     else
@@ -388,6 +391,9 @@ void Player::update(float dt, World *wrld) {
     if (in_pause) {
         pauseMenu->update();
     }
+
+    vel.x = 0.0f;
+    vel.z = 0.0f;
 }
 
 auto Player::draw(World *wrld) -> void {
