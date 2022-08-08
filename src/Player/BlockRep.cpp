@@ -17,15 +17,18 @@ auto BlockRep::add_face_to_mesh(std::array<float, 12> data,
     c.color = lightVal;
 
     // Push Back Verts
-    for (int i = 0, tx = 0, idx = 0; i < 4; i++) {
-        m_verts[type].push_back(Rendering::Vertex{
-            uv[tx++],
-            uv[tx++],
-            c,
-            data[idx++] + mypos.x,
-            data[idx++] + mypos.y,
-            data[idx++] + mypos.z,
-        });
+    u8 idx = 0;
+    for (int i = 0, tx = 0; i < 4; i++) {
+
+        Rendering::Vertex vert;
+        vert.color = c;
+        vert.u = uv[tx++];
+        vert.v = uv[tx++];
+        vert.x = data[idx++] + mypos.x;
+        vert.y = data[idx++] + mypos.y;
+        vert.z = data[idx++] + mypos.z;
+
+        m_verts[type].push_back(vert);
     }
 
     // Push Back Indices
@@ -49,69 +52,46 @@ auto BlockRep::setup_model(uint8_t type) -> void {
     glm::vec3 p = {0, 0, 0};
 
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40) {
-
         add_face_to_mesh(xFace1, getTexCoord(type, LIGHT_SIDE_X), LIGHT_SIDE_X,
                          p, type);
         add_face_to_mesh(xFace2, getTexCoord(type, LIGHT_SIDE_X), LIGHT_SIDE_X,
                          p, type);
-    } else if (type == 44) {
-        add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP,
-                         {0, -0.5, 0}, type);
-        add_face_to_mesh(leftFaceHalf, getTexCoord(type, LIGHT_SIDE_X),
-                         LIGHT_BOT, p, type);
-        add_face_to_mesh(backFaceHalf, getTexCoord(type, LIGHT_SIDE_X),
-                         LIGHT_SIDE_X, {0, 0, 1}, type);
+    } else if (type == Block::Slab) {
+        add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP, {0, -0.5f, 0},
+            type);
+        add_face_to_mesh(leftFaceHalf, getTexCoord(type, LIGHT_SIDE_X), LIGHT_BOT,
+            p, type);
         add_face_to_mesh(frontFaceHalf, getTexCoord(type, LIGHT_SIDE_Z),
-                         LIGHT_SIDE_Z, {0, 0, 1}, type);
-        add_face_to_mesh(backFaceHalf, getTexCoord(type, LIGHT_SIDE_Z),
-                         LIGHT_SIDE_Z, p, type);
+            LIGHT_SIDE_Z, p, type);
     } else {
 
         add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP, p,
                          type);
         add_face_to_mesh(leftFace, getTexCoord(type, LIGHT_SIDE_X), LIGHT_BOT,
                          p, type);
-        add_face_to_mesh(backFace, getTexCoord(type, LIGHT_SIDE_X),
-                         LIGHT_SIDE_X, {0, 0, 1}, type);
         add_face_to_mesh(frontFace, getTexCoord(type, LIGHT_SIDE_Z),
-                         LIGHT_SIDE_Z, {0, 0, 1}, type);
-        add_face_to_mesh(backFace, getTexCoord(type, LIGHT_SIDE_Z),
                          LIGHT_SIDE_Z, p, type);
     }
 
     blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
-                             m_index[type].data(), idx_counter[type]);
+                             m_index[type].data(), m_index[type].size());
 }
 
 auto BlockRep::drawBlk(uint8_t type, int x, int y, float scale) -> void {
     Rendering::RenderContext::get().matrix_view(glm::mat4(1));
+  
     Rendering::RenderContext::get().matrix_translate(
         {153.5f + x * 20, 8 + y * 24, -20});
 
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40)
-        Rendering::RenderContext::get().matrix_rotate({0.0f, 45.0f, 0});
+        Rendering::RenderContext::get().matrix_rotate({ 0.0f, 45.0f, 0 });
     else
-        Rendering::RenderContext::get().matrix_rotate({30.0f, 45.0f, 0});
-
-    Rendering::RenderContext::get().matrix_scale({scale, scale, scale});
-
-// DISABLE CULL
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
-    glDisable(GL_CULL_FACE);
-#else
-    sceGuDisable(GU_CULL_FACE);
-#endif
-
+        Rendering::RenderContext::get().matrix_rotate({ 30.0f, 45.0f, 0 });
+    Rendering::RenderContext::get().matrix_scale({ scale, scale, scale });
+   
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
     blockMesh[type].draw();
-
-// ENABLE CULL
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
-    glEnable(GL_CULL_FACE);
-#else
-    sceGuEnable(GU_CULL_FACE);
-#endif
 
     Rendering::RenderContext::get().matrix_clear();
 }
@@ -130,10 +110,8 @@ auto BlockRep::drawBlkHand(uint8_t type, World *wrld, double cube_bob) -> void {
 
     // DISABLE CULL
 #if BUILD_PC || BUILD_PLAT == BUILD_VITA
-    glDisable(GL_CULL_FACE);
     glClear(GL_DEPTH_BUFFER_BIT);
 #else
-    sceGuDisable(GU_CULL_FACE);
     sceGuClear(GU_DEPTH_BUFFER_BIT);
 #endif
 
@@ -175,12 +153,6 @@ auto BlockRep::drawBlkHand(uint8_t type, World *wrld, double cube_bob) -> void {
                                  m_index[type].data(), idx_counter[type]);
     }
 
-    // ENABLE CULL
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
-    glEnable(GL_CULL_FACE);
-#else
-    sceGuEnable(GU_CULL_FACE);
-#endif
 
     ctx->matrix_clear();
 }
