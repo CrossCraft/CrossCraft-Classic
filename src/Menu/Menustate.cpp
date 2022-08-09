@@ -294,9 +294,9 @@ void MenuState::on_draw(Core::Application *app, double dt) {
                 CC_TEXT_COLOR_SELECT_FRONT, -20);
         }
 
-        fontRenderer->add_text("CrossCraft Classic 1.1 (0.30)", {3, 272 - 11},
+        fontRenderer->add_text("CrossCraft Classic 1.2 (0.30)", {3, 272 - 11},
                                Rendering::Color{21, 21, 21, 255}, -19);
-        fontRenderer->add_text("CrossCraft Classic 1.1 (0.30)", {2, 272 - 10},
+        fontRenderer->add_text("CrossCraft Classic 1.2 (0.30)", {2, 272 - 10},
                                Rendering::Color{85, 85, 85, 255}, -20);
 
         fontRenderer->add_text(
