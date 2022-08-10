@@ -15,8 +15,13 @@ struct Config {
     std::string key;
 
     inline static auto loadConfig() -> Config {
+        // Store default values
         Config config;
-        config.sense = 1.0f;
+        config.sense = 1.50f;
+        config.compat = 0;
+        config.ip = "classic.crosscraft.wtf";
+        config.port = 25565;
+        config.username = "CC-User";
 
         std::ifstream file(PLATFORM_FILE_PREFIX + "config.cfg");
 
