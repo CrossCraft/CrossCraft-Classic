@@ -11,6 +11,7 @@ ParticleSystem::~ParticleSystem() {
 auto rand_pos() -> float { return ((rand() % 16) - 8) * (1.0f / 16.0f); }
 float timer = 0.0f;
 auto bind_texture(Particle &particle, uint32_t type) -> void {
+
     particle.uv = getTexCoord(type, 0xFFCCCCCC);
 
     const float UV_SIZE = (2.0f / 16.0f) / 16.0f;

@@ -92,7 +92,7 @@ struct ChunkMeshCollection {
  * @param index Index of tile to get
  * @return std::array<float, 8>
  */
-inline auto getTexture(glm::vec2 sideCount, int index, bool rot = false)
+inline auto getTexture(glm::vec2 sideCount, int index)
     -> std::array<float, 8> {
     int row = index / (int)sideCount.x;
     int column = index % (int)sideCount.y;
@@ -104,10 +104,7 @@ inline auto getTexture(glm::vec2 sideCount, int index, bool rot = false)
     float h = y + sizeY;
     float w = x + sizeX;
 
-    if (rot)
-        return {x, y, x, h, w, h, w, y};
-    else
-        return {x, h, w, h, w, y, x, y};
+    return {x, h, w, h, w, y, x, y};
 }
 
 /*
@@ -270,7 +267,7 @@ inline std::array<float, 8> getTexCoord(uint8_t idx, uint32_t lv) {
         return getTexture(vec, 80);
 
     default:
-        return getTexture(vec, idx - 21 + 64, true);
+        return getTexture(vec, idx + 43);
     }
 }
 
