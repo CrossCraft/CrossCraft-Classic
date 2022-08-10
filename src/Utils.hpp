@@ -39,7 +39,7 @@ inline void createDirs() {
         dst << src.rdbuf();
     }
 #elif BUILD_PLAT == BUILD_PSP
-    mkdir("./texturepacks", 0777);
+    sceIoMkdir("./texturepacks", 0777);
     {
         std::ifstream src("./default.zip", std::ios::binary);
         if (src.is_open()) {
