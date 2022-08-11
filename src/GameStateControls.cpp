@@ -212,6 +212,28 @@ void GameState::bind_controls() {
         {(int)Input::Keys::Num9, KeyFlag::Press | KeyFlag::Held},
         {Player::change_selector, SelData{world->player.get(), 8}});
 
+    // Mouse wheel to cycle through objects
+    mouse_controller->add_command(
+        {(int)Input::MouseButtons::MWheelDown, KeyFlag::Press},
+        {Player::press_left, world->player.get()});
+    mouse_controller->add_command(
+        {(int)Input::MouseButtons::MWheelUp, KeyFlag::Press},
+        {Player::press_right, world->player.get()});
+
+    // Map directions to numpad
+    key_controller->add_command(
+        {(int)Input::Keys::KeyPad8, KeyFlag::Press},
+        {Player::press_up, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::KeyPad2, KeyFlag::Press},
+        {Player::press_down, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::KeyPad4, KeyFlag::Press},
+        {Player::press_left, world->player.get()});
+    key_controller->add_command(
+        {(int)Input::Keys::KeyPad6, KeyFlag::Press},
+        {Player::press_right, world->player.get()});
+
     key_controller->add_command({(int)Input::Keys::Tab, KeyFlag::Release},
                                 {Player::tab_end, world->player.get()});
     key_controller->add_command(
