@@ -11,6 +11,8 @@ Textures are a combination of handmade and adaptations from [Unity Pack](https:/
 
 CrossCraft's goal is to be platform-independent and work across all PC platforms and many major game consoles. CrossCraft supports Windows, Mac, Linux, PSP, and PS Vita. Further support will be added over time as systems change and upgrade.
 
+We are not associated with Mojang or Microsoft.
+
 <br>
 <div align=center><img src=./branding/Screenshot.png></div>
 <br>
