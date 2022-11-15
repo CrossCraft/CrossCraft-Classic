@@ -368,8 +368,12 @@ auto Player::rotate(float dt, float sense) -> void {
     cX = get_axis("Mouse", "X");
     cY = get_axis("Mouse", "Y");
 
-    cX *= 3.0f;
-    cY *= 3.0f;
+    int rx, ry;
+    glfwGetWindowSize(GI::window, &rx, &ry);
+    cX *= (float)rx / 1024.0f;
+    cX /= dt * 10.0f;
+    cY *= (float)ry / 1024.0f;
+    cY /= dt * 10.0f;
 #endif
     if (!in_inventory && !in_chat) {
         rot.y += cX * rotSpeed * dt * sense;
