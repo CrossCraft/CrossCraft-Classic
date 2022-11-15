@@ -18,8 +18,8 @@
 #include <psputility.h>
 #include <string.h>
 
-namespace Stardust_Celeste::Rendering {
-extern char list[0x100000] __attribute__((aligned(64)));
+namespace GI {
+extern unsigned int __attribute__((aligned(16))) list[0x10000];
 }
 #endif
 
@@ -437,7 +437,7 @@ auto ShowOSK(unsigned short *descritpion, unsigned short *outtext,
     bool done = true;
 
     while (done) {
-        sceGuStart(GU_DIRECT, Stardust_Celeste::Rendering::list);
+        sceGuStart(GU_DIRECT, GI::list);
         sceGuClear(GU_COLOR_BUFFER_BIT);
         sceGuFinish();
         sceGuSync(0, 0);
