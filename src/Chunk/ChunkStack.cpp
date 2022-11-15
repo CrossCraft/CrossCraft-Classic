@@ -3,7 +3,6 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtx/rotate_vector.hpp>
 
-
 namespace CrossCraft {
 ChunkStack::ChunkStack(int x, int z) : cX(x), cZ(z) {
     // Create new meshes
@@ -60,6 +59,19 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
 
                 wrld->update_surroundings(chk.x, chk.z);
 
+                updated.push_back(chk);
+            } else if (blkr == Block::Lava) {
+                uint16_t x = chk.x / 16;
+                uint16_t y = chk.z / 16;
+                uint32_t id = x << 16 | (y & 0x00FF);
+
+                wrld->worldData[idx] = 10;
+                wrld->update_lighting(chk.x, chk.z);
+
+                if (wrld->chunks.find(id) != wrld->chunks.end())
+                    wrld->chunks[id]->generate(wrld);
+
+                wrld->update_surroundings(chk.x, chk.z);
                 updated.push_back(chk);
             } else if (blkr == Block::Sapling || blkr == Block::Flower1 ||
                        blkr == Block::Flower2 || blkr == Block::Mushroom1 ||
@@ -123,6 +135,44 @@ auto ChunkStack::update_check(World *wrld, int blkr, glm::ivec3 chk) -> void {
                 updated.push_back(chk);
             }
         }
+
+        if ((blk == Block::Water || blk == Block::Still_Water) &&
+            blkr == Block::Lava) {
+            uint16_t x = chk.x / 16;
+            uint16_t y = chk.z / 16;
+            uint32_t id = x << 16 | (y & 0x00FF);
+
+            wrld->worldData[idx] = Block::Stone;
+            wrld->update_lighting(chk.x, chk.z);
+
+            wrld->update_nearby_blocks({chk.x, chk.y + 1, chk.z});
+
+            if (wrld->chunks.find(id) != wrld->chunks.end())
+                wrld->chunks[id]->generate(wrld);
+
+            wrld->update_surroundings(chk.x, chk.z);
+
+            updated.push_back(chk);
+        }
+
+        if ((blk == Block::Lava || blk == Block::Still_Lava) &&
+            blkr == Block::Water) {
+            uint16_t x = chk.x / 16;
+            uint16_t y = chk.z / 16;
+            uint32_t id = x << 16 | (y & 0x00FF);
+
+            wrld->worldData[idx] = Block::Obsidian;
+            wrld->update_lighting(chk.x, chk.z);
+
+            wrld->update_nearby_blocks({chk.x, chk.y + 1, chk.z});
+
+            if (wrld->chunks.find(id) != wrld->chunks.end())
+                wrld->chunks[id]->generate(wrld);
+
+            wrld->update_surroundings(chk.x, chk.z);
+
+            updated.push_back(chk);
+        }
     }
 }
 
@@ -146,7 +196,7 @@ void ChunkStack::chunk_update(World *wrld) {
         auto idx = wrld->getIdx(pos.x, pos.y, pos.z);
         auto blk = wrld->worldData[idx];
 
-        if (blk == Block::Water) {
+        if (blk == Block::Water || blk == Block::Lava) {
             update_check(wrld, blk, {pos.x, pos.y - 1, pos.z});
             update_check(wrld, blk, {pos.x - 1, pos.y, pos.z});
             update_check(wrld, blk, {pos.x + 1, pos.y, pos.z});
@@ -217,7 +267,7 @@ void ChunkStack::generate_border() {
     border = true;
 }
 
-bool ChunkStack::check_visible(World* wrld, glm::vec3 posCheck, int cY) {
+bool ChunkStack::check_visible(World *wrld, glm::vec3 posCheck, int cY) {
     auto pos = wrld->player->get_pos();
     pos.y -= (1.80f - 1.5965f);
 
@@ -230,8 +280,8 @@ bool ChunkStack::check_visible(World* wrld, glm::vec3 posCheck, int cY) {
         auto cast_pos = pos + (default_vec * static_cast<float>(c));
 
         auto ivec = glm::ivec3(static_cast<s32>(cast_pos.x),
-            static_cast<s32>(cast_pos.y),
-            static_cast<s32>(cast_pos.z));
+                               static_cast<s32>(cast_pos.y),
+                               static_cast<s32>(cast_pos.z));
 
         u32 idx = wrld->getIdx(ivec.x, ivec.y, ivec.z);
         if (idx < 0)
@@ -239,8 +289,8 @@ bool ChunkStack::check_visible(World* wrld, glm::vec3 posCheck, int cY) {
 
         auto blk = wrld->worldData[idx];
 
-        if (blk == Block::Air || blk == Block::Water ||
-            blk == Block::Leaves || blk == Block::Glass)
+        if (blk == Block::Air || blk == Block::Water || blk == Block::Leaves ||
+            blk == Block::Glass)
             continue;
 
         if (ivec.x < 0 || ivec.x > wrld->world_size.x || ivec.y < 0 ||
@@ -259,42 +309,74 @@ bool ChunkStack::check_visible(World* wrld, glm::vec3 posCheck, int cY) {
     return true;
 }
 
-void ChunkStack::draw(World* wrld) {
+void ChunkStack::draw(World *wrld) {
     // Draw meshes
     for (int i = 0; i < 4; i++) {
 
-        glm::vec2 relative_chunk_pos = glm::vec2(
-            cX * 16.0f, cZ * 16.0f);
-        auto diff =
-            glm::vec2(wrld->player->pos.x, wrld->player->pos.z) - relative_chunk_pos;
+        glm::vec2 relative_chunk_pos = glm::vec2(cX * 16.0f, cZ * 16.0f);
+        auto diff = glm::vec2(wrld->player->pos.x, wrld->player->pos.z) -
+                    relative_chunk_pos;
         auto len = fabsf(sqrtf(diff.x * diff.x + diff.y * diff.y));
 
         glm::vec4 centerpos =
             glm::vec4(cX * 16 + 8.0f, i * 16, cZ * 16 + 8.0f, 1.0f);
 
-        glm::vec4 res = wrld->player->projmat * wrld->player->viewmat * centerpos;
+        glm::vec4 res =
+            wrld->player->projmat * wrld->player->viewmat * centerpos;
 
         if (res.w >= 0 || len <= 24.0f) {
 
 #if BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA
             bool visible = false;
 
-            visible = visible || check_visible(wrld, glm::vec3(centerpos.x, centerpos.y + 8.0f, centerpos.z), i);
+            visible =
+                visible ||
+                check_visible(
+                    wrld,
+                    glm::vec3(centerpos.x, centerpos.y + 8.0f, centerpos.z), i);
 
-            visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, i * 16, (cZ + 0) * 16), i);
-            visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, i * 16, (cZ + 0) * 16), i);
-            visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, i * 16, (cZ + 1) * 16), i);
-            visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, i * 16, (cZ + 1) * 16), i);
+            visible =
+                visible ||
+                check_visible(
+                    wrld, glm::vec3((cX + 0) * 16, i * 16, (cZ + 0) * 16), i);
+            visible =
+                visible ||
+                check_visible(
+                    wrld, glm::vec3((cX + 1) * 16, i * 16, (cZ + 0) * 16), i);
+            visible =
+                visible ||
+                check_visible(
+                    wrld, glm::vec3((cX + 1) * 16, i * 16, (cZ + 1) * 16), i);
+            visible =
+                visible ||
+                check_visible(
+                    wrld, glm::vec3((cX + 0) * 16, i * 16, (cZ + 1) * 16), i);
 
-            visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, (i + 1) * 16, (cZ + 0) * 16), i);
-            visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, (i + 1) * 16, (cZ + 0) * 16), i);
-            visible = visible || check_visible(wrld, glm::vec3((cX + 1) * 16, (i + 1) * 16, (cZ + 1) * 16), i);
-            visible = visible || check_visible(wrld, glm::vec3((cX + 0) * 16, (i + 1) * 16, (cZ + 1) * 16), i);
-#else 
+            visible =
+                visible ||
+                check_visible(
+                    wrld, glm::vec3((cX + 0) * 16, (i + 1) * 16, (cZ + 0) * 16),
+                    i);
+            visible =
+                visible ||
+                check_visible(
+                    wrld, glm::vec3((cX + 1) * 16, (i + 1) * 16, (cZ + 0) * 16),
+                    i);
+            visible =
+                visible ||
+                check_visible(
+                    wrld, glm::vec3((cX + 1) * 16, (i + 1) * 16, (cZ + 1) * 16),
+                    i);
+            visible =
+                visible ||
+                check_visible(
+                    wrld, glm::vec3((cX + 0) * 16, (i + 1) * 16, (cZ + 1) * 16),
+                    i);
+#else
             bool visible = true;
 #endif
 
-            if(visible || len <= 33.0f)
+            if (visible || len <= 33.0f)
                 stack[i]->draw(ChunkMeshSelection::Opaque);
         }
     }
