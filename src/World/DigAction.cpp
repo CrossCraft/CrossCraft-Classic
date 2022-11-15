@@ -64,6 +64,7 @@ auto DigAction::dig(std::any d) -> void {
         } else if (w->player->pauseMenu->selIdx == 2) {
             exit(0);
         }
+        return;
     }
 #endif
 
