@@ -1,5 +1,5 @@
 #include "Gamestate.hpp"
-
+#include "MusicManager.hpp"
 #include "Rendering/ShaderManager.hpp"
 #include "TexturePackManager.hpp"
 #include "Utils.hpp"
@@ -178,6 +178,8 @@ void GameState::quit(std::any d) {
 }
 
 void GameState::on_update(Core::Application *app, double dt) {
+    MusicManager::get().update(dt);
+
     if (client.get() != nullptr)
         client->update(dt);
 
@@ -192,6 +194,5 @@ void GameState::on_draw(Core::Application *app, double dt) {
 
     if (client.get() == nullptr || client->is_ready)
         world->draw();
-
 }
 } // namespace CrossCraft

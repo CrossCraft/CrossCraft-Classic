@@ -1,5 +1,6 @@
 #include "Menustate.hpp"
 #include "../Gamestate.hpp"
+#include "../MusicManager.hpp"
 #include "../UI/TextHelper.hpp"
 #include <Utilities/Controllers/KeyboardController.hpp>
 #include <Utilities/Controllers/MouseController.hpp>
@@ -128,6 +129,7 @@ void MenuState::quit(std::any d) {
 }
 
 void MenuState::on_update(Core::Application *app, double dt) {
+    MusicManager::get().update(dt);
     if (shouldQuit) {
         app->exit();
     }
