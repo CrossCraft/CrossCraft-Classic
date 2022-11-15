@@ -1,6 +1,6 @@
 #include "Clouds.hpp"
-#include <array>
 #include "../TexturePackManager.hpp"
+#include <array>
 namespace CrossCraft {
 
 Clouds::Clouds() {
@@ -14,15 +14,15 @@ Clouds::Clouds() {
 }
 Clouds::~Clouds() {
     Rendering::TextureManager::get().delete_texture(texture);
-    m_verts.clear();
-    m_index.clear();
+    mesh.vertices.clear();
+    mesh.indices.clear();
 }
 
 void Clouds::generate() {
     mesh.delete_data();
     idx_counter = 0;
-    m_verts.clear();
-    m_index.clear();
+    mesh.vertices.clear();
+    mesh.indices.clear();
 
     for (int x = 0; x < 16; x++) {
         for (int z = 0; z < 16; z++) {
@@ -34,7 +34,7 @@ void Clouds::generate() {
             Rendering::Color c;
             c.color = 0xBBFFFFFF;
 
-            m_verts.push_back(Rendering::Vertex{
+            mesh.vertices.push_back(Rendering::Vertex{
                 uvs[0] * (1 / 128.f) + ((float)x / 128.f) + scroll,
                 uvs[1] * (1 / 128.f) + ((float)z / 128.f),
                 c,
@@ -43,7 +43,7 @@ void Clouds::generate() {
                 cFace[2] * 16 + z * 16,
             });
 
-            m_verts.push_back(Rendering::Vertex{
+            mesh.vertices.push_back(Rendering::Vertex{
                 uvs[2] * (1 / 128.f) + ((float)x / 128.f) + scroll,
                 uvs[3] * (1 / 128.f) + ((float)z / 128.f),
                 c,
@@ -52,7 +52,7 @@ void Clouds::generate() {
                 cFace[5] * 16 + z * 16,
             });
 
-            m_verts.push_back(Rendering::Vertex{
+            mesh.vertices.push_back(Rendering::Vertex{
                 uvs[4] * (1 / 128.f) + ((float)x / 128.f) + scroll,
                 uvs[5] * (1 / 128.f) + ((float)z / 128.f),
                 c,
@@ -61,7 +61,7 @@ void Clouds::generate() {
                 cFace[8] * 16 + z * 16,
             });
 
-            m_verts.push_back(Rendering::Vertex{
+            mesh.vertices.push_back(Rendering::Vertex{
                 uvs[6] * (1 / 128.f) + ((float)x / 128.f) + scroll,
                 uvs[7] * (1 / 128.f) + ((float)z / 128.f),
                 c,
@@ -70,18 +70,17 @@ void Clouds::generate() {
                 cFace[11] * 16 + z * 16,
             });
 
-            m_index.push_back(idx_counter);
-            m_index.push_back(idx_counter + 1);
-            m_index.push_back(idx_counter + 2);
-            m_index.push_back(idx_counter + 2);
-            m_index.push_back(idx_counter + 3);
-            m_index.push_back(idx_counter + 0);
+            mesh.indices.push_back(idx_counter);
+            mesh.indices.push_back(idx_counter + 1);
+            mesh.indices.push_back(idx_counter + 2);
+            mesh.indices.push_back(idx_counter + 2);
+            mesh.indices.push_back(idx_counter + 3);
+            mesh.indices.push_back(idx_counter + 0);
             idx_counter += 4;
         }
     }
 
-    mesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
-                  m_index.size());
+    mesh.setup_buffer();
 }
 
 void Clouds::update(double dt) {

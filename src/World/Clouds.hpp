@@ -17,11 +17,9 @@ class Clouds {
 
     unsigned int texture;
 
-    uint16_t idx_counter;
     float scroll;
-    std::vector<Rendering::Vertex> m_verts;
-    std::vector<uint16_t> m_index;
 
-    Rendering::Mesh mesh;
+    uint16_t idx_counter;
+    Rendering::Mesh<Rendering::Vertex> mesh;
 };
 } // namespace CrossCraft

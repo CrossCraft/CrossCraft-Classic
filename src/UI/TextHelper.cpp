@@ -23,12 +23,10 @@ TextHelper::TextHelper() {
 }
 
 auto TextHelper::clear() -> void {
-    fontRenderer->clear();
+    fontRenderer->clear_tiles();
     posBox.clear();
 }
-auto TextHelper::rebuild() -> void {
-    fontRenderer->rebuild();
-}
+auto TextHelper::rebuild() -> void { fontRenderer->generate_map(); }
 
 auto TextHelper::draw() -> void {
 

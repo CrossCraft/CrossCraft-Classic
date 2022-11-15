@@ -34,25 +34,24 @@ struct ChunkMeshInst {
     inline auto delete_data() -> void {
         mesh.delete_data();
         idx_counter = 0;
-        m_verts.clear();
-        m_verts.shrink_to_fit();
-        m_index.clear();
-        m_index.shrink_to_fit();
+        mesh.vertices.clear();
+        mesh.vertices.shrink_to_fit();
+        mesh.indices.clear();
+        mesh.indices.shrink_to_fit();
     }
 
     inline auto preallocate_memory() -> void {
         const int numFace = 8192;
-        m_verts.reserve(4 * numFace);
-        m_index.reserve(6 * numFace);
+        mesh.vertices.reserve(4 * numFace);
+        mesh.indices.reserve(6 * numFace);
     }
 
     inline auto finalize() -> void {
         // Cleanup memory
-        m_verts.shrink_to_fit();
-        m_index.shrink_to_fit();
+        mesh.vertices.shrink_to_fit();
+        mesh.indices.shrink_to_fit();
         // Add data
-        mesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
-                      m_index.size());
+        mesh.setup_buffer();
     }
 
     inline auto draw() -> void {
@@ -63,9 +62,7 @@ struct ChunkMeshInst {
     }
 
     uint16_t idx_counter;
-    std::vector<Rendering::Vertex> m_verts;
-    std::vector<uint16_t> m_index;
-    Rendering::Mesh mesh;
+    Rendering::Mesh<Rendering::Vertex> mesh;
 };
 
 struct ChunkMeshCollection {
@@ -92,8 +89,7 @@ struct ChunkMeshCollection {
  * @param index Index of tile to get
  * @return std::array<float, 8>
  */
-inline auto getTexture(glm::vec2 sideCount, int index)
-    -> std::array<float, 8> {
+inline auto getTexture(glm::vec2 sideCount, int index) -> std::array<float, 8> {
     int row = index / (int)sideCount.x;
     int column = index % (int)sideCount.y;
 

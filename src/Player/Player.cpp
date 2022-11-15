@@ -28,7 +28,7 @@ extern char list[0x100000] __attribute__((aligned(64)));
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-namespace Stardust_Celeste::Rendering {
+namespace GI {
 extern GLFWwindow *window;
 }
 #endif
@@ -65,8 +65,7 @@ extern Player *player_ptr;
 
 Player::Player()
     : pos(0.f, 64.0f, 0.f), rot(0.f, 180.f), vel(0.f, 0.f, 0.f),
-      cam(pos, glm::vec3(rot.x, rot.y, 0), DEGTORAD(70.0f), 16.0f / 9.0f, 0.1f,
-          255.0f),
+      cam(pos, glm::vec3(rot.x, rot.y, 0), 70.0f, 16.0f / 9.0f, 0.1f, 255.0f),
       is_falling(true),
       model(pos, {0.6, 1.8, 0.6}), itemSelections{1,  4,  45, 3, 5,
                                                   17, 18, 20, 44},
@@ -152,8 +151,7 @@ Player::Player()
     fps_display = 0;
 
 #if BUILD_PC
-    glfwSetCharCallback(Stardust_Celeste::Rendering::window,
-                        character_callback);
+    glfwSetCharCallback(GI::window, character_callback);
 #endif
 }
 
@@ -207,48 +205,36 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
     int zMin = (int)(pos.z - 0.3f);
     int zMax = (int)(pos.z + 0.3f);
 
-    if (vel.x < 0.0)
-    {
+    if (vel.x < 0.0) {
         x = (int)(pos.x - 0.3f + vel.x * dt);
         testX = true;
-    }
-    else if (vel.x > 0.0)
-    {
+    } else if (vel.x > 0.0) {
         x = (int)(pos.x + 0.3f + vel.x * dt);
         testX = true;
     }
 
-    if (vel.y < 0.0)
-    {
-        y = (int)(pos.y - 1.8f + vel.y * dt );
+    if (vel.y < 0.0) {
+        y = (int)(pos.y - 1.8f + vel.y * dt);
         testY = true;
-    }
-    else if (vel.y > 0.0)
-    {
+    } else if (vel.y > 0.0) {
         y = (int)(pos.y + vel.y * dt);
         testY = true;
     }
 
-    if (vel.z < 0.0)
-    {
+    if (vel.z < 0.0) {
         z = (int)(pos.z - 0.3f + vel.z * dt);
         testZ = true;
-    }
-    else if (vel.z > 0.0)
-    {
+    } else if (vel.z > 0.0) {
         z = (int)(pos.z + 0.3f + vel.z * dt);
         testZ = true;
     }
 
     glm::vec3 newPosition = pos;
 
-    if (testX)
-    {
+    if (testX) {
         bool collided = false;
-        for (int y = yMin; y <= yMax; y++)
-        {
-            for (int z = zMin; z <= zMax; z++)
-            {
+        for (int y = yMin; y <= yMax; y++) {
+            for (int z = zMin; z <= zMax; z++) {
                 glm::ivec3 pos = glm::ivec3(x, y, z);
                 if (test(pos, wrld)) {
                     collided = true;
@@ -258,14 +244,10 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
         }
     }
 
-
-    if (testY)
-    {
+    if (testY) {
         bool collided = false;
-        for (int x = xMin; x <= xMax; x++)
-        {
-            for (int z = zMin; z <= zMax; z++)
-            {
+        for (int x = xMin; x <= xMax; x++) {
+            for (int z = zMin; z <= zMax; z++) {
                 glm::ivec3 pos = glm::ivec3(x, y, z);
                 if (test(pos, wrld)) {
                     collided = true;
@@ -276,13 +258,10 @@ void Player::test_collide(glm::vec3 testpos, World *wrld, float dt) {
         }
     }
 
-    if (testZ)
-    {
+    if (testZ) {
         bool collided = false;
-        for (int x = xMin; x <= xMax; x++)
-        {
-            for (int y = yMin; y <= yMax; y++)
-            {
+        for (int x = xMin; x <= xMax; x++) {
+            for (int y = yMin; y <= yMax; y++) {
                 glm::ivec3 pos = glm::ivec3(x, y, z);
                 if (test(pos, wrld)) {
                     collided = true;

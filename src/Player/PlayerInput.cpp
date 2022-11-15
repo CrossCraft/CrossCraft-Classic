@@ -29,7 +29,7 @@ extern char list[0x100000] __attribute__((aligned(64)));
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-namespace Stardust_Celeste::Rendering {
+namespace GI {
 extern GLFWwindow *window;
 }
 #endif
@@ -70,11 +70,9 @@ auto Player::enter_chat(std::any d) -> void {
 
 #if BUILD_PC
         if (p->in_chat)
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
-                             GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(GI::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         else
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
-                             GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(GI::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         Utilities::Input::set_cursor_center();
 #endif
@@ -93,11 +91,9 @@ auto Player::enter_chat_slash(std::any d) -> void {
 
 #if BUILD_PC
         if (p->in_chat)
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
-                             GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(GI::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         else
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
-                             GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(GI::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         Utilities::Input::set_cursor_center();
 #endif
@@ -122,7 +118,7 @@ auto Player::submit_chat(std::any d) -> void {
     chat_text = "";
 
 #if BUILD_PC
-    glfwSetInputMode(Rendering::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(GI::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     Utilities::Input::set_cursor_center();
 #endif
 }
@@ -147,17 +143,15 @@ auto Player::move_reset(std::any d) -> void {
 
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory &&
-        !p->in_chat && !p->in_pause) {
-            p->vel.x += -sinf(DEGTORAD(-p->rot.y));
-            p->vel.z += -cosf(DEGTORAD(-p->rot.y));
+    if (!p->in_inventory && !p->in_chat && !p->in_pause) {
+        p->vel.x += -sinf(DEGTORAD(-p->rot.y));
+        p->vel.z += -cosf(DEGTORAD(-p->rot.y));
     }
 }
 
 auto Player::move_backward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory &&
-        !p->in_chat && !p->in_pause) {
+    if (!p->in_inventory && !p->in_chat && !p->in_pause) {
 
         p->vel.x += sinf(DEGTORAD(-p->rot.y));
         p->vel.z += cosf(DEGTORAD(-p->rot.y));
@@ -174,19 +168,17 @@ auto Player::move_backward(std::any d) -> void {
 
 auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory &&
-        !p->in_chat && !p->in_pause) {
-            p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f));
-            p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f));
+    if (!p->in_inventory && !p->in_chat && !p->in_pause) {
+        p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f));
+        p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f));
     }
 }
 
 auto Player::move_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
-    if (!p->in_inventory &&
-        !p->in_chat && !p->in_pause) {
-            p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f));
-            p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f));
+    if (!p->in_inventory && !p->in_chat && !p->in_pause) {
+        p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f));
+        p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f));
     }
 }
 
@@ -196,7 +188,6 @@ auto Player::respawn(std::any d) -> void {
     if (!p.player->in_inventory && !p.player->in_chat && !p.wrld->client)
         p.player->spawn(p.wrld);
 }
-
 
 auto Player::move_up(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
@@ -332,11 +323,9 @@ auto Player::toggle_inv(std::any d) -> void {
 
 #if BUILD_PC
         if (p->in_inventory)
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
-                             GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(GI::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         else
-            glfwSetInputMode(Rendering::window, GLFW_CURSOR,
-                             GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(GI::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         Utilities::Input::set_cursor_center();
 #endif

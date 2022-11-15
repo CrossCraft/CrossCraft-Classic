@@ -203,8 +203,8 @@ void MenuState::on_draw(Core::Application *app, double dt) {
             Rendering::RenderContext::get().matrix_clear();
         }
 
-    fontRenderer->clear();
-    splashRenderer->clear();
+    fontRenderer->clear_tiles();
+    splashRenderer->clear_tiles();
     if (!textureMenu) {
         // Singleplayer
         if (selIdx != 0) {
@@ -231,20 +231,24 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         if (selIdx != 1) {
             fontRenderer->add_text(
                 "Multiplayer",
-                {241 - fontRenderer->calculate_size("Multiplayer") / 2, 134 - 24},
+                {241 - fontRenderer->calculate_size("Multiplayer") / 2,
+                 134 - 24},
                 shadow, -19);
             fontRenderer->add_text(
                 "Multiplayer",
-                {240 - fontRenderer->calculate_size("Multiplayer") / 2, 135 - 24},
+                {240 - fontRenderer->calculate_size("Multiplayer") / 2,
+                 135 - 24},
                 white, -20);
         } else {
             fontRenderer->add_text(
                 "Multiplayer",
-                {241 - fontRenderer->calculate_size("Multiplayer") / 2, 134 - 24},
+                {241 - fontRenderer->calculate_size("Multiplayer") / 2,
+                 134 - 24},
                 CC_TEXT_COLOR_SELECT_BACK, -19);
             fontRenderer->add_text(
                 "Multiplayer",
-                {240 - fontRenderer->calculate_size("Multiplayer") / 2, 135 - 24},
+                {240 - fontRenderer->calculate_size("Multiplayer") / 2,
+                 135 - 24},
                 CC_TEXT_COLOR_SELECT_FRONT, -20);
         }
 
@@ -253,23 +257,23 @@ void MenuState::on_draw(Core::Application *app, double dt) {
             fontRenderer->add_text(
                 "Texture Packs",
                 {241 - fontRenderer->calculate_size("Texture Packs") / 2,
-                134 - 24 * 2},
+                 134 - 24 * 2},
                 shadow, -19);
             fontRenderer->add_text(
                 "Texture Packs",
                 {240 - fontRenderer->calculate_size("Texture Packs") / 2,
-                135 - 24 * 2},
+                 135 - 24 * 2},
                 white, -20);
         } else {
             fontRenderer->add_text(
                 "Texture Packs",
                 {241 - fontRenderer->calculate_size("Texture Packs") / 2,
-                134 - 24 * 2},
+                 134 - 24 * 2},
                 CC_TEXT_COLOR_SELECT_BACK, -19);
             fontRenderer->add_text(
                 "Texture Packs",
                 {240 - fontRenderer->calculate_size("Texture Packs") / 2,
-                135 - 24 * 2},
+                 135 - 24 * 2},
                 CC_TEXT_COLOR_SELECT_FRONT, -20);
         }
 
@@ -277,20 +281,24 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         if (selIdx != 3) {
             fontRenderer->add_text(
                 "Quit Game",
-                {241 - fontRenderer->calculate_size("Quit Game") / 2, 134 - 24 * 3},
+                {241 - fontRenderer->calculate_size("Quit Game") / 2,
+                 134 - 24 * 3},
                 shadow, -19);
             fontRenderer->add_text(
                 "Quit Game",
-                {240 - fontRenderer->calculate_size("Quit Game") / 2, 135 - 24 * 3},
+                {240 - fontRenderer->calculate_size("Quit Game") / 2,
+                 135 - 24 * 3},
                 white, -20);
         } else {
             fontRenderer->add_text(
                 "Quit Game",
-                {241 - fontRenderer->calculate_size("Quit Game") / 2, 134 - 24 * 3},
+                {241 - fontRenderer->calculate_size("Quit Game") / 2,
+                 134 - 24 * 3},
                 CC_TEXT_COLOR_SELECT_BACK, -19);
             fontRenderer->add_text(
                 "Quit Game",
-                {240 - fontRenderer->calculate_size("Quit Game") / 2, 135 - 24 * 3},
+                {240 - fontRenderer->calculate_size("Quit Game") / 2,
+                 135 - 24 * 3},
                 CC_TEXT_COLOR_SELECT_FRONT, -20);
         }
 
@@ -317,8 +325,8 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         splashRenderer->add_text("Classic!", {1, -1},
                                  CC_TEXT_COLOR_SPLASH_FRONT, -10);
 
-        splashRenderer->add_text("Classic!", {0, 0},
-                                 CC_TEXT_COLOR_SPLASH_BACK, -11);
+        splashRenderer->add_text("Classic!", {0, 0}, CC_TEXT_COLOR_SPLASH_BACK,
+                                 -11);
 
         logo_sprite->draw();
 
@@ -378,23 +386,23 @@ void MenuState::on_draw(Core::Application *app, double dt) {
                     fontRenderer->add_text(
                         name,
                         {241 - fontRenderer->calculate_size(name) / 2,
-                        200 - i * 24},
+                         200 - i * 24},
                         shadow, -19);
                     fontRenderer->add_text(
                         name,
                         {240 - fontRenderer->calculate_size(name) / 2,
-                        200 - i * 24},
+                         200 - i * 24},
                         white, -20);
                 } else {
                     fontRenderer->add_text(
                         name,
                         {241 - fontRenderer->calculate_size(name) / 2,
-                        200 - i * 24},
+                         200 - i * 24},
                         CC_TEXT_COLOR_SELECT_BACK, -19);
                     fontRenderer->add_text(
                         name,
                         {240 - fontRenderer->calculate_size(name) / 2,
-                        200 - i * 24},
+                         200 - i * 24},
                         CC_TEXT_COLOR_SELECT_FRONT, -20);
                 }
             }
@@ -403,25 +411,29 @@ void MenuState::on_draw(Core::Application *app, double dt) {
         if (selIdx != 0) {
             fontRenderer->add_text(
                 "Back",
-                {241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                {241 - fontRenderer->calculate_size("Back") / 2,
+                 136 - 128 + 14},
                 shadow, -19);
             fontRenderer->add_text(
                 "Back",
-                {240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                {240 - fontRenderer->calculate_size("Back") / 2,
+                 136 - 128 + 14},
                 white, -20);
         } else {
             fontRenderer->add_text(
                 "Back",
-                {241 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                {241 - fontRenderer->calculate_size("Back") / 2,
+                 136 - 128 + 14},
                 CC_TEXT_COLOR_SELECT_BACK, -19);
             fontRenderer->add_text(
                 "Back",
-                {240 - fontRenderer->calculate_size("Back") / 2, 136 - 128 + 14},
+                {240 - fontRenderer->calculate_size("Back") / 2,
+                 136 - 128 + 14},
                 CC_TEXT_COLOR_SELECT_FRONT, -20);
         }
     }
-    fontRenderer->rebuild();
-    splashRenderer->rebuild();
+    fontRenderer->generate_map();
+    splashRenderer->generate_map();
 
     fontRenderer->draw();
 

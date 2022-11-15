@@ -28,25 +28,25 @@ auto BlockRep::add_face_to_mesh(std::array<float, 12> data,
         vert.y = data[idx++] + mypos.y;
         vert.z = data[idx++] + mypos.z;
 
-        m_verts[type].push_back(vert);
+        blockMesh[type].vertices.push_back(vert);
     }
 
     // Push Back Indices
-    m_index[type].push_back(idx_counter[type]);
-    m_index[type].push_back(idx_counter[type] + 1);
-    m_index[type].push_back(idx_counter[type] + 2);
-    m_index[type].push_back(idx_counter[type] + 2);
-    m_index[type].push_back(idx_counter[type] + 3);
-    m_index[type].push_back(idx_counter[type] + 0);
+    blockMesh[type].indices.push_back(idx_counter[type]);
+    blockMesh[type].indices.push_back(idx_counter[type] + 1);
+    blockMesh[type].indices.push_back(idx_counter[type] + 2);
+    blockMesh[type].indices.push_back(idx_counter[type] + 2);
+    blockMesh[type].indices.push_back(idx_counter[type] + 3);
+    blockMesh[type].indices.push_back(idx_counter[type] + 0);
     idx_counter[type] += 4;
 }
 
 auto BlockRep::setup_model(uint8_t type) -> void {
     idx_counter[type] = 0;
-    m_verts[type].clear();
-    m_verts[type].shrink_to_fit();
-    m_index[type].clear();
-    m_index[type].shrink_to_fit();
+    blockMesh[type].vertices.clear();
+    blockMesh[type].vertices.shrink_to_fit();
+    blockMesh[type].indices.clear();
+    blockMesh[type].indices.shrink_to_fit();
     blockMesh[type].delete_data();
 
     glm::vec3 p = {0, 0, 0};
@@ -57,12 +57,12 @@ auto BlockRep::setup_model(uint8_t type) -> void {
         add_face_to_mesh(xFace2, getTexCoord(type, LIGHT_SIDE_X), LIGHT_SIDE_X,
                          p, type);
     } else if (type == Block::Slab) {
-        add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP, {0, -0.5f, 0},
-            type);
-        add_face_to_mesh(leftFaceHalf, getTexCoord(type, LIGHT_SIDE_X), LIGHT_BOT,
-            p, type);
+        add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP,
+                         {0, -0.5f, 0}, type);
+        add_face_to_mesh(leftFaceHalf, getTexCoord(type, LIGHT_SIDE_X),
+                         LIGHT_BOT, p, type);
         add_face_to_mesh(frontFaceHalf, getTexCoord(type, LIGHT_SIDE_Z),
-            LIGHT_SIDE_Z, p, type);
+                         LIGHT_SIDE_Z, p, type);
     } else {
 
         add_face_to_mesh(topFace, getTexCoord(type, LIGHT_TOP), LIGHT_TOP, p,
@@ -73,29 +73,28 @@ auto BlockRep::setup_model(uint8_t type) -> void {
                          LIGHT_SIDE_Z, p, type);
     }
 
-    blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
-                             m_index[type].data(), m_index[type].size());
+    blockMesh[type].setup_buffer();
 }
 
-auto BlockRep::drawBlk(uint8_t type, int x, int y, int y_offset, float scale) -> void {
+auto BlockRep::drawBlk(uint8_t type, int x, int y, int y_offset, float scale)
+    -> void {
     Rendering::RenderContext::get().matrix_view(glm::mat4(1));
-  
+
     Rendering::RenderContext::get().matrix_translate(
         {153.5f + x * 20, (8 + y * 24) + y_offset, -20});
 
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40)
-        Rendering::RenderContext::get().matrix_rotate({ 0.0f, 45.0f, 0 });
+        Rendering::RenderContext::get().matrix_rotate({0.0f, 45.0f, 0});
     else
-        Rendering::RenderContext::get().matrix_rotate({ 30.0f, 45.0f, 0 });
-    Rendering::RenderContext::get().matrix_scale({ scale, scale, scale });
-   
+        Rendering::RenderContext::get().matrix_rotate({30.0f, 45.0f, 0});
+    Rendering::RenderContext::get().matrix_scale({scale, scale, scale});
+
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
-
 #if BUILD_PC || BUILD_PLAT == BUILD_VITA
     glDisable(GL_CULL_FACE);
-#else 
+#else
     sceGuDisable(GU_CULL_FACE);
 #endif
 
@@ -103,7 +102,7 @@ auto BlockRep::drawBlk(uint8_t type, int x, int y, int y_offset, float scale) ->
 
 #if BUILD_PC || BUILD_PLAT == BUILD_VITA
     glEnable(GL_CULL_FACE);
-#else 
+#else
     sceGuEnable(GU_CULL_FACE);
 #endif
 
@@ -143,19 +142,18 @@ auto BlockRep::drawBlkHand(uint8_t type, World *wrld, double cube_bob) -> void {
 
     // manipulate the model on the fly to tint when under a shadow
     if (on_shaded_block) {
-        for (auto &vert : m_verts[type]) {
+        for (auto &vert : blockMesh[type].vertices) {
             vert.color.rgba.r *= 0.6;
             vert.color.rgba.g *= 0.6;
             vert.color.rgba.b *= 0.6;
         }
         blockMesh[type].delete_data();
-        blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
-                                 m_index[type].data(), idx_counter[type]);
+        blockMesh[type].setup_buffer();
     }
 
 #if BUILD_PC || BUILD_PLAT == BUILD_VITA
     glDisable(GL_CULL_FACE);
-#else 
+#else
     sceGuDisable(GU_CULL_FACE);
 #endif
 
@@ -163,22 +161,20 @@ auto BlockRep::drawBlkHand(uint8_t type, World *wrld, double cube_bob) -> void {
 
 #if BUILD_PC || BUILD_PLAT == BUILD_VITA
     glEnable(GL_CULL_FACE);
-#else 
+#else
     sceGuEnable(GU_CULL_FACE);
 #endif
 
     // revert back
     if (on_shaded_block) {
-        for (auto &vert : m_verts[type]) {
+        for (auto &vert : blockMesh[type].vertices) {
             vert.color.rgba.r /= 0.6;
             vert.color.rgba.g /= 0.6;
             vert.color.rgba.b /= 0.6;
         }
         blockMesh[type].delete_data();
-        blockMesh[type].add_data(m_verts[type].data(), m_verts[type].size(),
-                                 m_index[type].data(), idx_counter[type]);
+        blockMesh[type].setup_buffer();
     }
-
 
     ctx->matrix_clear();
 }

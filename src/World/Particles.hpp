@@ -24,12 +24,9 @@ class ParticleSystem {
   private:
     unsigned int texture;
 
-    uint16_t idx_counter;
-    std::vector<Rendering::Vertex> m_verts;
-    std::vector<uint16_t> m_index;
-
     std::vector<Particle> particles;
 
-    Rendering::Mesh mesh;
+    uint16_t idx_counter;
+    Rendering::Mesh<Rendering::Vertex> mesh;
 };
 } // namespace CrossCraft

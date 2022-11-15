@@ -171,8 +171,8 @@ void ChunkMeshBuilder::add_xface_to_mesh(ChunkMesh *chunkMesh,
     auto mesh =
         chunkMesh->meshCollection.select(ChunkMeshSelection::Transparent);
 
-    auto *m = &mesh->m_verts;
-    auto *mi = &mesh->m_index;
+    auto *m = &mesh->mesh.vertices;
+    auto *mi = &mesh->mesh.indices;
     auto *idc = &mesh->idx_counter;
 
     // Create color
@@ -283,8 +283,8 @@ void ChunkMeshBuilder::add_face_to_mesh_wrld(ChunkMesh *chunkMesh,
 
     auto mesh = chunkMesh->meshCollection.select(meshSel);
 
-    auto *m = &mesh->m_verts;
-    auto *mi = &mesh->m_index;
+    auto *m = &mesh->mesh.vertices;
+    auto *mi = &mesh->mesh.indices;
     auto *idc = &mesh->idx_counter;
 
     int idxl = ((World *)wrld)
@@ -347,8 +347,8 @@ void ChunkMeshBuilder::add_face_to_mesh(ChunkMesh *chunkMesh,
 
     auto mesh = chunkMesh->meshCollection.select(meshSel);
 
-    auto *m = &mesh->m_verts;
-    auto *mi = &mesh->m_index;
+    auto *m = &mesh->mesh.vertices;
+    auto *mi = &mesh->mesh.indices;
     auto *idc = &mesh->idx_counter;
 
     // Create color

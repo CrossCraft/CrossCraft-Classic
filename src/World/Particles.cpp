@@ -4,8 +4,8 @@
 namespace CrossCraft {
 ParticleSystem::ParticleSystem(uint32_t tex) : texture(tex) { idx_counter = 0; }
 ParticleSystem::~ParticleSystem() {
-    m_verts.clear();
-    m_index.clear();
+    mesh.vertices.clear();
+    mesh.indices.clear();
 }
 
 auto rand_pos() -> float { return ((rand() % 16) - 8) * (1.0f / 16.0f); }
@@ -61,8 +61,8 @@ void ParticleSystem::initialize(uint32_t type, glm::vec3 pos) {
 void ParticleSystem::generate() {
     mesh.delete_data();
     idx_counter = 0;
-    m_verts.clear();
-    m_index.clear();
+    mesh.vertices.clear();
+    mesh.indices.clear();
 
     for (auto &p : particles) {
         const std::array<float, 12> cFace{
@@ -83,7 +83,7 @@ void ParticleSystem::generate() {
         Rendering::Color c;
         c.color = 0xFFFFFFFF;
 
-        m_verts.push_back(Rendering::Vertex{
+        mesh.vertices.push_back(Rendering::Vertex{
             p.uv[0],
             p.uv[1],
             c,
@@ -92,7 +92,7 @@ void ParticleSystem::generate() {
             cFace[2] + p.position.z,
         });
 
-        m_verts.push_back(Rendering::Vertex{
+        mesh.vertices.push_back(Rendering::Vertex{
             p.uv[2],
             p.uv[3],
             c,
@@ -101,7 +101,7 @@ void ParticleSystem::generate() {
             cFace[5] + p.position.z,
         });
 
-        m_verts.push_back(Rendering::Vertex{
+        mesh.vertices.push_back(Rendering::Vertex{
             p.uv[4],
             p.uv[5],
             c,
@@ -110,7 +110,7 @@ void ParticleSystem::generate() {
             cFace[8] + p.position.z,
         });
 
-        m_verts.push_back(Rendering::Vertex{
+        mesh.vertices.push_back(Rendering::Vertex{
             p.uv[6],
             p.uv[7],
             c,
@@ -119,17 +119,16 @@ void ParticleSystem::generate() {
             cFace[11] + p.position.z,
         });
 
-        m_index.push_back(idx_counter);
-        m_index.push_back(idx_counter + 1);
-        m_index.push_back(idx_counter + 2);
-        m_index.push_back(idx_counter + 2);
-        m_index.push_back(idx_counter + 3);
-        m_index.push_back(idx_counter + 0);
+        mesh.indices.push_back(idx_counter);
+        mesh.indices.push_back(idx_counter + 1);
+        mesh.indices.push_back(idx_counter + 2);
+        mesh.indices.push_back(idx_counter + 2);
+        mesh.indices.push_back(idx_counter + 3);
+        mesh.indices.push_back(idx_counter + 0);
         idx_counter += 4;
     }
 
-    mesh.add_data(m_verts.data(), m_verts.size(), m_index.data(),
-                  m_index.size());
+    mesh.setup_buffer();
 }
 
 void ParticleSystem::update(double dt) {
