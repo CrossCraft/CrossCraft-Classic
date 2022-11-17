@@ -1,9 +1,9 @@
 #include "Client.hpp"
+#include "../Model/SteveModel.hpp"
+#include "../TexturePackManager.hpp"
 #include "../World/World.hpp"
 #include "InPackets.hpp"
 #include "OutPackets.hpp"
-
-#include "../TexturePackManager.hpp"
 #include <string>
 #include <thread>
 #include <zlib.h>
@@ -63,245 +63,6 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     // Create color
     Rendering::Color c;
     c.color = 0xFFFFFFFF;
-
-    // Push Back Verts
-
-    // Front
-    {
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            0,
-            1,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            0,
-            1,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            1,
-            1,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            1,
-            1,
-        });
-    }
-
-    // Back Face
-    {
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            0,
-            0,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            0,
-            0,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            1,
-            0,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            1,
-            0,
-        });
-    }
-
-    // Left Face
-    {
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            0,
-            0,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            0,
-            1,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            1,
-            1,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            1,
-            0,
-        });
-    }
-
-    // Right Face
-    {
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            0,
-            1,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            0,
-            0,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            1,
-            0,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            1,
-            1,
-        });
-    }
-
-    // Top Face
-    {
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            1,
-            1,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            1,
-            1,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            1,
-            0,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            1,
-            0,
-        });
-    }
-
-    // Bottom Face
-    {
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            0,
-            0,
-        });
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            0,
-            0,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            1,
-            0,
-            1,
-        });
-
-        mesh.vertices.push_back(Rendering::Vertex{
-            0,
-            0,
-            c,
-            0,
-            0,
-            1,
-        });
-    }
-
-    // Push Back Indices
-    for (int i = 0; i < 6; i++) {
-        mesh.indices.push_back(0 + i * 4);
-        mesh.indices.push_back(1 + i * 4);
-        mesh.indices.push_back(2 + i * 4);
-        mesh.indices.push_back(2 + i * 4);
-        mesh.indices.push_back(3 + i * 4);
-        mesh.indices.push_back(0 + i * 4);
-    }
-
-    mesh.setup_buffer();
 
     font_texture = TexturePackManager::get().load_texture(
         "assets/default.png", SC_TEX_FILTER_NEAREST, SC_TEX_FILTER_NEAREST,
@@ -505,6 +266,7 @@ void Client::process_packet(RefPtr<Network::ByteBuffer> packet) {
             player_rep[data2->PlayerID].Z += data2->DZ;
             player_rep[data2->PlayerID].Yaw = data2->Yaw;
             player_rep[data2->PlayerID].Pitch = data2->Pitch;
+            player_rep[data2->PlayerID].aTime += 0.015f;
         }
 
         break;
@@ -612,32 +374,22 @@ void Client::draw() {
             continue;
         }
 
-        Rendering::RenderContext::get().matrix_translate(entitypos);
+        Model::SteveData sd;
+        sd.pos = entitypos;
+        sd.rot.x = 0;
+        sd.rot.y = static_cast<float>(-pinfo.Yaw) / 256.0f * 360.0f + 270.0f;
+        sd.animTime = pinfo.aTime;
 
+        Model::Steve::get().draw(&sd);
+
+        GI::set_culling_mode(false, true);
+
+        Rendering::RenderContext::get().matrix_clear();
+        Rendering::RenderContext::get().matrix_translate(entitypos);
         Rendering::RenderContext::get().matrix_scale({0.6, 1.8, 0.6});
         Rendering::RenderContext::get().matrix_rotate(
             {0.0f, -wrld->player->rot.y, 0.0f});
 
-#if PSP
-        sceGuDisable(GU_TEXTURE_2D);
-#else
-        glDisable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0);
-#endif
-
-        mesh.draw();
-
-#if PSP
-        sceGuEnable(GU_TEXTURE_2D);
-#else
-        glEnable(GL_TEXTURE_2D);
-#endif
-
-#if PSP
-        sceGuDisable(GU_CULL_FACE);
-#else
-        glDisable(GL_CULL_FACE);
-#endif
         Rendering::RenderContext::get().matrix_scale(
             {1.0f / 0.6, 1.0f / 1.8, 1.0f / 0.6});
         Rendering::RenderContext::get().matrix_scale({0.05f, 0.05f, 0.05f});
@@ -649,11 +401,7 @@ void Client::draw() {
         fontRenderer->generate_map();
         fontRenderer->draw();
 
-#if PSP
-        sceGuEnable(GU_CULL_FACE);
-#else
-        glEnable(GL_CULL_FACE);
-#endif
+        GI::set_culling_mode(true, true);
     }
 }
 

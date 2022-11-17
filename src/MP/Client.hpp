@@ -26,6 +26,7 @@ struct PlayerInfo {
     short Z;
     uint8_t Yaw;
     uint8_t Pitch;
+    float aTime;
 };
 
 class Client {
@@ -62,6 +63,5 @@ class Client {
     bool connected;
 
     void process_packet(RefPtr<Network::ByteBuffer> packet);
-    Rendering::Mesh<Rendering::Vertex> mesh;
 };
 } // namespace CrossCraft::MP
