@@ -358,7 +358,13 @@ void Player::update(float dt, World *wrld) {
     } else {
         view_timer = 0;
     }
-    view_bob = sinf(view_timer * 3.14159 * 2.5f) / 18.0f;
+
+    if (Option::get().bobbing) {
+        view_bob = sinf(view_timer * 3.14159 * 3.0f) / 18.0f;
+    }
+    else {
+        view_bob = 0.0f;
+    }
     cube_bob = cosf(view_timer * 3.14159 * 4.8f) / 44.0f;
 
     // Update camera
@@ -483,11 +489,13 @@ auto Player::draw(World *wrld) -> void {
         prev_ipos = ipos;
     }
 
-    if (change)
-        playerHUD->draw_text("FPS: " + std::to_string(fps_display),
-                             CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
-                             CC_TEXT_ALIGN_TOP, 0, 0, false);
-
+    if (change) {
+        if(Option::get().fps)
+            playerHUD->draw_text("FPS: " + std::to_string(fps_display),
+                CC_TEXT_COLOR_WHITE, CC_TEXT_ALIGN_RIGHT,
+                CC_TEXT_ALIGN_TOP, 0, 0, false);
+    }
+        
     if (change) {
         int i = 9;
         for (int x = chat->data.size() - 1; x >= 0; x--) {

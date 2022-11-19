@@ -235,8 +235,8 @@ auto Player::press_down(std::any d) -> void {
         p->in_chat = false;
     } else if (p->in_pause) {
         p->pauseMenu->selIdx++;
-        if (p->pauseMenu->selIdx > 2) {
-            p->pauseMenu->selIdx = 2;
+        if (p->pauseMenu->selIdx > 3) {
+            p->pauseMenu->selIdx = 3;
         }
     } else if (!p->in_chat && p->in_inventory) {
         p->in_cursor_y += 1;

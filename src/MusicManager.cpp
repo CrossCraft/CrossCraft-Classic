@@ -1,5 +1,5 @@
 #include "MusicManager.hpp"
-//#include "Option.hpp"
+#include "Option.hpp"
 #include "TexturePackManager.hpp"
 #include "Utils.hpp"
 
@@ -21,10 +21,10 @@ MusicManager::MusicManager() {
 MusicManager::~MusicManager() {}
 
 auto MusicManager::update(float dt) -> void {
-    //    if (!Option::get().music) {
-    //        music->stop();
-    //        return;
-    //    }
+    if (!Option::get().music && music != nullptr) {
+        music->stop();
+        return;
+    }
 
     if (timer >= 0) {
         timer -= dt;

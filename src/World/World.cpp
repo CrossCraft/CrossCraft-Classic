@@ -138,16 +138,18 @@ const auto CHUNKS_PER_SECOND = 4.0f;
 const auto CHUNKS_PER_SECOND = 96.0f;
 #endif
 
-#if PSP
-const auto RENDER_DISTANCE_DIAMETER = 5.0f;
-#elif BUILD_PLAT == BUILD_VITA
+#if BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA
 const auto RENDER_DISTANCE_DIAMETER = 8.0f;
 #else
 const auto RENDER_DISTANCE_DIAMETER = 16.f;
 #endif
 
 auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
-    auto rad = RENDER_DISTANCE_DIAMETER / 2.f;
+    auto RDIST_DIAMETER = RENDER_DISTANCE_DIAMETER *
+        static_cast<float>(Option::get().renderDist + 1) /
+        4.0f;
+
+    auto rad = RDIST_DIAMETER / 2.f;
 
     std::vector<glm::ivec2> needed_chunks;
     for (auto x = (-rad - 1); x < (rad + 1); x++) {
@@ -172,6 +174,7 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
     return needed_chunks;
 }
 
+int old_rdist = 0;
 void World::update(double dt) {
 
     // Request 3D Mode
@@ -206,7 +209,8 @@ void World::update(double dt) {
     glm::ivec2 new_pos = {static_cast<int>(ppos.x) / 16,
                           static_cast<int>(ppos.z) / 16};
 
-    if (pchunk_pos != new_pos) {
+    if (pchunk_pos != new_pos || Option::get().renderDist != old_rdist) {
+        old_rdist = Option::get().renderDist;
         pchunk_pos = new_pos;
 
         // Get what's needed

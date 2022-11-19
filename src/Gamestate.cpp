@@ -120,6 +120,8 @@ void GameState::on_start() {
     Rendering::ShaderManager::get().bind_shader(shad);
 #endif
 
+    Rendering::RenderContext::get().vsync = Option::get().vsync;
+
     // Make a world and generate it
     world = create_scopeptr<World>(create_refptr<Player>());
 

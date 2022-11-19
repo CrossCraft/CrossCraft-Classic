@@ -1,4 +1,5 @@
 #pragma once
+#include "../Option.hpp"
 #include <Graphics/2D/FontRenderer.hpp>
 #include <Graphics/2D/Sprite.hpp>
 #include <Rendering/Camera.hpp>
@@ -19,6 +20,7 @@ class PauseMenu {
     auto update() -> void;
 
     int selIdx = -1;
+    int pauseState = 0;
 
   private:
     uint32_t gui_tex;
@@ -27,7 +29,7 @@ class PauseMenu {
     ScopePtr<Graphics::G2D::Sprite> unsel_sprite;
     ScopePtr<Graphics::G2D::Sprite> sel_sprite;
     ScopePtr<Graphics::G2D::Sprite> dis_sprite;
-    ScopePtr<Graphics::G2D::FontRenderer> fontRenderer;
+    RefPtr<Graphics::G2D::FontRenderer> fontRenderer;
 
     ScopePtr<Rendering::Primitive::Rectangle> background_rectangle;
 };

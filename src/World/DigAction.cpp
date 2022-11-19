@@ -1,4 +1,5 @@
 #include "DigAction.hpp"
+#include "../Option.hpp"
 #include "SaveData.hpp"
 #include <Utilities/Input.hpp>
 #include <gtx/rotate_vector.hpp>
@@ -57,12 +58,56 @@ auto DigAction::dig(std::any d) -> void {
 
 #if BUILD_PC
     if (w->player->in_pause) {
-        if (w->player->pauseMenu->selIdx == 0) {
-            w->player->in_pause = false;
-        } else if (w->player->pauseMenu->selIdx == 1) {
-            SaveData::save(w);
-        } else if (w->player->pauseMenu->selIdx == 2) {
-            exit(0);
+        if (w->player->pauseMenu->pauseState == 0) {
+            if (w->player->pauseMenu->selIdx == 0) {
+                w->player->in_pause = false;
+                w->player->pauseMenu->exit();
+            }
+            else if (w->player->pauseMenu->selIdx == 1) {
+                w->player->pauseMenu->pauseState = 1;
+            }
+            else if (w->player->pauseMenu->selIdx == 2) {
+                SaveData::save(w);
+            }
+            else if (w->player->pauseMenu->selIdx == 3) {
+                exit(0);
+            }
+        }
+        else if (w->player->pauseMenu->pauseState == 1) {
+            if (w->player->pauseMenu->selIdx == 0) {
+                Option::get().music = !Option::get().music;
+                Option::get().writeOptions();
+            }
+            else if (w->player->pauseMenu->selIdx == 1) {
+                Option::get().renderDist++;
+                if (Option::get().renderDist > 3) {
+                    Option::get().renderDist = 0;
+                }
+                Option::get().writeOptions();
+            }
+            else if (w->player->pauseMenu->selIdx == 2) {
+                Option::get().bobbing = !Option::get().bobbing;
+                Option::get().writeOptions();
+            }
+            else if (w->player->pauseMenu->selIdx == 3) {
+                Option::get().sound = !Option::get().sound;
+                Option::get().writeOptions();
+            }
+            else if (w->player->pauseMenu->selIdx == 4) {
+                Option::get().fps = !Option::get().fps;
+                Option::get().writeOptions();
+            }
+            else if (w->player->pauseMenu->selIdx == 5) {
+                Option::get().vsync = !Option::get().vsync;
+                Rendering::RenderContext::get().vsync = Option::get().vsync;
+                Option::get().writeOptions();
+            }
+            else if (w->player->pauseMenu->selIdx == 6) {
+                w->player->pauseMenu->pauseState = 2;
+            }
+            else if (w->player->pauseMenu->selIdx == 7) {
+                w->player->pauseMenu->pauseState = 0;
+            }
         }
         return;
     }
