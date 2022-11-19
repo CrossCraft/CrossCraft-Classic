@@ -6,6 +6,34 @@ namespace CrossCraft::NoiseUtil {
 FastNoiseLite fsl;
 uint32_t seed;
 
+extern "C" {
+double onoise(uint64_t octaves, double x, double y, uint32_t s) {
+    double sum = 0;
+    double amp = 1;
+    double freq = 1.3;
+    fsl.SetFrequency(0.7f);
+
+    for (int i = 0; i < octaves; i++) {
+        fsl.SetSeed(seed + s);
+        sum += fsl.GetNoise(x * freq, y * freq) * amp;
+
+        amp *= 2;
+        freq /= 2;
+    }
+
+    return sum;
+}
+
+double noise1(double x, double y) {
+    auto n1 = onoise(8, x, y, 0);
+    return onoise(8, x + n1, y, 0);
+}
+double noise2(double x, double y) {
+    auto n1 = onoise(8, x, y, 0);
+    return onoise(8, x + n1, y, 0);
+}
+}
+
 auto initialize(int s) -> void {
     fsl.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     fsl.SetFrequency(0.001f * 5.f);
