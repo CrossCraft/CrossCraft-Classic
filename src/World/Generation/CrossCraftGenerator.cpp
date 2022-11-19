@@ -366,7 +366,7 @@ auto create_plants(World *wrld, int32_t *heightMap) -> void {
 
 auto CrossCraftGenerator::generate(World *wrld) -> void {
 
-    int *heightMap = (int *)calloc(256 * 256, sizeof(int));
+    int32_t *heightMap = (int32_t *)calloc(256 * 256, sizeof(int32_t));
 
     //"Raising..."
     generate_heightmap(heightMap);
