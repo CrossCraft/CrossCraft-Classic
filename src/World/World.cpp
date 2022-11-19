@@ -327,10 +327,6 @@ void World::draw() {
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
-    // Draw flora
-    for (auto const &[key, val] : chunk_reverse_sorted) {
-        val->draw_flora();
-    }
     // Draw transparent
     for (auto const &[key, val] : chunk_reverse_sorted) {
         val->draw_transparent();

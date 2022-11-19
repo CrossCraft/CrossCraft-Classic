@@ -13,15 +13,12 @@ ChunkMesh::~ChunkMesh() {}
 
 void ChunkMesh::reset_allocate() {
     meshCollection.transparent.delete_data();
-    meshCollection.flora.delete_data();
     meshCollection.opaque.delete_data();
     meshCollection.opaque.preallocate_memory();
 }
 
 void ChunkMesh::finalize_mesh() {
-
     meshCollection.transparent.finalize();
-    meshCollection.flora.finalize();
     meshCollection.opaque.finalize();
 
 #if PSP

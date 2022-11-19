@@ -34,7 +34,7 @@ add_executable(CrossCraft-Classic ${MINIZIP_SRC} ${SRC_FILES} ${INC_FILES})
 target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp ext/zlib/)
 
 if(NOT VITA)
-    target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlib yaml-cpp)
+    target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlibstatic yaml-cpp)
 else()
     target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlibstatic)
 endif()
