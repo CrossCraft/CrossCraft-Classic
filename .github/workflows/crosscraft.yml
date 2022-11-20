@@ -140,8 +140,8 @@ jobs:
         run: |
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
-          git config --global --add safe.directory /__w/CrossCraft-Classic/CrossCraft-Classic
-          git submodule update --init --recursive --remote
+          git clone https://github.com/CrossCraft/CrossCraft-Classic.git --recursive 
+          cd CrossCraft-Classic
           mkdir -p build
           cd build
           cmake -DVITA=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake ..
