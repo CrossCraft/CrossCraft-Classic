@@ -140,6 +140,7 @@ jobs:
         run: |
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
+          git config --global --add safe.directory /__w/CrossCraft-Classic/CrossCraft-Classic
           git submodule update --init --recursive --remote
           mkdir -p build
           cd build
