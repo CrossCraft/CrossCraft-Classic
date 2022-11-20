@@ -1,4 +1,5 @@
 #include "PauseMenu.hpp"
+#include "../Controls.hpp"
 #include "../TexturePackManager.hpp"
 #include "../UI/TextHelper.hpp"
 
@@ -235,8 +236,113 @@ auto PauseMenu::draw() -> void {
 
         break;
     }
-    }
 
+    case 2: {
+#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA)
+        Rendering::RenderContext::get().matrix_translate({-108, 32, 0});
+
+        if (selIdx == 0)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 1)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 2)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 3)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_clear();
+        Rendering::RenderContext::get().matrix_translate({108, 32, 0});
+
+        if (selIdx == 4)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 5)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 6)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 7)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_clear();
+        Rendering::RenderContext::get().matrix_translate({0, -96 - 16, 0});
+        if (selIdx == 8)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        render_with_shadow(fontRenderer, std::string("Controls:"), 240, 216);
+        render_with_shadow(
+            fontRenderer,
+            std::string("Forward: ") +
+                Controls::get().upperKeyName(Controls::get().keyForward),
+            132, 182);
+        render_with_shadow(fontRenderer,
+                           std::string("Back: ") + Controls::get().upperKeyName(
+                                                       Controls::get().keyBack),
+                           132, 182 - 24);
+        render_with_shadow(fontRenderer,
+                           std::string("Jump: ") + Controls::get().upperKeyName(
+                                                       Controls::get().keyJump),
+                           132, 182 - 48);
+        render_with_shadow(fontRenderer,
+                           std::string("Chat: ") + Controls::get().upperKeyName(
+                                                       Controls::get().keyChat),
+                           132, 182 - 72);
+
+        render_with_shadow(fontRenderer,
+                           std::string("Left: ") + Controls::get().upperKeyName(
+                                                       Controls::get().keyLeft),
+                           348, 182);
+        render_with_shadow(
+            fontRenderer,
+            std::string("Right: ") +
+                Controls::get().upperKeyName(Controls::get().keyRight),
+            348, 182 - 24);
+        render_with_shadow(
+            fontRenderer,
+            std::string("Tab Menu: ") +
+                Controls::get().upperKeyName(Controls::get().keyTab),
+            348, 182 - 48);
+        render_with_shadow(
+            fontRenderer,
+            std::string("Respawn: ") +
+                Controls::get().upperKeyName(Controls::get().keyRespawn),
+            348, 182 - 72);
+
+        render_with_shadow(fontRenderer, "Back", 240, 62 - 24);
+#else
+
+#endif
+        break;
+    }
+    }
     Rendering::RenderContext::get().matrix_clear();
     fontRenderer->generate_map();
     fontRenderer->draw();
@@ -263,8 +369,7 @@ auto PauseMenu::update() -> void {
                 selIdx = 3;
             }
         }
-    }
-    else if (pauseState == 1) {
+    } else if (pauseState == 1) {
         cY -= 22;
         if (cX >= 32 && cX <= 232) {
             if (cY >= 154 && cY <= 174) {
@@ -276,8 +381,7 @@ auto PauseMenu::update() -> void {
             if (cY >= 106 && cY <= 126) {
                 selIdx = 2;
             }
-        }
-        else if (cX >= 248 && cX <= 448) {
+        } else if (cX >= 248 && cX <= 448) {
             if (cY >= 154 && cY <= 174) {
                 selIdx = 3;
             }
@@ -296,6 +400,42 @@ auto PauseMenu::update() -> void {
             }
             if (cY >= 36 && cY <= 56) {
                 selIdx = 7;
+            }
+        }
+    } else if (pauseState == 2) {
+        cY -= 22;
+        if (cX >= 32 && cX <= 232) {
+            if (cY >= 154 && cY <= 174) {
+                selIdx = 0;
+            }
+            if (cY >= 130 && cY <= 154) {
+                selIdx = 1;
+            }
+            if (cY >= 106 && cY <= 126) {
+                selIdx = 2;
+            }
+            if (cY >= 82 && cY <= 102) {
+                selIdx = 3;
+            }
+        } else if (cX >= 248 && cX <= 448) {
+            if (cY >= 154 && cY <= 174) {
+                selIdx = 4;
+            }
+            if (cY >= 130 && cY <= 154) {
+                selIdx = 5;
+            }
+            if (cY >= 106 && cY <= 126) {
+                selIdx = 6;
+            }
+            if (cY >= 82 && cY <= 102) {
+                selIdx = 7;
+            }
+        }
+
+        cY += 22;
+        if (cX >= 140 && cX <= 340) {
+            if (cY >= 36 && cY <= 56) {
+                selIdx = 8;
             }
         }
     }

@@ -1,15 +1,21 @@
 #include "Gamestate.hpp"
 
+#include "Controls.hpp"
 #include "World/DigAction.hpp"
 #include "World/PlaceAction.hpp"
 #include "World/SaveData.hpp"
-
 namespace CrossCraft {
 
 using namespace Stardust_Celeste::Utilities;
 /* Ugly Key-Binding Function */
 
 void GameState::bind_controls() {
+
+    psp_controller->clear_command();
+    key_controller->clear_command();
+    mouse_controller->clear_command();
+    vita_controller->clear_command();
+
     //
     // PSP Face Buttons: Release
     //
@@ -132,34 +138,38 @@ void GameState::bind_controls() {
     key_controller->add_command({(int)Input::Keys::Escape, KeyFlag::Press},
                                 {Player::pause, world->player.get()});
 
-    key_controller->add_command({(int)Input::Keys::W, KeyFlag::Release},
-                                {Player::move_reset, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::S, KeyFlag::Release},
-                                {Player::move_reset, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::A, KeyFlag::Release},
-                                {Player::move_reset, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::D, KeyFlag::Release},
-                                {Player::move_reset, world->player.get()});
+    key_controller->add_command(
+        {(int)Controls::get().keyForward, KeyFlag::Release},
+        {Player::move_reset, world->player.get()});
+    key_controller->add_command(
+        {(int)Controls::get().keyBack, KeyFlag::Release},
+        {Player::move_reset, world->player.get()});
+    key_controller->add_command(
+        {(int)Controls::get().keyLeft, KeyFlag::Release},
+        {Player::move_reset, world->player.get()});
+    key_controller->add_command(
+        {(int)Controls::get().keyRight, KeyFlag::Release},
+        {Player::move_reset, world->player.get()});
 
     key_controller->add_command(
-        {(int)Input::Keys::W, KeyFlag::Press | KeyFlag::Held},
+        {(int)Controls::get().keyForward, KeyFlag::Press | KeyFlag::Held},
         {Player::move_forward, world->player.get()});
     key_controller->add_command(
-        {(int)Input::Keys::S, KeyFlag::Press | KeyFlag::Held},
+        {(int)Controls::get().keyBack, KeyFlag::Press | KeyFlag::Held},
         {Player::move_backward, world->player.get()});
     key_controller->add_command(
-        {(int)Input::Keys::A, KeyFlag::Press | KeyFlag::Held},
+        {(int)Controls::get().keyLeft, KeyFlag::Press | KeyFlag::Held},
         {Player::move_left, world->player.get()});
     key_controller->add_command(
-        {(int)Input::Keys::D, KeyFlag::Press | KeyFlag::Held},
+        {(int)Controls::get().keyRight, KeyFlag::Press | KeyFlag::Held},
         {Player::move_right, world->player.get()});
 
     key_controller->add_command(
-        {(int)Input::Keys::R, KeyFlag::Press | KeyFlag::Held},
+        {(int)Controls::get().keyRespawn, KeyFlag::Press | KeyFlag::Held},
         {Player::respawn, RespawnRequest{world->player.get(), world.get()}});
 
     key_controller->add_command(
-        {(int)Input::Keys::Space, KeyFlag::Press | KeyFlag::Held},
+        {(int)Controls::get().keyJump, KeyFlag::Press | KeyFlag::Held},
         {Player::move_up, world->player.get()});
     key_controller->add_command(
         {(int)Input::Keys::LShift, KeyFlag::Press | KeyFlag::Held},
@@ -169,7 +179,7 @@ void GameState::bind_controls() {
 
     key_controller->add_command({(int)Input::Keys::Enter, KeyFlag::Press},
                                 {Player::submit_chat, world->player.get()});
-    key_controller->add_command({(int)Input::Keys::T, KeyFlag::Press},
+    key_controller->add_command({(int)Controls::get().keyChat, KeyFlag::Press},
                                 {Player::enter_chat, world->player.get()});
     key_controller->add_command(
         {(int)Input::Keys::Slash, KeyFlag::Press},
@@ -221,33 +231,20 @@ void GameState::bind_controls() {
         {Player::press_right, world->player.get()});
 
     // Map directions to numpad
-    key_controller->add_command(
-        {(int)Input::Keys::KeyPad8, KeyFlag::Press},
-        {Player::press_up, world->player.get()});
-    key_controller->add_command(
-        {(int)Input::Keys::KeyPad2, KeyFlag::Press},
-        {Player::press_down, world->player.get()});
-    key_controller->add_command(
-        {(int)Input::Keys::KeyPad4, KeyFlag::Press},
-        {Player::press_left, world->player.get()});
-    key_controller->add_command(
-        {(int)Input::Keys::KeyPad6, KeyFlag::Press},
-        {Player::press_right, world->player.get()});
+    key_controller->add_command({(int)Input::Keys::KeyPad8, KeyFlag::Press},
+                                {Player::press_up, world->player.get()});
+    key_controller->add_command({(int)Input::Keys::KeyPad2, KeyFlag::Press},
+                                {Player::press_down, world->player.get()});
+    key_controller->add_command({(int)Input::Keys::KeyPad4, KeyFlag::Press},
+                                {Player::press_left, world->player.get()});
+    key_controller->add_command({(int)Input::Keys::KeyPad6, KeyFlag::Press},
+                                {Player::press_right, world->player.get()});
 
-    key_controller->add_command({(int)Input::Keys::Tab, KeyFlag::Release},
+    key_controller->add_command({(int)Controls::get().keyTab, KeyFlag::Release},
                                 {Player::tab_end, world->player.get()});
     key_controller->add_command(
         {(int)Input::Keys::Tab, KeyFlag::Press | KeyFlag::Held},
         {Player::tab_start, world->player.get()});
-
-    Input::add_controller(psp_controller);
-    Input::add_controller(key_controller);
-    Input::add_controller(mouse_controller);
-    Input::add_controller(vita_controller);
-
-    Input::set_differential_mode("Mouse", true);
-    Input::set_differential_mode("PSP", true);
-    Input::set_differential_mode("Vita", true);
 }
 
 } // namespace CrossCraft

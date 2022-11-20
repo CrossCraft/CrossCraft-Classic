@@ -108,10 +108,20 @@ const std::string frag_source =
 )";
 #endif
 
+GameState *instanced_gamestate = nullptr;
+
+void GameState::apply_controls() {
+    if (instanced_gamestate != nullptr) {
+        instanced_gamestate->bind_controls();
+    }
+}
+
 void GameState::on_start() {
     // Set Color
     Rendering::RenderContext::get().set_color(
         Rendering::Color{0x99, 0xCC, 0xFF, 0xFF});
+
+    instanced_gamestate = this;
 
 #if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX ||                \
     BUILD_PLAT == BUILD_VITA
@@ -161,6 +171,15 @@ void GameState::on_start() {
 
     // Bind our controllers
     bind_controls();
+
+    Utilities::Input::add_controller(psp_controller);
+    Utilities::Input::add_controller(key_controller);
+    Utilities::Input::add_controller(mouse_controller);
+    Utilities::Input::add_controller(vita_controller);
+
+    Utilities::Input::set_differential_mode("Mouse", true);
+    Utilities::Input::set_differential_mode("PSP", true);
+    Utilities::Input::set_differential_mode("Vita", true);
 
     // Request 3D Mode
     Rendering::RenderContext::get().set_mode_3D();

@@ -1,4 +1,6 @@
 #include "DigAction.hpp"
+#include "../Controls.hpp"
+#include "../Gamestate.hpp"
 #include "../Option.hpp"
 #include "SaveData.hpp"
 #include <Utilities/Input.hpp>
@@ -62,52 +64,88 @@ auto DigAction::dig(std::any d) -> void {
             if (w->player->pauseMenu->selIdx == 0) {
                 w->player->in_pause = false;
                 w->player->pauseMenu->exit();
-            }
-            else if (w->player->pauseMenu->selIdx == 1) {
+            } else if (w->player->pauseMenu->selIdx == 1) {
                 w->player->pauseMenu->pauseState = 1;
-            }
-            else if (w->player->pauseMenu->selIdx == 2) {
+            } else if (w->player->pauseMenu->selIdx == 2) {
                 SaveData::save(w);
-            }
-            else if (w->player->pauseMenu->selIdx == 3) {
+            } else if (w->player->pauseMenu->selIdx == 3) {
                 exit(0);
             }
-        }
-        else if (w->player->pauseMenu->pauseState == 1) {
+        } else if (w->player->pauseMenu->pauseState == 1) {
             if (w->player->pauseMenu->selIdx == 0) {
                 Option::get().music = !Option::get().music;
                 Option::get().writeOptions();
-            }
-            else if (w->player->pauseMenu->selIdx == 1) {
+            } else if (w->player->pauseMenu->selIdx == 1) {
                 Option::get().renderDist++;
                 if (Option::get().renderDist > 3) {
                     Option::get().renderDist = 0;
                 }
                 Option::get().writeOptions();
-            }
-            else if (w->player->pauseMenu->selIdx == 2) {
+            } else if (w->player->pauseMenu->selIdx == 2) {
                 Option::get().bobbing = !Option::get().bobbing;
                 Option::get().writeOptions();
-            }
-            else if (w->player->pauseMenu->selIdx == 3) {
+            } else if (w->player->pauseMenu->selIdx == 3) {
                 Option::get().sound = !Option::get().sound;
                 Option::get().writeOptions();
-            }
-            else if (w->player->pauseMenu->selIdx == 4) {
+            } else if (w->player->pauseMenu->selIdx == 4) {
                 Option::get().fps = !Option::get().fps;
                 Option::get().writeOptions();
-            }
-            else if (w->player->pauseMenu->selIdx == 5) {
+            } else if (w->player->pauseMenu->selIdx == 5) {
                 Option::get().vsync = !Option::get().vsync;
                 Rendering::RenderContext::get().vsync = Option::get().vsync;
                 Option::get().writeOptions();
-            }
-            else if (w->player->pauseMenu->selIdx == 6) {
+            } else if (w->player->pauseMenu->selIdx == 6) {
                 w->player->pauseMenu->pauseState = 2;
-            }
-            else if (w->player->pauseMenu->selIdx == 7) {
+            } else if (w->player->pauseMenu->selIdx == 7) {
                 w->player->pauseMenu->pauseState = 0;
             }
+        } else if (w->player->pauseMenu->pauseState == 2) {
+            if (w->player->pauseMenu->selIdx == 0) {
+                auto val = Controls::get().getNextKey();
+                if (val != 0) {
+                    Controls::get().keyForward = val;
+                }
+            } else if (w->player->pauseMenu->selIdx == 1) {
+                auto val = Controls::get().getNextKey();
+                if (val != 0) {
+                    Controls::get().keyBack = val;
+                }
+            } else if (w->player->pauseMenu->selIdx == 2) {
+                auto val = Controls::get().getNextKey();
+                if (val != 0) {
+                    Controls::get().keyJump = val;
+                }
+            } else if (w->player->pauseMenu->selIdx == 3) {
+                auto val = Controls::get().getNextKey();
+                if (val != 0) {
+                    Controls::get().keyChat = val;
+                }
+            } else if (w->player->pauseMenu->selIdx == 4) {
+                auto val = Controls::get().getNextKey();
+                if (val != 0) {
+                    Controls::get().keyLeft = val;
+                }
+            } else if (w->player->pauseMenu->selIdx == 5) {
+                auto val = Controls::get().getNextKey();
+                if (val != 0) {
+                    Controls::get().keyRight = val;
+                }
+            } else if (w->player->pauseMenu->selIdx == 6) {
+                auto val = Controls::get().getNextKey();
+                if (val != 0) {
+                    Controls::get().keyTab = val;
+                }
+            } else if (w->player->pauseMenu->selIdx == 7) {
+                auto val = Controls::get().getNextKey();
+                if (val != 0) {
+                    Controls::get().keyRespawn = val;
+                }
+            } else if (w->player->pauseMenu->selIdx == 8) {
+                w->player->pauseMenu->pauseState = 1;
+            }
+
+            Controls::get().writeControls();
+            GameState::apply_controls();
         }
         return;
     }
