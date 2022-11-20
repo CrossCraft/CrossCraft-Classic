@@ -25,10 +25,11 @@ endif()
 file(GLOB_RECURSE SRC_FILES src/*.cpp)
 file(GLOB_RECURSE INC_FILES include/*.hpp)
 
-file(GLOB LUA_SRC ext/lua/*.c)
+set(LUA_SRC ext/lua/onelua.c)
 file(GLOB LUA_INC ext/lua/*.h)
 
 add_library(Lua ${LUA_SRC} ${LUA_INC})
+target_compile_definitions(Lua PUBLIC MAKE_LIB)
 
 set(MINIZIP_SRC ext/zlib/contrib/minizip/ioapi.c ext/zlib/contrib/minizip/mztools.c ext/zlib/contrib/minizip/unzip.c ext/zlib/contrib/minizip/zip.c)
 
