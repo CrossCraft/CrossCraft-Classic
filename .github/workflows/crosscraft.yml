@@ -149,7 +149,7 @@ jobs:
           cd CrossCraft-Classic
           mkdir -p build
           cd build
-          ../../cmake-3.25.0-linux-x86_64/bin/cmake -DVITA=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake ..
+          ../../cmake-3.25.0-linux-x86_64/bin/cmake -DCMAKE_MAKE_PROGRAM=/usr/bin/make -DVITA=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake ..
           make
           cd ..
           mv build/CrossCraft-Classic.vpk CrossCraft-Classic.vpk
