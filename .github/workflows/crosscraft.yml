@@ -130,23 +130,9 @@ jobs:
 
   Vita:
     runs-on: ubuntu-latest
+    container: iridescentrose/psvitadev:latest
     
-    steps:
-      - name: Install dependencies
-        run: |
-          export VITASDK=/usr/local/vitasdk
-          export PATH=$VITASDK/bin:$PATH
-          git clone https://github.com/vitasdk/vdpm
-          cd vdpm
-          ./bootstrap-vitasdk.sh
-          ./install-all.sh
-          cd ..
-          git clone https://github.com/Rinnegatamante/vitaGL.git
-          cd vitaGL
-          make install
-          cd ..
-
-    
+    steps:    
       - name: Checkout
         uses: actions/checkout@v2
     
@@ -154,6 +140,7 @@ jobs:
         run: |
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
+          git config --global --add safe.directory /__w/CrossCraft-Classic/CrossCraft-Classic
           git submodule update --init --recursive --remote
           mkdir -p build
           cd build
