@@ -214,10 +214,10 @@ void GameState::bind_controls() {
 
     // Mouse wheel to cycle through objects
     mouse_controller->add_command(
-        {(int)Input::MouseButtons::MWheelDown, KeyFlag::Press},
+        {(int)Input::MouseButtons::MWheelUp, KeyFlag::Press},
         {Player::press_left, world->player.get()});
     mouse_controller->add_command(
-        {(int)Input::MouseButtons::MWheelUp, KeyFlag::Press},
+        {(int)Input::MouseButtons::MWheelDown, KeyFlag::Press | KeyFlag::Held},
         {Player::press_right, world->player.get()});
 
     // Map directions to numpad

@@ -1,7 +1,7 @@
 #include "CrossCraftGenerator.hpp"
 #include "NoiseUtil.hpp"
 #include "WorldGenUtil.hpp"
-
+#include "../World.hpp"
 extern "C" {
 extern void generate(uint32_t seed, void *data);
 
@@ -80,12 +80,12 @@ auto create_surface(World *wrld, int32_t *heightMap) -> void {
 
             auto idx = wrld->getIdx(x, y, z);
 
-            if (blkA == 8 and is_gravel) {
+            if (blkA == 8 && is_gravel) {
                 wrld->worldData[idx] = 13;
             }
 
             if (blkA == 0) {
-                if (y <= 32 and is_sand) {
+                if (y <= 32 && is_sand) {
                     wrld->worldData[idx] = 12;
                 } else {
                     wrld->worldData[idx] = 2;
@@ -270,7 +270,7 @@ auto growTree(uint32_t x, uint32_t y, uint32_t z, uint32_t h, World *wrld)
 
                     wrld->worldData[wrld->getIdx(x, m, z)] = 17;
 
-                } else if (m == max - 2 or m == max - 3) {
+                } else if (m == max - 2 || m == max - 3) {
                     wrld->worldData[wrld->getIdx(x - 1, m, z)] = 18;
                     wrld->worldData[wrld->getIdx(x + 1, m, z)] = 18;
                     wrld->worldData[wrld->getIdx(x, m, z - 1)] = 18;
@@ -321,7 +321,7 @@ auto growTree(uint32_t x, uint32_t y, uint32_t z, uint32_t h, World *wrld)
     return false;
 }
 
-auto create_tree(World *wrld, int32_t *heightMap) -> void {
+void create_tree(World *wrld, int32_t *heightMap) {
     auto px = rand() % 256;
     auto pz = rand() % 256;
 
@@ -348,7 +348,7 @@ auto create_tree(World *wrld, int32_t *heightMap) -> void {
     }
 }
 
-auto create_plants(World *wrld, int32_t *heightMap) -> void {
+void create_plants(World *wrld, int32_t *heightMap) {
     const int numFlowers = 256 * 256 / 3000;
     const int numMushrooms = 256 * 256 * 64 / 2000;
     const int numTrees = 256 * 256 / 4000;
