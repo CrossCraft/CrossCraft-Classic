@@ -1,6 +1,7 @@
 #include "DigAction.hpp"
 #include "../Controls.hpp"
 #include "../Gamestate.hpp"
+#include "../Modding/Mod.hpp"
 #include "../Option.hpp"
 #include "SaveData.hpp"
 #include <Utilities/Input.hpp>
@@ -199,6 +200,7 @@ auto DigAction::dig(std::any d) -> void {
             was_sponge = true;
         }
 
+        auto oblk = w->worldData[idx];
         // Set to air
         w->worldData[idx] = Block::Air;
 
@@ -235,6 +237,8 @@ auto DigAction::dig(std::any d) -> void {
 
         w->update_surroundings(ivec.x, ivec.z);
         w->update_nearby_blocks(ivec);
+
+        Modding::ModManager::get().onBreak(ivec, oblk);
 
         break;
     }

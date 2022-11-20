@@ -1,4 +1,5 @@
 #include "Gamestate.hpp"
+#include "Modding/Mod.hpp"
 #include "MusicManager.hpp"
 #include "Rendering/ShaderManager.hpp"
 #include "TexturePackManager.hpp"
@@ -121,6 +122,9 @@ void GameState::on_start() {
     Rendering::RenderContext::get().set_color(
         Rendering::Color{0x99, 0xCC, 0xFF, 0xFF});
 
+    int num_mods = Modding::ModManager::get().get_num_mods();
+    SC_APP_INFO("Loaded {} mods!", num_mods);
+
     instanced_gamestate = this;
 
 #if BUILD_PLAT == BUILD_WINDOWS || BUILD_PLAT == BUILD_POSIX ||                \
@@ -183,6 +187,9 @@ void GameState::on_start() {
 
     // Request 3D Mode
     Rendering::RenderContext::get().set_mode_3D();
+
+    Modding::ModManager::set_ptr(world.get());
+    Modding::ModManager::get().onStart();
 }
 
 void GameState::on_cleanup() {
@@ -208,6 +215,8 @@ void GameState::on_update(Core::Application *app, double dt) {
         Input::update();
         world->update(dt);
     }
+
+    Modding::ModManager::get().onUpdate();
 }
 void GameState::on_draw(Core::Application *app, double dt) {
     if (client.get() != nullptr)

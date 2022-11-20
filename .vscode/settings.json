@@ -81,7 +81,15 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "filesystem": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "bitset": "cpp",
+        "complex": "cpp",
+        "csignal": "cpp",
+        "forward_list": "cpp",
+        "set": "cpp",
+        "future": "cpp",
+        "valarray": "cpp",
+        "variant": "cpp"
     },
     "editor.formatOnSave": true,
     "cmake.configureOnOpen": false,

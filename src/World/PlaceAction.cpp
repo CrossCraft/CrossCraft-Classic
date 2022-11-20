@@ -1,4 +1,5 @@
 #include "PlaceAction.hpp"
+#include "../Modding/Mod.hpp"
 #include <Utilities/Input.hpp>
 #include <gtx/rotate_vector.hpp>
 
@@ -174,6 +175,9 @@ auto PlaceAction::place(std::any d) -> void {
 
         w->update_surroundings(ivec.x, ivec.z);
         w->update_nearby_blocks(ivec);
+
+        Modding::ModManager::get().onPlace(
+            ivec, w->player->itemSelections[w->player->selectorIDX]);
 
         return;
     }

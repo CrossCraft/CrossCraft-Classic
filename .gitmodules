@@ -7,3 +7,6 @@
 [submodule "ext/zlib"]
 	path = ext/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "ext/lua"]
+	path = ext/lua
+	url = https://github.com/lua/lua.git

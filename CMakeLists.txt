@@ -24,6 +24,12 @@ endif()
 
 file(GLOB_RECURSE SRC_FILES src/*.cpp)
 file(GLOB_RECURSE INC_FILES include/*.hpp)
+
+file(GLOB LUA_SRC ext/lua/*.c)
+file(GLOB LUA_INC ext/lua/*.h)
+
+add_library(Lua ${LUA_SRC} ${LUA_INC})
+
 set(MINIZIP_SRC ext/zlib/contrib/minizip/ioapi.c ext/zlib/contrib/minizip/mztools.c ext/zlib/contrib/minizip/unzip.c ext/zlib/contrib/minizip/zip.c)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -31,12 +37,12 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 add_executable(CrossCraft-Classic ${MINIZIP_SRC} ${SRC_FILES} ${INC_FILES})
-target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp ext/zlib/)
+target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp ext/zlib/ ext/lua/)
 
 if(NOT VITA)
-    target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlibstatic yaml-cpp)
+    target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlibstatic yaml-cpp Lua)
 else()
-    target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlibstatic)
+    target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlibstatic Lua)
 endif()
 
 if(WIN32)

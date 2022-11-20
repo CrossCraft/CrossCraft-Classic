@@ -1,4 +1,5 @@
 #include "World.hpp"
+#include "../Modding/Mod.hpp"
 #include "../TexturePackManager.hpp"
 #include "Generation/NoiseUtil.hpp"
 #include "Generation/WorldGenUtil.hpp"
@@ -146,8 +147,8 @@ const auto RENDER_DISTANCE_DIAMETER = 16.f;
 
 auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
     auto RDIST_DIAMETER = RENDER_DISTANCE_DIAMETER *
-        static_cast<float>(Option::get().renderDist + 1) /
-        4.0f;
+                          static_cast<float>(Option::get().renderDist + 1) /
+                          4.0f;
 
     auto rad = RDIST_DIAMETER / 2.f;
 
@@ -202,6 +203,8 @@ void World::update(double dt) {
 
                 value->post_update(this);
             }
+
+            Modding::ModManager::get().onTick();
         }
     }
 
