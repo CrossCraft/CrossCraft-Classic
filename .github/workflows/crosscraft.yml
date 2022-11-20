@@ -130,7 +130,7 @@ jobs:
 
   Vita:
     runs-on: ubuntu-latest
-    container: jkap/psvitadev:latest
+    container: iridescentrose/psvitadev:latest
     
     steps:    
       - name: Checkout
@@ -140,16 +140,11 @@ jobs:
         run: |
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
-          cat /etc/*-release
-          curl -OL https://github.com/Kitware/CMake/releases/download/v3.25.0/cmake-3.25.0-linux-x86_64.tar.gz
-          tar -xzvf cmake-3.25.0-linux-x86_64.tar.gz
-          sudo apt-get update
-          sudo apt-get --yes --force-yes install build-essential
-          git clone https://github.com/CrossCraft/CrossCraft-Classic.git --recursive 
-          cd CrossCraft-Classic
+          git config --global --add safe.directory /__w/CrossCraft-Classic/CrossCraft-Classic
+          git submodule update --init --recursive --remote
           mkdir -p build
           cd build
-          ../../cmake-3.25.0-linux-x86_64/bin/cmake -DCMAKE_MAKE_PROGRAM=/usr/bin/make -DVITA=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake ..
+          cmake -DVITA=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake ..
           make
           cd ..
           mv build/CrossCraft-Classic.vpk CrossCraft-Classic.vpk
