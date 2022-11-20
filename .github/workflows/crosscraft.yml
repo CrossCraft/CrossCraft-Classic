@@ -140,6 +140,8 @@ jobs:
         run: |
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
+          cat /etc/*-release
+          sudo apt-get update && sudo apt-get upgrade
           git clone https://github.com/CrossCraft/CrossCraft-Classic.git --recursive 
           cd CrossCraft-Classic
           mkdir -p build
