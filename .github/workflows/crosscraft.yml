@@ -142,7 +142,7 @@ jobs:
           export PATH=$VITASDK/bin:$PATH
           cat /etc/*-release
           curl -OL https://github.com/Kitware/CMake/releases/download/v3.25.0/cmake-3.25.0-linux-x86_64.tar.gz
-          tar –xvzf cmake-3.25.0-linux-x86_64.tar.gz
+          tar -xzvf cmake-3.25.0-linux-x86_64.tar.gz
           git clone https://github.com/CrossCraft/CrossCraft-Classic.git --recursive 
           cd CrossCraft-Classic
           mkdir -p build
