@@ -1,5 +1,7 @@
 #include "../BlockConst.hpp"
 #include "../Chunk/ChunkUtil.hpp"
+#include "../Controls.hpp"
+#include "../Gamestate.hpp"
 #include "../MP/OutPackets.hpp"
 #include "../TexturePackManager.hpp"
 #include "../World/SaveData.hpp"
@@ -10,7 +12,6 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtx/projection.hpp>
 #include <gtx/rotate_vector.hpp>
-
 #if PSP
 #include <malloc.h>
 #include <pspctrl.h>
@@ -156,12 +157,95 @@ auto Player::move_backward(std::any d) -> void {
         p->vel.x += sinf(DEGTORAD(-p->rot.y));
         p->vel.z += cosf(DEGTORAD(-p->rot.y));
     } else if (p->in_pause) {
-        if (p->pauseMenu->selIdx == 0) {
-            p->in_pause = false;
-        } else if (p->pauseMenu->selIdx == 1) {
-            SaveData::save(p->wrldRef);
-        } else if (p->pauseMenu->selIdx == 2) {
-            exit(0);
+        if (p->in_pause) {
+            if (p->pauseMenu->pauseState == 0) {
+                if (p->pauseMenu->selIdx == 0) {
+                    p->in_pause = false;
+                    p->pauseMenu->exit();
+                } else if (p->pauseMenu->selIdx == 1) {
+                    p->pauseMenu->pauseState = 1;
+                } else if (p->pauseMenu->selIdx == 2) {
+                    SaveData::save(p->wrldRef);
+                } else if (p->pauseMenu->selIdx == 3) {
+                    exit(0);
+                }
+            } else if (p->pauseMenu->pauseState == 1) {
+                if (p->pauseMenu->selIdx == 0) {
+                    Option::get().music = !Option::get().music;
+                    Option::get().writeOptions();
+                } else if (p->pauseMenu->selIdx == 1) {
+                    Option::get().renderDist++;
+                    if (Option::get().renderDist > 3) {
+                        Option::get().renderDist = 0;
+                    }
+                    Option::get().writeOptions();
+                } else if (p->pauseMenu->selIdx == 2) {
+                    Option::get().bobbing = !Option::get().bobbing;
+                    Option::get().writeOptions();
+                } else if (p->pauseMenu->selIdx == 3) {
+                    Option::get().sound = !Option::get().sound;
+                    Option::get().writeOptions();
+                } else if (p->pauseMenu->selIdx == 4) {
+                    Option::get().fps = !Option::get().fps;
+                    Option::get().writeOptions();
+                } else if (p->pauseMenu->selIdx == 5) {
+                    Option::get().vsync = !Option::get().vsync;
+                    Rendering::RenderContext::get().vsync = Option::get().vsync;
+                    Option::get().writeOptions();
+                } else if (p->pauseMenu->selIdx == 6) {
+                    p->pauseMenu->pauseState = 2;
+                } else if (p->pauseMenu->selIdx == 7) {
+                    p->pauseMenu->pauseState = 0;
+                }
+            } else if (p->pauseMenu->pauseState == 2) {
+                if (p->pauseMenu->selIdx == 0) {
+                    auto val = Controls::get().getNextKey();
+                    if (val != 0) {
+                        Controls::get().keyForward = val;
+                    }
+                } else if (p->pauseMenu->selIdx == 1) {
+                    auto val = Controls::get().getNextKey();
+                    if (val != 0) {
+                        Controls::get().keyBack = val;
+                    }
+                } else if (p->pauseMenu->selIdx == 2) {
+                    auto val = Controls::get().getNextKey();
+                    if (val != 0) {
+                        Controls::get().keyJump = val;
+                    }
+                } else if (p->pauseMenu->selIdx == 3) {
+                    auto val = Controls::get().getNextKey();
+                    if (val != 0) {
+                        Controls::get().keyChat = val;
+                    }
+                } else if (p->pauseMenu->selIdx == 4) {
+                    auto val = Controls::get().getNextKey();
+                    if (val != 0) {
+                        Controls::get().keyLeft = val;
+                    }
+                } else if (p->pauseMenu->selIdx == 5) {
+                    auto val = Controls::get().getNextKey();
+                    if (val != 0) {
+                        Controls::get().keyRight = val;
+                    }
+                } else if (p->pauseMenu->selIdx == 6) {
+                    auto val = Controls::get().getNextKey();
+                    if (val != 0) {
+                        Controls::get().keyTab = val;
+                    }
+                } else if (p->pauseMenu->selIdx == 7) {
+                    auto val = Controls::get().getNextKey();
+                    if (val != 0) {
+                        Controls::get().keyRespawn = val;
+                    }
+                } else if (p->pauseMenu->selIdx == 8) {
+                    p->pauseMenu->pauseState = 1;
+                }
+
+                Controls::get().writeControls();
+                GameState::apply_controls();
+            }
+            return;
         }
     }
 }
@@ -235,8 +319,19 @@ auto Player::press_down(std::any d) -> void {
         p->in_chat = false;
     } else if (p->in_pause) {
         p->pauseMenu->selIdx++;
-        if (p->pauseMenu->selIdx > 3) {
-            p->pauseMenu->selIdx = 3;
+
+        if (p->pauseMenu->pauseState == 0) {
+            if (p->pauseMenu->selIdx > 3) {
+                p->pauseMenu->selIdx = 3;
+            }
+        } else if (p->pauseMenu->pauseState == 1) {
+            if (p->pauseMenu->selIdx > 7) {
+                p->pauseMenu->selIdx = 7;
+            }
+        } else if (p->pauseMenu->pauseState == 2) {
+            if (p->pauseMenu->selIdx > 8) {
+                p->pauseMenu->selIdx = 8;
+            }
         }
     } else if (!p->in_chat && p->in_inventory) {
         p->in_cursor_y += 1;
