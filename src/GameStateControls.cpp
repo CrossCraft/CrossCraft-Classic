@@ -32,19 +32,6 @@ void GameState::bind_controls() {
         {(int)Input::PSPButtons::Circle, KeyFlag::Release},
         {Player::move_reset, world->player.get()});
 
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Triangle, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Cross, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Square, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Circle, KeyFlag::Release},
-        {Player::move_reset, world->player.get()});
-
     //
     // PSP Face Buttons: Press/Hold
     //
@@ -59,19 +46,6 @@ void GameState::bind_controls() {
         {Player::move_left, world->player.get()});
     psp_controller->add_command(
         {(int)Input::PSPButtons::Circle, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_right, world->player.get()});
-
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Triangle, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_forward, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Cross, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_backward, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Square, KeyFlag::Press | KeyFlag::Held},
-        {Player::move_left, world->player.get()});
-    vita_controller->add_command(
-        {(int)Input::VitaButtons::Circle, KeyFlag::Press | KeyFlag::Held},
         {Player::move_right, world->player.get()});
 
     //

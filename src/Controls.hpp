@@ -63,11 +63,18 @@ struct Controls {
         return glfwretval;
 #else
         SceCtrlData data;
-        data.Buttons = 0;
         Stardust_Celeste::delay(1000);
+#if PSP
         sceCtrlReadBufferPositive(&data, 1);
+#else
+        sceCtrlReadBufferPositive(0, &data, 1);
+#endif
 
+#if PSP
         return data.Buttons & 0x01FFFF;
+#else
+        return data.buttons & 0x01FFFF;
+#endif
 #endif
         return 0;
     }

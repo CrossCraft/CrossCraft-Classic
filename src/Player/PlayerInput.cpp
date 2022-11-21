@@ -145,17 +145,48 @@ auto Player::move_reset(std::any d) -> void {
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && !p->in_chat && !p->in_pause) {
+#if PSP
+        if (!Controls::get().pspJoystickView) {
+            p->rot.x -= 5.0f;
+            if (p->rot.x < -89.9f) {
+                p->rot.x = -89.9f;
+            }
+
+            if (p->rot.x > 89.9f) {
+                p->rot.x = 89.9f;
+            }
+        } else {
+            p->vel.x += -sinf(DEGTORAD(-p->rot.y));
+            p->vel.z += -cosf(DEGTORAD(-p->rot.y));
+        }
+#else
         p->vel.x += -sinf(DEGTORAD(-p->rot.y));
         p->vel.z += -cosf(DEGTORAD(-p->rot.y));
+#endif
     }
 }
 
 auto Player::move_backward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && !p->in_chat && !p->in_pause) {
+#if PSP
+        if (!Controls::get().pspJoystickView) {
+            p->rot.x += 5.0f;
+            if (p->rot.x < -89.9f) {
+                p->rot.x = -89.9f;
+            }
 
+            if (p->rot.x > 89.9f) {
+                p->rot.x = 89.9f;
+            }
+        } else {
+            p->vel.x += sinf(DEGTORAD(-p->rot.y));
+            p->vel.z += cosf(DEGTORAD(-p->rot.y));
+        }
+#else
         p->vel.x += sinf(DEGTORAD(-p->rot.y));
         p->vel.z += cosf(DEGTORAD(-p->rot.y));
+#endif
     } else if (p->in_pause) {
         if (p->in_pause) {
             if (p->pauseMenu->pauseState == 0) {
@@ -241,16 +272,51 @@ auto Player::move_backward(std::any d) -> void {
 auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && !p->in_chat && !p->in_pause) {
+
+#if PSP
+        if (!Controls::get().pspJoystickView) {
+            p->rot.y -= 5.0f;
+            if (p->rot.y > 360.0f) {
+                p->rot.y -= 360.0f;
+            }
+
+            if (p->rot.y < 0.0f) {
+                p->rot.y += 360.0f;
+            }
+
+        } else {
+            p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f));
+            p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f));
+        }
+#else
         p->vel.x += -sinf(DEGTORAD(-p->rot.y + 90.f));
         p->vel.z += -cosf(DEGTORAD(-p->rot.y + 90.f));
+#endif
     }
 }
 
 auto Player::move_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && !p->in_chat && !p->in_pause) {
+#if PSP
+        if (!Controls::get().pspJoystickView) {
+            p->rot.y += 5.0f;
+            if (p->rot.y > 360.0f) {
+                p->rot.y -= 360.0f;
+            }
+
+            if (p->rot.y < 0.0f) {
+                p->rot.y += 360.0f;
+            }
+
+        } else {
+            p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f));
+            p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f));
+        }
+#else
         p->vel.x += sinf(DEGTORAD(-p->rot.y + 90.f));
         p->vel.z += cosf(DEGTORAD(-p->rot.y + 90.f));
+#endif
     }
 }
 
@@ -425,10 +491,16 @@ auto Player::rotate(float dt, float sense) -> void {
     const auto rotSpeed = 500.0f;
     float cX, cY;
 
+    float mX, mY;
+
 #if BUILD_PLAT == BUILD_VITA
-    cX = get_axis("Vita", "LX");
-    cY = get_axis("Vita", "LY");
-
+    if (Controls::get().vitaJoystickSwap) {
+        cX = get_axis("Vita", "LX");
+        cY = get_axis("Vita", "LY");
+    } else {
+        cX = get_axis("Vita", "RX");
+        cY = get_axis("Vita", "RY");
+    }
     if (cX <= 0.4f && cX >= -0.4f)
         cX = 0.0f;
     if (cY <= 0.4f && cY >= -0.4f)
@@ -436,17 +508,53 @@ auto Player::rotate(float dt, float sense) -> void {
 
     cX *= 0.3f;
     cY *= 0.3f;
+
+    if (!Controls::get().vitaJoystickSwap) {
+        mX = get_axis("Vita", "LX");
+        mY = get_axis("Vita", "LY");
+    } else {
+        mX = get_axis("Vita", "RX");
+        mY = get_axis("Vita", "RY");
+    }
+
+    if (mX > 0.5f || mX < -0.5f) {
+        vel.x += sinf(DEGTORAD(-rot.y + 90.0f)) * mX;
+        vel.z += cosf(DEGTORAD(-rot.y + 90.0f)) * mX;
+    }
+
+    if (mY > 0.5f || mY < -0.5f) {
+        vel.x += sinf(DEGTORAD(-rot.y)) * mY;
+        vel.z += cosf(DEGTORAD(-rot.y)) * mY;
+    }
+
 #elif BUILD_PLAT == BUILD_PSP
-    cX = get_axis("PSP", "X");
-    cY = get_axis("PSP", "Y");
+    cX = 0.0f;
+    cY = 0.0f;
+    if (Controls::get().pspJoystickView) {
+        cX = get_axis("PSP", "X");
+        cY = get_axis("PSP", "Y");
 
-    if (cX <= 0.4f && cX >= -0.4f)
-        cX = 0.0f;
-    if (cY <= 0.4f && cY >= -0.4f)
-        cY = 0.0f;
+        if (cX <= 0.4f && cX >= -0.4f)
+            cX = 0.0f;
+        if (cY <= 0.4f && cY >= -0.4f)
+            cY = 0.0f;
 
-    cX *= 0.3f;
-    cY *= 0.3f;
+        cX *= 0.3f;
+        cY *= 0.3f;
+    } else {
+        mX = get_axis("PSP", "X");
+        mY = get_axis("PSP", "Y");
+
+        if (mX > 0.5f || mX < -0.5f) {
+            vel.x += sinf(DEGTORAD(-rot.y + 90.0f)) * mX;
+            vel.z += cosf(DEGTORAD(-rot.y + 90.0f)) * mX;
+        }
+
+        if (mY > 0.5f || mY < -0.5f) {
+            vel.x += sinf(DEGTORAD(-rot.y)) * mY;
+            vel.z += cosf(DEGTORAD(-rot.y)) * mY;
+        }
+    }
 #else
     cX = get_axis("Mouse", "X");
     cY = get_axis("Mouse", "Y");
