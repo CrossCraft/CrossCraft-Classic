@@ -47,6 +47,11 @@ struct Controls {
     int keyRespawn;
     int keyTab;
 
+    int buttonBreak;
+    int buttonPlace;
+    int buttonJump;
+    int buttonMenu;
+
     inline auto getNextKey() -> int {
 #if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA)
         glfwretval = 0;
@@ -87,8 +92,64 @@ struct Controls {
                 return "";
             }
         }
-#else
-        return "";
+#elif BUILD_PLAT == BUILD_PSP
+        switch (key) {
+        case PSP_CTRL_SELECT:
+            return "select";
+        case PSP_CTRL_START:
+            return "start";
+        case PSP_CTRL_UP:
+            return "up";
+        case PSP_CTRL_RIGHT:
+            return "right";
+        case PSP_CTRL_DOWN:
+            return "down";
+        case PSP_CTRL_LEFT:
+            return "left";
+        case PSP_CTRL_LTRIGGER:
+            return "ltrigger";
+        case PSP_CTRL_RTRIGGER:
+            return "rtrigger";
+        case PSP_CTRL_TRIANGLE:
+            return "triangle";
+        case PSP_CTRL_CIRCLE:
+            return "circle";
+        case PSP_CTRL_CROSS:
+            return "cross";
+        case PSP_CTRL_SQUARE:
+            return "square";
+        default:
+            return "";
+        }
+#elif BUILD_PLAT == BUILD_VITA
+        switch (key) {
+        case SCE_CTRL_SELECT:
+            return "select";
+        case SCE_CTRL_START:
+            return "start";
+        case SCE_CTRL_UP:
+            return "up";
+        case SCE_CTRL_RIGHT:
+            return "right";
+        case SCE_CTRL_DOWN:
+            return "down";
+        case SCE_CTRL_LEFT:
+            return "left";
+        case SCE_CTRL_LTRIGGER:
+            return "ltrigger";
+        case SCE_CTRL_RTRIGGER:
+            return "rtrigger";
+        case SCE_CTRL_TRIANGLE:
+            return "triangle";
+        case SCE_CTRL_CIRCLE:
+            return "circle";
+        case SCE_CTRL_CROSS:
+            return "cross";
+        case SCE_CTRL_SQUARE:
+            return "square";
+        default:
+            return "";
+        }
 #endif
     }
 
@@ -114,6 +175,16 @@ struct Controls {
         keyChat = GLFW_KEY_T;
         keyRespawn = GLFW_KEY_R;
         keyTab = GLFW_KEY_TAB;
+#elif BUILD_PLAT == BUILD_PSP
+        buttonBreak = PSP_CTRL_LTRIGGER;
+        buttonPlace = PSP_CTRL_RTRIGGER;
+        buttonMenu = PSP_CTRL_SELECT;
+        buttonJump = PSP_CTRL_UP;
+#elif BUILD_PLAT == BUILD_VITA
+        buttonBreak = SCE_CTRL_LTRIGGER;
+        buttonPlace = SCE_CTRL_RTRIGGER;
+        buttonMenu = SCE_CTRL_SELECT;
+        buttonJump = SCE_CTRL_UP;
 #endif
 
         std::ifstream file(PLATFORM_FILE_PREFIX + "controls.txt");
@@ -178,6 +249,26 @@ struct Controls {
                     std::stringstream str(line);
 
                     str >> keyTab;
+                } else if (line == "butJump") {
+                    std::getline(file, line);
+                    std::stringstream str(line);
+
+                    str >> buttonJump;
+                } else if (line == "butBreak") {
+                    std::getline(file, line);
+                    std::stringstream str(line);
+
+                    str >> buttonBreak;
+                } else if (line == "butMenu") {
+                    std::getline(file, line);
+                    std::stringstream str(line);
+
+                    str >> buttonMenu;
+                } else if (line == "butPlace") {
+                    std::getline(file, line);
+                    std::stringstream str(line);
+
+                    str >> buttonPlace;
                 }
             }
         } else {
@@ -199,6 +290,10 @@ struct Controls {
         file2 << "keyChat:" << keyChat << std::endl;
         file2 << "keyTab:" << keyTab << std::endl;
         file2 << "keyRespawn:" << keyRespawn << std::endl;
+        file2 << "butBreak:" << buttonBreak << std::endl;
+        file2 << "butPlace:" << buttonPlace << std::endl;
+        file2 << "butJump:" << buttonJump << std::endl;
+        file2 << "butMenu:" << buttonMenu << std::endl;
 
         file2.close();
     }

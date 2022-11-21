@@ -18,7 +18,7 @@ struct Config {
         // Store default values
         Config config;
         config.sense = 1.50f;
-        config.compat = 0;
+        config.compat = 1;
         config.ip = "classic.crosscraft.wtf";
         config.port = 25565;
         config.username = "CC-User";

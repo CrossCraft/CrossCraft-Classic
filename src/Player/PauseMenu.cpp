@@ -339,6 +339,82 @@ auto PauseMenu::draw() -> void {
         render_with_shadow(fontRenderer, "Back", 240, 62 - 24);
 #else
 
+        if (selIdx == 0)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 1)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_clear();
+        Rendering::RenderContext::get().matrix_translate({108, 32, 0});
+
+        if (selIdx == 2)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 3)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_clear();
+        Rendering::RenderContext::get().matrix_translate({0, -96 + 8, 0});
+        if (selIdx == 4)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        Rendering::RenderContext::get().matrix_translate({0, -24, 0});
+        if (selIdx == 5)
+            sel_sprite->draw();
+        else
+            unsel_sprite->draw();
+
+        render_with_shadow(fontRenderer, std::string("Controls:"), 240, 216);
+        render_with_shadow(
+            fontRenderer,
+            std::string("Break: ") +
+                Controls::get().upperKeyName(Controls::get().buttonBreak),
+            132, 182);
+        render_with_shadow(
+            fontRenderer,
+            std::string("Place: ") +
+                Controls::get().upperKeyName(Controls::get().buttonPlace),
+            132, 182 - 24);
+        render_with_shadow(
+            fontRenderer,
+            std::string("Block Menu: ") +
+                Controls::get().upperKeyName(Controls::get().buttonMenu),
+            348, 182 - 48);
+        render_with_shadow(
+            fontRenderer,
+            std::string("Jump: ") +
+                Controls::get().upperKeyName(Controls::get().buttonJump),
+            348, 182 - 72);
+
+#if PSP
+        render_with_shadow(fontRenderer,
+                           std::string("Left Analog: ") +
+                               (Controls::get().pspJoystickView
+                                    ? std::string("View")
+                                    : std::string("Move")),
+                           240, 62);
+#else
+        render_with_shadow(fontRenderer,
+                           std::string("Left Analog: ") +
+                               (Controls::get().vitaJoystickSwap
+                                    ? std::string("View")
+                                    : std::string("Move")),
+                           240, 62);
+#endif
+        render_with_shadow(fontRenderer, "Back", 240, 62 - 24);
 #endif
         break;
     }
