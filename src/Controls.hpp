@@ -61,6 +61,13 @@ struct Controls {
         glfwSetKeyCallback(GI::window, prev);
 
         return glfwretval;
+#else
+        SceCtrlData data;
+        data.Buttons = 0;
+        Stardust_Celeste::delay(1000);
+        sceCtrlReadBufferPositive(&data, 1);
+
+        return data.Buttons & 0x01FFFF;
 #endif
         return 0;
     }

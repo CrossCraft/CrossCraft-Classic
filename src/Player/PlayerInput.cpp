@@ -201,50 +201,38 @@ auto Player::move_backward(std::any d) -> void {
                 if (p->pauseMenu->selIdx == 0) {
                     auto val = Controls::get().getNextKey();
                     if (val != 0) {
-                        Controls::get().keyForward = val;
+                        Controls::get().buttonBreak = val;
                     }
                 } else if (p->pauseMenu->selIdx == 1) {
                     auto val = Controls::get().getNextKey();
                     if (val != 0) {
-                        Controls::get().keyBack = val;
+                        Controls::get().buttonPlace = val;
                     }
                 } else if (p->pauseMenu->selIdx == 2) {
                     auto val = Controls::get().getNextKey();
                     if (val != 0) {
-                        Controls::get().keyJump = val;
+                        Controls::get().buttonMenu = val;
                     }
                 } else if (p->pauseMenu->selIdx == 3) {
                     auto val = Controls::get().getNextKey();
                     if (val != 0) {
-                        Controls::get().keyChat = val;
+                        Controls::get().buttonJump = val;
                     }
                 } else if (p->pauseMenu->selIdx == 4) {
-                    auto val = Controls::get().getNextKey();
-                    if (val != 0) {
-                        Controls::get().keyLeft = val;
-                    }
+#if PSP
+                    Controls::get().pspJoystickView =
+                        !Controls::get().pspJoystickView;
+#elif VITA
+                    Controls::get().vitaJoystickSwap =
+                        !Controls::get().vitaJoystickSwap;
+#endif
                 } else if (p->pauseMenu->selIdx == 5) {
-                    auto val = Controls::get().getNextKey();
-                    if (val != 0) {
-                        Controls::get().keyRight = val;
-                    }
-                } else if (p->pauseMenu->selIdx == 6) {
-                    auto val = Controls::get().getNextKey();
-                    if (val != 0) {
-                        Controls::get().keyTab = val;
-                    }
-                } else if (p->pauseMenu->selIdx == 7) {
-                    auto val = Controls::get().getNextKey();
-                    if (val != 0) {
-                        Controls::get().keyRespawn = val;
-                    }
-                } else if (p->pauseMenu->selIdx == 8) {
                     p->pauseMenu->pauseState = 1;
                 }
-
                 Controls::get().writeControls();
                 GameState::apply_controls();
             }
+            delay(100);
             return;
         }
     }

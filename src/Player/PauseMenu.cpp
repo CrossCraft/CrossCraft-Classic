@@ -338,7 +338,7 @@ auto PauseMenu::draw() -> void {
 
         render_with_shadow(fontRenderer, "Back", 240, 62 - 24);
 #else
-
+        Rendering::RenderContext::get().matrix_translate({-108, 32, 0});
         if (selIdx == 0)
             sel_sprite->draw();
         else
@@ -392,12 +392,12 @@ auto PauseMenu::draw() -> void {
             fontRenderer,
             std::string("Block Menu: ") +
                 Controls::get().upperKeyName(Controls::get().buttonMenu),
-            348, 182 - 48);
+            348, 182);
         render_with_shadow(
             fontRenderer,
             std::string("Jump: ") +
                 Controls::get().upperKeyName(Controls::get().buttonJump),
-            348, 182 - 72);
+            348, 182 - 24);
 
 #if PSP
         render_with_shadow(fontRenderer,
