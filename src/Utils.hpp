@@ -30,6 +30,7 @@ inline void createDirs() {
 #if BUILD_PLAT == BUILD_VITA
     sceIoMkdir("ux0:/data/CrossCraft-Classic", 0777);
     sceIoMkdir("ux0:/data/CrossCraft-Classic/texturepacks", 0777);
+    sceIoMkdir("ux0:/data/CrossCraft-Classic/mods", 0777);
     Utilities::Logger::get_app_log()->flush_output = true;
     {
         std::ifstream src("app0:/texturepacks/default.zip", std::ios::binary);
@@ -40,6 +41,7 @@ inline void createDirs() {
     }
 #elif BUILD_PLAT == BUILD_PSP
     sceIoMkdir("./texturepacks", 0777);
+    sceIoMkdir("./mods", 0777);
     {
         std::ifstream src("./default.zip", std::ios::binary);
         if (src.is_open()) {

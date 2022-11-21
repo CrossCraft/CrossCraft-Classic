@@ -7,7 +7,8 @@ namespace CrossCraft::Model {
 
 Steve::Steve() {
     YAML::Node config =
-        YAML::LoadFile(PLATFORM_FILE_PREFIX + "model/steve.yaml");
+        YAML::LoadFile(PLATFORM_FILE_PREFIX + "texturepacks/default/assets/" +
+                       "model/steve.yaml");
 
     auto tSize = config["model"][0]["texsize"];
     auto texSize = glm::vec2(tSize[0].as<float>(), tSize[1].as<float>());

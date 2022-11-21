@@ -7,7 +7,7 @@ namespace CrossCraft {
 MusicManager::MusicManager() {
     std::string ext = "ogg";
 
-    std::string prefix = "audio/mus/";
+    std::string prefix = "texturepacks/default/assets/audio/mus/";
     tracks.push_back(prefix + "calm1." + ext);
     tracks.push_back(prefix + "calm2." + ext);
     tracks.push_back(prefix + "calm3." + ext);

@@ -1,6 +1,7 @@
 #include "Mod.hpp"
 #include "../Utils.hpp"
 #include "../World/World.hpp"
+#include <exception>
 #include <filesystem>
 
 namespace CrossCraft::Modding {
@@ -131,17 +132,21 @@ void Mod::onBreak(glm::vec3 location, uint8_t type) {
 void ModManager::scan_mods() {
     std::filesystem::path p(PLATFORM_FILE_PREFIX + "mods/");
 
-    for (const auto &entry : std::filesystem::directory_iterator(p)) {
-        if (entry.is_directory()) {
-            auto p = PLATFORM_FILE_PREFIX + "mods/" +
-                     entry.path().filename().string() + "/";
-            SC_APP_INFO("Found Mod Candidate {}", p);
-            ScopePtr<Mod> m = create_scopeptr<Mod>(p);
+    try {
+        for (const auto &entry : std::filesystem::directory_iterator(p)) {
+            if (entry.is_directory()) {
+                auto p = PLATFORM_FILE_PREFIX + "mods/" +
+                         entry.path().filename().string() + "/";
+                SC_APP_INFO("Found Mod Candidate {}", p);
+                ScopePtr<Mod> m = create_scopeptr<Mod>(p);
 
-            if (m->ok) {
-                mods.push_back(std::move(m));
+                if (m->ok) {
+                    mods.push_back(std::move(m));
+                }
             }
         }
+    } catch (std::exception e) {
+        SC_APP_ERROR("Could not load mods!");
     }
 }
 
