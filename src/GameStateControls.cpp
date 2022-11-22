@@ -48,6 +48,10 @@ void GameState::bind_controls() {
         {(int)Input::PSPButtons::Circle, KeyFlag::Press | KeyFlag::Held},
         {Player::move_right, world->player.get()});
 
+    vita_controller->add_command(
+        {(int)Input::VitaButtons::Cross, KeyFlag::Press | KeyFlag::Held},
+        {Player::move_backward, world->player.get()});
+
     //
     // PSP Directional Buttons: Press/Hold
     //

@@ -78,8 +78,8 @@ if(VITA)
     set(CMAKE_OBJDUMP arm-vita-eabi-objdump)
     set(CMAKE_RANLIB arm-vita-eabi-ranlib)
 
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wl,-q")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wl,-q")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -g3 -Wl,-q")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g3 -Wl,-q")
 
     set(VITA_ELF_CREATE vita-elf-create)
     set(VITA_ELF_EXPORT vita-elf-export)

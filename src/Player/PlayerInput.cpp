@@ -183,7 +183,7 @@ auto Player::move_backward(std::any d) -> void {
             p->vel.x += sinf(DEGTORAD(-p->rot.y));
             p->vel.z += cosf(DEGTORAD(-p->rot.y));
         }
-#else
+#elif BUILD_PLAT != BUILD_VITA
         p->vel.x += sinf(DEGTORAD(-p->rot.y));
         p->vel.z += cosf(DEGTORAD(-p->rot.y));
 #endif
@@ -253,7 +253,7 @@ auto Player::move_backward(std::any d) -> void {
 #if PSP
                     Controls::get().pspJoystickView =
                         !Controls::get().pspJoystickView;
-#elif VITA
+#elif BUILD_PLAT == BUILD_VITA
                     Controls::get().vitaJoystickSwap =
                         !Controls::get().vitaJoystickSwap;
 #endif

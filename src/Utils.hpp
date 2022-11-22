@@ -2,6 +2,7 @@
 #include <Network/Network.hpp>
 #include <Platform/Platform.hpp>
 #include <Utilities/Utilities.hpp>
+#include <filesystem>
 #include <string>
 
 #if BUILD_PLAT != BUILD_VITA
@@ -32,13 +33,19 @@ inline void createDirs() {
     sceIoMkdir("ux0:/data/CrossCraft-Classic/texturepacks", 0777);
     sceIoMkdir("ux0:/data/CrossCraft-Classic/mods", 0777);
     Utilities::Logger::get_app_log()->flush_output = true;
-    {
+
+    if (!std::filesystem::exists(
+            "ux0:/data/CrossCraft-Classic/texturepacks/default") &&
+        !std::filesystem::exists(
+            "ux0:/data/CrossCraft-Classic/texturepacks/default.zip")) {
+
         std::ifstream src("app0:/texturepacks/default.zip", std::ios::binary);
         std::ofstream dst(
             "ux0:/data/CrossCraft-Classic/texturepacks/default.zip",
             std::ios::binary);
         dst << src.rdbuf();
     }
+
 #elif BUILD_PLAT == BUILD_PSP
     sceIoMkdir("./texturepacks", 0777);
     sceIoMkdir("./mods", 0777);
