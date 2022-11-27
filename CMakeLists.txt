@@ -18,33 +18,24 @@ endif()
 add_subdirectory(ext/Stardust-Celeste Stardust)
 add_compile_definitions(YAML_CPP_STATIC_DEFINE)
 
-if(NOT VITA)
-    add_subdirectory(ext/zlib ZLib)
-endif()
-
 file(GLOB_RECURSE SRC_FILES src/*.cpp)
 file(GLOB_RECURSE INC_FILES include/*.hpp)
 
+if(NOT VITA)
+    set(ZLIB_SRCS ext/zlib/adler32.c ext/zlib/compress.c ext/zlib/crc32.c ext/zlib/deflate.c ext/zlib/gzclose.c ext/zlib/gzlib.c ext/zlib/gzread.c ext/zlib/gzwrite.c ext/zlib/inflate.c ext/zlib/infback.c ext/zlib/inftrees.c ext/zlib/inffast.c ext/zlib/trees.c ext/zlib/uncompr.c ext/zlib/zutil.c)
+endif()
+
 set(LUA_SRC ext/lua/onelua.c)
-file(GLOB LUA_INC ext/lua/*.h)
-
-add_library(Lua ${LUA_SRC} ${LUA_INC})
-target_compile_definitions(Lua PUBLIC MAKE_LIB)
-
 set(MINIZIP_SRC ext/zlib/contrib/minizip/ioapi.c ext/zlib/contrib/minizip/mztools.c ext/zlib/contrib/minizip/unzip.c ext/zlib/contrib/minizip/zip.c)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(MINIZIP_SRC ext/zlib/contrib/minizip/iowin32.c ext/zlib/contrib/minizip/ioapi.c ext/zlib/contrib/minizip/mztools.c ext/zlib/contrib/minizip/unzip.c ext/zlib/contrib/minizip/zip.c)
 endif()
 
-add_executable(CrossCraft-Classic ${MINIZIP_SRC} ${SRC_FILES} ${INC_FILES})
+add_executable(CrossCraft-Classic ${ZLIB_SRCS} ${LUA_SRC} ${MINIZIP_SRC} ${SRC_FILES} ${INC_FILES})
+target_compile_definitions(CrossCraft-Classic PUBLIC MAKE_LIB)
 target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/ext/glm/glm/ ext/FNL/Cpp ext/zlib/ ext/lua/)
-
-if(NOT VITA)
-    target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlibstatic yaml-cpp Lua)
-else()
-    target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste zlibstatic Lua)
-endif()
+target_link_libraries(CrossCraft-Classic SC-Entry Stardust-Celeste yaml-cpp)
 
 if(WIN32)
     target_link_libraries(CrossCraft-Classic ws2_32.lib)
@@ -95,7 +86,7 @@ if(VITA)
     set(VITA_VERSION "01.10")
 
     target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/include/)
-    target_link_libraries(CrossCraft-Classic SceCtrl_stub vitaGL vitashark mathneon SceShaccCg_stub SceShaccCgExt SceIme_stub SceAppMgr_stub SceGxm_stub SceCommonDialog_stub SceProcessmgr_stub SceDisplay_stub SceKernelDmacMgr_stub ScePower_stub taihen_stub openal pthread vorbisfile vorbis ogg SceAudio_stub SceAudioIn_stub)
+    target_link_libraries(CrossCraft-SurvivalTest Stardust-Celeste z)
 
     vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME})
 

@@ -28,7 +28,6 @@ auto MusicManager::update(float dt) -> void {
 
     if (timer >= 0) {
         timer -= dt;
-        music->update();
     } else {
         music.reset();
         srand(time(0));
