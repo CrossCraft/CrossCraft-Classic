@@ -19,7 +19,7 @@ class ParticleSystem {
     void generate();
 
     void update(double dt);
-    void draw();
+    void draw(glm::vec3 rot);
 
   private:
     unsigned int texture;

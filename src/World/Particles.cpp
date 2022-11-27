@@ -64,69 +64,57 @@ void ParticleSystem::generate() {
     mesh.vertices.clear();
     mesh.indices.clear();
 
-    for (auto &p : particles) {
-        const std::array<float, 12> cFace{
-            0,            // 0
-            0,            // 1
-            0,            // 2
-            0,            // 3
-            1.0f / 16.0f, // 4
-            0,            // 5
-            1.0f / 16.0f, // 6
-            1.0f / 16.0f, // 7
-            1.0f / 16.0f, // 8
-            1.0f / 16.0f, // 9
-            0,            // 10
-            1.0f / 16.0f, // 11
-        };
+    if (particles.size() <= 0)
+        return;
 
-        Rendering::Color c;
-        c.color = 0xFFFFFFFF;
+    auto cFace = frontFace;
 
-        mesh.vertices.push_back(Rendering::Vertex{
-            p.uv[0],
-            p.uv[1],
-            c,
-            cFace[0] + p.position.x,
-            cFace[1] + p.position.y,
-            cFace[2] + p.position.z,
-        });
+    Rendering::Color c;
+    c.color = 0xFFFFFFFF;
 
-        mesh.vertices.push_back(Rendering::Vertex{
-            p.uv[2],
-            p.uv[3],
-            c,
-            cFace[3] + p.position.x,
-            cFace[4] + p.position.y,
-            cFace[5] + p.position.z,
-        });
+    mesh.vertices.push_back(Rendering::Vertex{
+        particles[0].uv[0],
+        particles[0].uv[1],
+        c,
+        cFace[0],
+        cFace[1],
+        cFace[2],
+    });
 
-        mesh.vertices.push_back(Rendering::Vertex{
-            p.uv[4],
-            p.uv[5],
-            c,
-            cFace[6] + p.position.x,
-            cFace[7] + p.position.y,
-            cFace[8] + p.position.z,
-        });
+    mesh.vertices.push_back(Rendering::Vertex{
+        particles[0].uv[2],
+        particles[0].uv[3],
+        c,
+        cFace[3],
+        cFace[4],
+        cFace[5],
+    });
 
-        mesh.vertices.push_back(Rendering::Vertex{
-            p.uv[6],
-            p.uv[7],
-            c,
-            cFace[9] + p.position.x,
-            cFace[10] + p.position.y,
-            cFace[11] + p.position.z,
-        });
+    mesh.vertices.push_back(Rendering::Vertex{
+        particles[0].uv[4],
+        particles[0].uv[5],
+        c,
+        cFace[6],
+        cFace[7],
+        cFace[8],
+    });
 
-        mesh.indices.push_back(idx_counter);
-        mesh.indices.push_back(idx_counter + 1);
-        mesh.indices.push_back(idx_counter + 2);
-        mesh.indices.push_back(idx_counter + 2);
-        mesh.indices.push_back(idx_counter + 3);
-        mesh.indices.push_back(idx_counter + 0);
-        idx_counter += 4;
-    }
+    mesh.vertices.push_back(Rendering::Vertex{
+        particles[0].uv[6],
+        particles[0].uv[7],
+        c,
+        cFace[9],
+        cFace[10],
+        cFace[11],
+    });
+
+    mesh.indices.push_back(idx_counter);
+    mesh.indices.push_back(idx_counter + 1);
+    mesh.indices.push_back(idx_counter + 2);
+    mesh.indices.push_back(idx_counter + 2);
+    mesh.indices.push_back(idx_counter + 3);
+    mesh.indices.push_back(idx_counter + 0);
+    idx_counter += 4;
 
     mesh.setup_buffer();
 }
@@ -144,18 +132,29 @@ void ParticleSystem::update(double dt) {
         generate();
     }
 }
-void ParticleSystem::draw() {
+void ParticleSystem::draw(glm::vec3 rot) {
     if (timer < 1.0f) {
         Rendering::TextureManager::get().bind_texture(texture);
+
 #if BUILD_PC || BUILD_PLAT == BUILD_VITA
         glDisable(GL_CULL_FACE);
 #else
         sceGuDisable(GU_CULL_FACE);
 #endif
+        for (auto &p : particles) {
 
-        mesh.bind();
-        mesh.draw();
+            Rendering::RenderContext::get().matrix_translate(p.position);
+            Rendering::RenderContext::get().matrix_scale(
+                {0.125f, 0.125f, 0.125f});
+            Rendering::RenderContext::get().matrix_scale({0.75f, 0.75f, 0.75f});
+            Rendering::RenderContext::get().matrix_rotate({0.0f, -rot.y, 0.0f});
+            Rendering::RenderContext::get().matrix_rotate({-rot.x, 0.0f, 0.0f});
 
+            mesh.bind();
+            mesh.draw();
+
+            Rendering::RenderContext::get().matrix_clear();
+        }
 #if BUILD_PC || BUILD_PLAT == BUILD_VITA
         glEnable(GL_CULL_FACE);
 #else
