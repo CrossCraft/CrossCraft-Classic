@@ -86,7 +86,7 @@ if(VITA)
     set(VITA_VERSION "01.10")
 
     target_include_directories(CrossCraft-Classic PUBLIC ext/Stardust-Celeste/include/)
-    target_link_libraries(CrossCraft-SurvivalTest Stardust-Celeste z)
+    target_link_libraries(CrossCraft-Classic Stardust-Celeste z)
 
     vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME})
 
