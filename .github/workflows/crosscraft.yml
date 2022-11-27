@@ -20,7 +20,7 @@ jobs:
       - name: Build
         run: |
           sudo apt update
-          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev libasound2-dev libjack-jackd2-dev oss4-dev libpulse-dev libsdl2-dev libsdl2-mixer-dev
           git submodule update --init --recursive --remote
           mkdir -p build
           cd build
@@ -40,32 +40,6 @@ jobs:
             README.md
             config.cfg
   
-  Mac:
-    runs-on: macOS-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Build
-        run: |
-          git submodule update --init --recursive --remote
-          mkdir -p build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make
-          cd ..
-          mv build/CrossCraft-Classic CrossCraft-Classic
-          chmod +x ./CrossCraft-Classic
-      - name: Publish artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: CrossCraft-Mac
-          path: |
-            CrossCraft-Classic
-            texturepacks/
-            LICENSE
-            README.md
-            config.cfg
-
   Windows:
     runs-on: windows-latest
 
