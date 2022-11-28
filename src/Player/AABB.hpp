@@ -21,10 +21,8 @@ class AABB {
     }
 
     static auto intersectVec(AABB &a, AABB &b) -> glm::vec3 {
-        auto amin = a.getMin();
         auto amax = a.getMax();
         auto bmin = b.getMin();
-        auto bmax = b.getMax();
 
         return amax - bmin;
     }

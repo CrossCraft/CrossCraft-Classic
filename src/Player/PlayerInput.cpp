@@ -555,7 +555,7 @@ auto Player::rotate(float dt, float sense) -> void {
             vel.z += cosf(DEGTORAD(-rot.y)) * mY;
         }
     }
-#else
+#elif BUILD_PLAT != BUILD_PS2
     cX = get_axis("Mouse", "X");
     cY = get_axis("Mouse", "Y");
 

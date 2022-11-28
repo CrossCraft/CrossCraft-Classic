@@ -19,6 +19,8 @@
 #include <pspkernel.h>
 #elif BUILD_PLAT == BUILD_VITA
 #include <vitaGL.h>
+#elif BUILD_PLAT == BUILD_PS2
+#include <GL/gl.h>
 #else
 #include <glad/glad.hpp>
 #endif
