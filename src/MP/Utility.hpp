@@ -12,9 +12,7 @@
 #else
 #include <arpa/inet.h>
 #include <fcntl.h>
-#ifndef PS2
 #include <netinet/tcp.h>
-#endif
 #include <sys/socket.h>
 #include <unistd.h>
 #endif

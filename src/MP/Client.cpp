@@ -8,12 +8,6 @@
 #include <thread>
 #include <zlib.h>
 
-#if PS2
-extern "C" {
-static int inet_pton(const char *src, unsigned char *dst);
-}
-#endif
-
 namespace CrossCraft::MP {
 
 Client::Client(World *wrld, std::string ip, u16 port) {
@@ -22,12 +16,7 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     this->wrld = wrld;
     SC_APP_INFO("Connecting to: [" + ip + "]@" + std::to_string(port));
 
-#if PS2
-    my_socket =
-        static_cast<int>(lwip_socket(PF_INET, SOCK_STREAM, IPPROTO_TCP));
-#else
     my_socket = static_cast<int>(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP));
-#endif
 
     struct sockaddr_in name {};
     name.sin_family = AF_INET;
@@ -36,15 +25,9 @@ Client::Client(World *wrld, std::string ip, u16 port) {
     struct hostent *he = gethostbyname(ip.c_str());
     char *addr = inet_ntoa(*(struct in_addr *)he->h_addr_list[0]);
 
-#if PS2
-    inet_pton(addr, (unsigned char *)&name.sin_addr.s_addr);
-    bool b =
-        (lwip_connect(my_socket, (struct sockaddr *)&name, sizeof(name)) >= 0);
-#else
     inet_pton(AF_INET, addr, &name.sin_addr.s_addr);
     bool b =
         (::connect(my_socket, (struct sockaddr *)&name, sizeof(name)) >= 0);
-#endif
 
 #ifdef _WIN32
     unsigned long mode = (false) ? 0 : 1;
@@ -52,12 +35,7 @@ Client::Client(World *wrld, std::string ip, u16 port) {
 #endif
 
     int flag = 1;
-#if PS2
-    lwip_setsockopt(my_socket, IPPROTO_TCP, TCP_NODELAY, (char *)&flag,
-                    sizeof(int));
-#else
     setsockopt(my_socket, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
-#endif
 
     if (!b) {
         disconnected = true;
@@ -446,13 +424,8 @@ void Client::send() {
 
     for (auto &p : packetsOut) {
 
-#if PS2
-        int res = lwip_send(my_socket, p->m_Buffer,
-                            static_cast<int>(p->GetUsedSpace()), 0);
-#else
         int res = ::send(my_socket, p->m_Buffer,
                          static_cast<int>(p->GetUsedSpace()), 0);
-#endif
 
         if (res < 0) {
             SC_APP_ERROR("Client: Failed to send packets. Disconnecting.");
@@ -522,14 +495,10 @@ auto get_len(Byte type) -> int {
 
 void Client::receive() {
     Byte newByte;
-#if PS2
-    int res = lwip_recv(my_socket, reinterpret_cast<char *>(&newByte), 1,
-                        MSG_PEEK
-#else
-    int res = ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1, MSG_PEEK
-#endif
+    int res = ::recv(my_socket, reinterpret_cast<char *>(&newByte), 1,
+                     MSG_PEEK
 #if BUILD_PLAT != BUILD_WINDOWS
-                            | MSG_DONTWAIT
+                         | MSG_DONTWAIT
 #endif
     );
     if (res <= 0)
@@ -550,12 +519,7 @@ void Client::receive() {
             continue;
         }
 #else
-#if PS2
-        lwip_recv(my_socket, reinterpret_cast<char *>(&b), 1, 0);
-#else
         ::recv(my_socket, reinterpret_cast<char *>(&b), 1, 0);
-#endif
-
 #endif
 
         byte_buffer->WriteU8(b);

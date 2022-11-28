@@ -5,8 +5,7 @@
 #include <sstream>
 #include <string>
 
-#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA ||                   \
-      BUILD_PLAT == BUILD_PS2)
+#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA)
 #include <GLFW/glfw3.h>
 
 namespace GI {
@@ -54,8 +53,7 @@ struct Controls {
     int buttonMenu;
 
     inline auto getNextKey() -> int {
-#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA ||                   \
-      BUILD_PLAT == BUILD_PS2)
+#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA)
         glfwretval = 0;
         auto prev = glfwSetKeyCallback(GI::window, controls_key_callback);
         Stardust_Celeste::delay(1000);
@@ -63,7 +61,7 @@ struct Controls {
         glfwSetKeyCallback(GI::window, prev);
 
         return glfwretval;
-#elif BUILD_PLAT != BUILD_PS2
+#else
         SceCtrlData data;
         Stardust_Celeste::delay(1000);
 #if PSP
@@ -82,8 +80,7 @@ struct Controls {
     }
 
     inline auto getKeyName(int key) -> std::string {
-#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA ||                   \
-      BUILD_PLAT == BUILD_PS2)
+#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA)
         auto res = glfwGetKeyName(key, 0);
         if (res != nullptr) {
             return std::string(res);
@@ -182,8 +179,7 @@ struct Controls {
         vitaJoystickSwap = true;
         ps2JoystickSwap = true;
 
-#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA ||                   \
-      BUILD_PLAT == BUILD_PS2)
+#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA)
         keyForward = GLFW_KEY_W;
         keyBack = GLFW_KEY_S;
         keyLeft = GLFW_KEY_A;
