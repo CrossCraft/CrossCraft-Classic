@@ -92,7 +92,7 @@ auto BlockRep::drawBlk(uint8_t type, int x, int y, int y_offset, float scale)
     // Set up texture
     Rendering::TextureManager::get().bind_texture(terrain_atlas);
 
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA || BUILD_PLAT == BUILD_3DS
     glDisable(GL_CULL_FACE);
 #else
     sceGuDisable(GU_CULL_FACE);
@@ -100,7 +100,7 @@ auto BlockRep::drawBlk(uint8_t type, int x, int y, int y_offset, float scale)
 
     blockMesh[type].draw();
 
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA || BUILD_PLAT == BUILD_3DS
     glEnable(GL_CULL_FACE);
 #else
     sceGuEnable(GU_CULL_FACE);
@@ -122,7 +122,7 @@ auto BlockRep::drawBlkHand(uint8_t type, World *wrld, double cube_bob) -> void {
     ctx->matrix_scale({0.40f, 0.40f, 0.40f});
 
     // DISABLE CULL
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA || BUILD_PLAT == BUILD_3DS
     glClear(GL_DEPTH_BUFFER_BIT);
 #else
     sceGuClear(GU_DEPTH_BUFFER_BIT);
@@ -151,7 +151,7 @@ auto BlockRep::drawBlkHand(uint8_t type, World *wrld, double cube_bob) -> void {
         blockMesh[type].setup_buffer();
     }
 
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA || BUILD_PLAT == BUILD_3DS
     glDisable(GL_CULL_FACE);
 #else
     sceGuDisable(GU_CULL_FACE);
@@ -159,7 +159,7 @@ auto BlockRep::drawBlkHand(uint8_t type, World *wrld, double cube_bob) -> void {
 
     blockMesh[type].draw();
 
-#if BUILD_PC || BUILD_PLAT == BUILD_VITA
+#if BUILD_PC || BUILD_PLAT == BUILD_VITA || BUILD_PLAT == BUILD_3DS
     glEnable(GL_CULL_FACE);
 #else
     sceGuEnable(GU_CULL_FACE);

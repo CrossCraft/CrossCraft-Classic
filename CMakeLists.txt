@@ -8,6 +8,9 @@ if(WIN32)
 elseif(PSP)
     add_compile_definitions(BUILD_PLAT=2)
     add_compile_definitions(IOAPI_NO_64)
+elseif(3DS)
+    add_compile_definitions(BUILD_PLAT=7)
+    add_compile_definitions(IOAPI_NO_64)
 elseif(VITA)
     add_compile_definitions(BUILD_PLAT=3)
     add_compile_definitions(IOAPI_NO_64)
@@ -52,6 +55,10 @@ if(PSP)
         BACKGROUND_PATH ../src/assets/psp/PIC1.png
         BUILD_PRX 1
     )
+endif()
+
+if(3DS)
+    target_link_libraries(CrossCraft-Classic citro3d ctru)
 endif()
 
 if(VITA)
