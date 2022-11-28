@@ -61,7 +61,12 @@ if(3DS)
     target_link_libraries(CrossCraft-Classic citro3d ctru)
     include(ext/Stardust-Celeste/Tools3DS.cmake)
 
-    add_3dsx_target(CrossCraft-Classic NO_SMDH)
+    add_3dsx_target(
+        CrossCraft-Classic
+        APP_TITLE CrossCraft-Classic
+        APP_DESCRIPTION "CrossCraft Classic 3DS"
+        APP_AUTHOR "Iridescence and CypressImplex"
+    )
 endif()
 
 if(VITA)
