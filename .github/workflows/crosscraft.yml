@@ -50,6 +50,7 @@ jobs:
         run: |
           git submodule update --init --recursive --remote
           vcpkg install sdl2 --triplet x64-windows
+          vcpkg install sdl2-mixer --triplet x64-windows
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 .
           copy ext/zconf.h ext/zlib/zconf.h
           cmake --build . --config Release
