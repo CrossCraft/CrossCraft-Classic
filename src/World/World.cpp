@@ -157,7 +157,7 @@ auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
     auto RDIST_DIAMETER = RENDER_DISTANCE_DIAMETER *
                           static_cast<float>(Option::get().renderDist + 1) /
                           4.0f;
-#endif;
+#endif
 
     auto rad = RDIST_DIAMETER / 2.f;
 
