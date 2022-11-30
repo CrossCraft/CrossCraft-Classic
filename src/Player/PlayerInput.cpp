@@ -572,7 +572,7 @@ auto Player::rotate(float dt, float sense) -> void {
         cY *= -0.3f;
     } else {
         mX = get_axis("3DS", "LX");
-        mY = get_axis("3DS", "LY");
+        mY = -get_axis("3DS", "LY");
 
         if (mX > 0.5f || mX < -0.5f) {
             vel.x += sinf(DEGTORAD(-rot.y + 90.0f)) * mX;
