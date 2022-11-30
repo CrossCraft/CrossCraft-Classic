@@ -39,6 +39,33 @@ jobs:
             LICENSE
             README.md
             config.cfg
+
+  N3DS:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkitarm:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          git config --global --add safe.directory /__w/CrossCraft-Classic/CrossCraft-Classic
+          git submodule update --init --recursive --remote
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -D3DS=1 ..
+          make
+          cd ..
+          mkdir -p CrossCraft-Classic/texturepacks/
+          mv build/CrossCraft-Classic.3dsx CrossCraft-Classic.3dsx
+          mv texturepacks/default.zip CrossCraft-Classic/texturepacks/default.zip
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: CrossCraft-N3DS
+          path: |
+            CrossCraft-Classic.3dsx
+            CrossCraft-Classic
   
   Windows:
     runs-on: windows-latest
