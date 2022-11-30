@@ -172,6 +172,7 @@ void GameState::on_start() {
     vita_controller = new Input::VitaController();
     key_controller = new Input::KeyboardController();
     mouse_controller = new Input::MouseController();
+    n3ds_controller = new Input::N3DSController();
 
     // Bind our controllers
     bind_controls();
@@ -180,10 +181,12 @@ void GameState::on_start() {
     Utilities::Input::add_controller(key_controller);
     Utilities::Input::add_controller(mouse_controller);
     Utilities::Input::add_controller(vita_controller);
+    Utilities::Input::add_controller(n3ds_controller);
 
     Utilities::Input::set_differential_mode("Mouse", true);
     Utilities::Input::set_differential_mode("PSP", true);
     Utilities::Input::set_differential_mode("Vita", true);
+    Utilities::Input::set_differential_mode("3DS", true);
 
     // Request 3D Mode
     Rendering::RenderContext::get().set_mode_3D();
@@ -197,6 +200,7 @@ void GameState::on_cleanup() {
     delete vita_controller;
     delete key_controller;
     delete mouse_controller;
+    delete n3ds_controller;
 }
 
 void GameState::quit(std::any d) {

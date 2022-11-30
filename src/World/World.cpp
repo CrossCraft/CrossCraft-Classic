@@ -135,7 +135,7 @@ World::~World() {
 
 #if PSP
 const auto CHUNKS_PER_SECOND = 2.0f;
-#elif BUILD_PLAT == BUILD_VITA
+#elif BUILD_PLAT == BUILD_VITA || BUILD_PLAT == BUILD_3DS
 const auto CHUNKS_PER_SECOND = 4.0f;
 #else
 const auto CHUNKS_PER_SECOND = 96.0f;
@@ -143,14 +143,21 @@ const auto CHUNKS_PER_SECOND = 96.0f;
 
 #if BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA
 const auto RENDER_DISTANCE_DIAMETER = 10.0f;
+#elif BUILD_PLAT == BUILD_3DS
+const auto RENDER_DISTANCE_DIAMETER = 5.0f;
 #else
 const auto RENDER_DISTANCE_DIAMETER = 16.f;
 #endif
 
 auto World::get_needed_chunks() -> std::vector<glm::ivec2> {
+
+#if BUILD_PLAT == BUILD_3DS
+    auto RDIST_DIAMETER = static_cast<float>(RENDER_DISTANCE_DIAMETER);
+#else
     auto RDIST_DIAMETER = RENDER_DISTANCE_DIAMETER *
                           static_cast<float>(Option::get().renderDist + 1) /
                           4.0f;
+#endif;
 
     auto rad = RDIST_DIAMETER / 2.f;
 

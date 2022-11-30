@@ -203,6 +203,11 @@ struct Controls {
         buttonPlace = SCE_CTRL_RTRIGGER;
         buttonMenu = SCE_CTRL_SELECT;
         buttonJump = SCE_CTRL_UP;
+#elif BUILD_PLAT == BUILD_3DS
+        buttonBreak = KEY_L;
+        buttonPlace = KEY_R;
+        buttonMenu = KEY_SELECT;
+        buttonJump = KEY_DUP;
 #endif
 
         std::ifstream file(PLATFORM_FILE_PREFIX + "controls.txt");

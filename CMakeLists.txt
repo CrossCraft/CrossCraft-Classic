@@ -58,7 +58,7 @@ if(PSP)
 endif()
 
 if(3DS)
-    target_link_libraries(CrossCraft-Classic citro3d ctru)
+    target_link_libraries(CrossCraft-Classic)
     include(ext/Stardust-Celeste/Tools3DS.cmake)
 
     add_3dsx_target(

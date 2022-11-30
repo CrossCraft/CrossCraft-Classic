@@ -555,6 +555,35 @@ auto Player::rotate(float dt, float sense) -> void {
             vel.z += cosf(DEGTORAD(-rot.y)) * mY;
         }
     }
+
+#elif BUILD_PLAT == BUILD_3DS
+    cX = 0.0f;
+    cY = 0.0f;
+    if (Controls::get().pspJoystickView) {
+        cX = get_axis("3DS", "LX");
+        cY = get_axis("3DS", "LY");
+
+        if (cX <= 0.4f && cX >= -0.4f)
+            cX = 0.0f;
+        if (cY <= 0.4f && cY >= -0.4f)
+            cY = 0.0f;
+
+        cX *= 0.3f;
+        cY *= -0.3f;
+    } else {
+        mX = get_axis("3DS", "LX");
+        mY = get_axis("3DS", "LY");
+
+        if (mX > 0.5f || mX < -0.5f) {
+            vel.x += sinf(DEGTORAD(-rot.y + 90.0f)) * mX;
+            vel.z += cosf(DEGTORAD(-rot.y + 90.0f)) * mX;
+        }
+
+        if (mY > 0.5f || mY < -0.5f) {
+            vel.x += sinf(DEGTORAD(-rot.y)) * mY;
+            vel.z += cosf(DEGTORAD(-rot.y)) * mY;
+        }
+    }
 #elif BUILD_PC
     cX = get_axis("Mouse", "X");
     cY = get_axis("Mouse", "Y");

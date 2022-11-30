@@ -4,6 +4,7 @@
 
 #include <Utilities/Controllers/KeyboardController.hpp>
 #include <Utilities/Controllers/MouseController.hpp>
+#include <Utilities/Controllers/N3DSController.hpp>
 #include <Utilities/Controllers/PSPController.hpp>
 #include <Utilities/Controllers/VitaController.hpp>
 
@@ -100,6 +101,7 @@ class GameState : public Core::ApplicationState {
     Utilities::Controller *vita_controller;
     Utilities::Controller *key_controller;
     Utilities::Controller *mouse_controller;
+    Utilities::Controller *n3ds_controller;
 };
 
 } // namespace CrossCraft

@@ -4,6 +4,7 @@
 #include "../UI/TextHelper.hpp"
 #include <Utilities/Controllers/KeyboardController.hpp>
 #include <Utilities/Controllers/MouseController.hpp>
+#include <Utilities/Controllers/N3DSController.hpp>
 #include <Utilities/Controllers/PSPController.hpp>
 #include <Utilities/Controllers/VitaController.hpp>
 #include <fstream>
@@ -42,6 +43,7 @@ void MenuState::on_start() {
     vita_controller = new Input::VitaController();
     key_controller = new Input::KeyboardController();
     mouse_controller = new Input::MouseController();
+    n3ds_controller = new Input::N3DSController();
 
     // Bind our controllers
     bind_controls();
@@ -130,6 +132,7 @@ void MenuState::on_update(Core::Application *app, double dt) {
         delete key_controller;
         delete mouse_controller;
         delete vita_controller;
+        delete n3ds_controller;
 
         app->push_state(create_refptr<GameState>());
         return;
@@ -143,6 +146,7 @@ void MenuState::on_update(Core::Application *app, double dt) {
         delete key_controller;
         delete mouse_controller;
         delete vita_controller;
+        delete n3ds_controller;
 
         app->push_state(create_refptr<GameState>(true));
         return;
@@ -580,6 +584,14 @@ void MenuState::bind_controls() {
         {(int)Input::VitaButtons::Down, KeyFlag::Press},
         {MenuState::down, this});
 
+    n3ds_controller->add_command({(int)Input::N3DSButtons::A, KeyFlag::Press},
+                                 {MenuState::trigger, this});
+    n3ds_controller->add_command({(int)Input::N3DSButtons::Up, KeyFlag::Press},
+                                 {MenuState::up, this});
+    n3ds_controller->add_command(
+        {(int)Input::N3DSButtons::Down, KeyFlag::Press},
+        {MenuState::down, this});
+
     mouse_controller->add_command(
         {(int)Input::MouseButtons::Left, KeyFlag::Press},
         {MenuState::trigger, this});
@@ -588,5 +600,6 @@ void MenuState::bind_controls() {
     Input::add_controller(vita_controller);
     Input::add_controller(key_controller);
     Input::add_controller(mouse_controller);
+    Input::add_controller(n3ds_controller);
 }
 } // namespace CrossCraft
