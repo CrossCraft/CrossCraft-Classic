@@ -238,7 +238,8 @@ auto PauseMenu::draw() -> void {
     }
 
     case 2: {
-#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA)
+#if !(BUILD_PLAT == BUILD_PSP || BUILD_PLAT == BUILD_VITA ||                   \
+      BUILD_PLAT == BUILD_3DS)
         Rendering::RenderContext::get().matrix_translate({-108, 32, 0});
 
         if (selIdx == 0)
@@ -399,7 +400,7 @@ auto PauseMenu::draw() -> void {
                 Controls::get().upperKeyName(Controls::get().buttonJump),
             348, 182 - 24);
 
-#if PSP
+#if PSP || BUILD_PLAT == BUILD_3DS
         render_with_shadow(fontRenderer,
                            std::string("Left Analog: ") +
                                (Controls::get().pspJoystickView

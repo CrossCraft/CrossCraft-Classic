@@ -109,6 +109,35 @@ struct Controls {
                 return "";
             }
         }
+#elif BUILD_PLAT == BUILD_3DS
+        switch (key) {
+        case KEY_SELECT:
+            return "select";
+        case KEY_START:
+            return "start";
+        case KEY_DUP:
+            return "up";
+        case KEY_DRIGHT:
+            return "right";
+        case KEY_DDOWN:
+            return "down";
+        case KEY_DLEFT:
+            return "left";
+        case KEY_L:
+            return "ltrigger";
+        case KEY_R:
+            return "rtrigger";
+        case KEY_Y:
+            return "y";
+        case KEY_B:
+            return "b";
+        case KEY_A:
+            return "a";
+        case KEY_X:
+            return "x";
+        default:
+            return "";
+        }
 #elif BUILD_PLAT == BUILD_PSP
         switch (key) {
         case PSP_CTRL_SELECT:
