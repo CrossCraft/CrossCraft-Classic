@@ -145,7 +145,7 @@ auto Player::move_reset(std::any d) -> void {
 auto Player::move_forward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && !p->in_chat && !p->in_pause) {
-#if PSP
+#if PSP || BUILD_PLAT == BUILD_3DS
         if (!Controls::get().pspJoystickView) {
             p->rot.x -= 5.0f;
             if (p->rot.x < -89.9f) {
@@ -169,7 +169,7 @@ auto Player::move_forward(std::any d) -> void {
 auto Player::move_backward(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && !p->in_chat && !p->in_pause) {
-#if PSP
+#if PSP || BUILD_PLAT == BUILD_3DS
         if (!Controls::get().pspJoystickView) {
             p->rot.x += 5.0f;
             if (p->rot.x < -89.9f) {
@@ -250,7 +250,7 @@ auto Player::move_backward(std::any d) -> void {
                         Controls::get().buttonJump = val;
                     }
                 } else if (p->pauseMenu->selIdx == 4) {
-#if PSP
+#if PSP || BUILD_PLAT == BUILD_3DS
                     Controls::get().pspJoystickView =
                         !Controls::get().pspJoystickView;
 #elif BUILD_PLAT == BUILD_VITA
@@ -273,7 +273,7 @@ auto Player::move_left(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && !p->in_chat && !p->in_pause) {
 
-#if PSP
+#if PSP || BUILD_PLAT == BUILD_3DS
         if (!Controls::get().pspJoystickView) {
             p->rot.y -= 5.0f;
             if (p->rot.y > 360.0f) {
@@ -298,7 +298,7 @@ auto Player::move_left(std::any d) -> void {
 auto Player::move_right(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     if (!p->in_inventory && !p->in_chat && !p->in_pause) {
-#if PSP
+#if PSP || BUILD_PLAT == BUILD_3DS
         if (!Controls::get().pspJoystickView) {
             p->rot.y += 5.0f;
             if (p->rot.y > 360.0f) {
