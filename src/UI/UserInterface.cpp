@@ -1,6 +1,15 @@
 #include "UserInterface.hpp"
 #include "../BlockConst.hpp"
 
+#if BUILD_PLAT == BUILD_3DS
+#define SCREEN_W 400
+#define SCREEN_H 240
+#else
+#define SCREEN_W 480
+#define SCREEN_H 272
+#endif
+#define SCREEN_CENTER (SCREEN_W / 2)
+
 namespace CrossCraft {
 
 UserInterface::UserInterface() { textHelper = create_scopeptr<TextHelper>(); }
@@ -113,14 +122,13 @@ auto UserInterface::clear() -> void { textHelper->clear(); }
 
 auto UserInterface::begin2D() -> void {
     Rendering::RenderContext::get().set_mode_2D();
-    Rendering::RenderContext::get().matrix_ortho(0, 480, 0, 272, 100, -100);
+    Rendering::RenderContext::get().matrix_ortho(0, SCREEN_W, 0, SCREEN_H, 100,
+                                                 -100);
 }
 
 auto UserInterface::end2D() -> void { textHelper->draw(); }
 
-auto UserInterface::rebuild() -> void {
-    textHelper->rebuild();
-}
+auto UserInterface::rebuild() -> void { textHelper->rebuild(); }
 
 auto get_color(char c) -> uint8_t {
     switch (c) {
@@ -175,10 +183,12 @@ auto UserInterface::draw_text(std::string text, unsigned char color,
         x_position = 2;
         break;
     case CC_TEXT_ALIGN_CENTER:
-        x_position = 240 - static_cast<short>(textHelper->get_width(text) / 2);
+        x_position =
+            SCREEN_CENTER - static_cast<short>(textHelper->get_width(text) / 2);
         break;
     case CC_TEXT_ALIGN_RIGHT:
-        x_position = 478 - static_cast<short>(textHelper->get_width(text));
+        x_position =
+            SCREEN_W - 2 - static_cast<short>(textHelper->get_width(text));
         break;
     default:
         break;
@@ -186,10 +196,10 @@ auto UserInterface::draw_text(std::string text, unsigned char color,
 
     switch (y_align) {
     case CC_TEXT_ALIGN_TOP:
-        y_position = 262;
+        y_position = SCREEN_H - 8;
         break;
     case CC_TEXT_ALIGN_CENTER:
-        y_position = 132;
+        y_position = SCREEN_H / 2 - 4;
         break;
     case CC_TEXT_ALIGN_BOTTOM:
         y_position = 2;

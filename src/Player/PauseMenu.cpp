@@ -14,6 +14,15 @@ extern GLFWwindow *window;
 }
 #endif
 
+#if BUILD_PLAT == BUILD_3DS
+#define SCREEN_W 400
+#define SCREEN_H 240
+#else
+#define SCREEN_W 480
+#define SCREEN_H 272
+#endif
+#define SCREEN_CENTER (SCREEN_W / 2)
+
 namespace CrossCraft {
 
 PauseMenu::PauseMenu() {
@@ -26,20 +35,20 @@ PauseMenu::PauseMenu() {
         false, false);
 
     unsel_sprite = create_scopeptr<Graphics::G2D::Sprite>(
-        gui_tex, Rendering::Rectangle{{140, 144}, {200, 20}},
+        gui_tex, Rendering::Rectangle{{SCREEN_CENTER - 100, 144}, {200, 20}},
         Rendering::Rectangle{{0, (256.0f - 86.0f) / 256.0f},
                              {200.0f / 256.0f, 20.0f / 256.0f}});
 
     unsel_sprite->set_layer(-4);
 
     sel_sprite = create_scopeptr<Graphics::G2D::Sprite>(
-        gui_tex, Rendering::Rectangle{{140, 144}, {200, 20}},
+        gui_tex, Rendering::Rectangle{{SCREEN_CENTER - 100, 144}, {200, 20}},
         Rendering::Rectangle{{0, (256.0f - 106.0f) / 256.0f},
                              {200.0f / 256.0f, 20.0f / 256.0f}});
     sel_sprite->set_layer(-4);
 
     dis_sprite = create_scopeptr<Graphics::G2D::Sprite>(
-        gui_tex, Rendering::Rectangle{{140, 144}, {200, 20}},
+        gui_tex, Rendering::Rectangle{{SCREEN_CENTER - 100, 144}, {200, 20}},
         Rendering::Rectangle{{0, (256.0f - 66.0f) / 256.0f},
                              {200.0f / 256.0f, 20.0f / 256.0f}});
     dis_sprite->set_layer(-4);
@@ -117,11 +126,11 @@ auto PauseMenu::draw() -> void {
         else
             unsel_sprite->draw();
 
-        render_with_shadow(fontRenderer, "Game Menu", 240, 216);
-        render_with_shadow(fontRenderer, "Back to Game", 240, 160);
-        render_with_shadow(fontRenderer, "Options", 240, 136);
-        render_with_shadow(fontRenderer, "Save Game", 240, 112);
-        render_with_shadow(fontRenderer, "Quit Game", 240, 64);
+        render_with_shadow(fontRenderer, "Game Menu", SCREEN_CENTER, 216);
+        render_with_shadow(fontRenderer, "Back to Game", SCREEN_CENTER, 160);
+        render_with_shadow(fontRenderer, "Options", SCREEN_CENTER, 136);
+        render_with_shadow(fontRenderer, "Save Game", SCREEN_CENTER, 112);
+        render_with_shadow(fontRenderer, "Quit Game", SCREEN_CENTER, 64);
         break;
     }
 
@@ -178,13 +187,14 @@ auto PauseMenu::draw() -> void {
         else
             unsel_sprite->draw();
 
-        render_with_shadow(fontRenderer, std::string("Option Menu:"), 240, 216);
+        render_with_shadow(fontRenderer, std::string("Option Menu:"),
+                           SCREEN_CENTER, 216);
 
         render_with_shadow(fontRenderer,
                            std::string("Music: ") + (Option::get().music
                                                          ? std::string("ON")
                                                          : std::string("OFF")),
-                           132, 182);
+                           SCREEN_CENTER - 108, 182);
 
         auto dist = Option::get().renderDist;
         auto str = std::string("");
@@ -208,31 +218,31 @@ auto PauseMenu::draw() -> void {
         }
 
         render_with_shadow(fontRenderer, std::string("Render Distance: ") + str,
-                           132, 158);
+                           SCREEN_CENTER - 108, 158);
         render_with_shadow(fontRenderer,
                            std::string("View Bobbing: ") +
                                (Option::get().bobbing ? std::string("ON")
                                                       : std::string("OFF")),
-                           132, 134);
+                           SCREEN_CENTER - 108, 134);
 
         render_with_shadow(fontRenderer,
                            std::string("Sound: ") + (Option::get().sound
                                                          ? std::string("ON")
                                                          : std::string("OFF")),
-                           348, 182);
+                           SCREEN_CENTER + 108, 182);
         render_with_shadow(
             fontRenderer,
             std::string("Show FPS: ") +
                 (Option::get().fps ? std::string("ON") : std::string("OFF")),
-            348, 158);
+            SCREEN_CENTER + 108, 158);
         render_with_shadow(fontRenderer,
                            std::string("Vsync: ") + (Option::get().vsync
                                                          ? std::string("ON")
                                                          : std::string("OFF")),
-                           348, 134);
+                           SCREEN_CENTER + 108, 134);
 
-        render_with_shadow(fontRenderer, "Controls", 240, 62);
-        render_with_shadow(fontRenderer, "Back", 240, 62 - 24);
+        render_with_shadow(fontRenderer, "Controls", SCREEN_CENTER, 62);
+        render_with_shadow(fontRenderer, "Back", SCREEN_CENTER, 62 - 24);
 
         break;
     }
@@ -298,7 +308,8 @@ auto PauseMenu::draw() -> void {
         else
             unsel_sprite->draw();
 
-        render_with_shadow(fontRenderer, std::string("Controls:"), 240, 216);
+        render_with_shadow(fontRenderer, std::string("Controls:"),
+                           SCREEN_CENTER, 216);
         render_with_shadow(
             fontRenderer,
             std::string("Forward: ") +
@@ -378,27 +389,28 @@ auto PauseMenu::draw() -> void {
         else
             unsel_sprite->draw();
 
-        render_with_shadow(fontRenderer, std::string("Controls:"), 240, 216);
+        render_with_shadow(fontRenderer, std::string("Controls:"),
+                           SCREEN_CENTER, 216);
         render_with_shadow(
             fontRenderer,
             std::string("Break: ") +
                 Controls::get().upperKeyName(Controls::get().buttonBreak),
-            132, 182);
+            SCREEN_CENTER - 108, 182);
         render_with_shadow(
             fontRenderer,
             std::string("Place: ") +
                 Controls::get().upperKeyName(Controls::get().buttonPlace),
-            132, 182 - 24);
+            SCREEN_CENTER - 108, 182 - 24);
         render_with_shadow(
             fontRenderer,
             std::string("Block Menu: ") +
                 Controls::get().upperKeyName(Controls::get().buttonMenu),
-            348, 182);
+            SCREEN_CENTER + 108, 182);
         render_with_shadow(
             fontRenderer,
             std::string("Jump: ") +
                 Controls::get().upperKeyName(Controls::get().buttonJump),
-            348, 182 - 24);
+            SCREEN_CENTER + 108, 182 - 24);
 
 #if PSP || BUILD_PLAT == BUILD_3DS
         render_with_shadow(fontRenderer,
@@ -406,16 +418,16 @@ auto PauseMenu::draw() -> void {
                                (Controls::get().pspJoystickView
                                     ? std::string("View")
                                     : std::string("Move")),
-                           240, 62);
+                           SCREEN_CENTER, 62);
 #else
         render_with_shadow(fontRenderer,
                            std::string("Left Analog: ") +
                                (Controls::get().vitaJoystickSwap
                                     ? std::string("View")
                                     : std::string("Move")),
-                           240, 62);
+                           SCREEN_CENTER, 62);
 #endif
-        render_with_shadow(fontRenderer, "Back", 240, 62 - 24);
+        render_with_shadow(fontRenderer, "Back", SCREEN_CENTER, 62 - 24);
 #endif
         break;
     }

@@ -33,6 +33,15 @@ extern GLFWwindow *window;
 }
 #endif
 
+#if BUILD_PLAT == BUILD_3DS
+#define SCREEN_W 400
+#define SCREEN_H 240
+#else
+#define SCREEN_W 480
+#define SCREEN_H 272
+#endif
+#define SCREEN_CENTER (SCREEN_W / 2)
+
 #if PSP
 u32 totalRamFree() {
     u32 size = 0;
@@ -93,27 +102,31 @@ Player::Player()
 
     hasDir = false;
 
+    auto backX = SCREEN_CENTER - 114;
     background_rectangle = create_scopeptr<Rendering::Primitive::Rectangle>(
-        Rendering::Rectangle{{126, 55}, {226, 167}},
+        Rendering::Rectangle{{backX, 55}, {226, 167}},
         Rendering::Color{0, 0, 0, 128}, 2);
 
+    auto posX = SCREEN_CENTER - 91;
+
     item_box = create_scopeptr<Graphics::G2D::Sprite>(
-        gui_texture, Rendering::Rectangle{{149, 1}, {182, 22}},
+        gui_texture, Rendering::Rectangle{{posX, 1}, {182, 22}},
         Rendering::Rectangle{{0, (256.0f - 22.0f) / 256.0f},
                              {182.0f / 256.0f, 22.0f / 256.0f}});
-    item_box->set_position({149, 5});
+    item_box->set_position({posX, 5});
     item_box->set_layer(-1);
 
     selector = create_scopeptr<Graphics::G2D::Sprite>(
-        gui_texture, Rendering::Rectangle{{148, 0}, {24, 24}},
+        gui_texture, Rendering::Rectangle{{posX - 1, 0}, {24, 24}},
         Rendering::Rectangle{{0, (256.0f - 22.0f - 24.0f) / 256.0f},
                              {24.0f / 256.0f, 24.0f / 256.0f}});
 
-    selector->set_position({148, 4});
+    selector->set_position({posX - 1, 4});
     selector->set_layer(-2);
 
     crosshair = create_scopeptr<Graphics::G2D::Sprite>(
-        gui_texture, Rendering::Rectangle{{240 - 8, 136 - 8}, {16, 16}},
+        gui_texture,
+        Rendering::Rectangle{{SCREEN_CENTER - 8, SCREEN_H / 2 - 8}, {16, 16}},
         Rendering::Rectangle{
             {(256.0f - 16.0f) / 256.0f, (256.0f - 16.0f) / 256.0f},
             {16.0f / 256.0f, 16.0f / 256.0f}});

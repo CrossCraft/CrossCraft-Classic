@@ -445,6 +445,12 @@ auto Player::pause(std::any d) -> void {
     }
 }
 
+#if BUILD_PLAT == BUILD_3DS
+#define SCREEN_CENTER 200
+#else
+#define SCREEN_CENTER 240
+#endif
+
 auto Player::inc_selector(std::any d) -> void {
     auto p = std::any_cast<Player *>(d);
     p->selectorIDX++;
@@ -452,7 +458,7 @@ auto Player::inc_selector(std::any d) -> void {
     if (p->selectorIDX > 8)
         p->selectorIDX = 0;
 
-    p->selector->set_position({148 + 20 * p->selectorIDX, 4});
+    p->selector->set_position({SCREEN_CENTER - 92 + 20 * p->selectorIDX, 4});
 }
 
 auto Player::dec_selector(std::any d) -> void {
@@ -462,7 +468,7 @@ auto Player::dec_selector(std::any d) -> void {
     if (p->selectorIDX < 0)
         p->selectorIDX = 8;
 
-    p->selector->set_position({148 + 20 * p->selectorIDX, 4});
+    p->selector->set_position({SCREEN_CENTER - 92 + 20 * p->selectorIDX, 4});
 }
 
 auto Player::toggle_inv(std::any d) -> void {

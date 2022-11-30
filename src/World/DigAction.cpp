@@ -34,7 +34,7 @@ auto DigAction::doInventory(World *w) -> void {
     if (idx > 41)
         return;
 
-#if PSP || BUILD_PLAT == BUILD_VITA
+#if PSP || BUILD_PLAT == BUILD_VITA || BUILD_PLAT == BUILD_3DS
     idx = (w->player->in_cursor_x) + (w->player->in_cursor_y * 9);
 #endif
 

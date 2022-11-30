@@ -5,8 +5,10 @@
 #include <filesystem>
 #include <string>
 
-#if BUILD_PLAT != BUILD_VITA
+#if BUILD_PLAT != BUILD_VITA && BUILD_PLAT != BUILD_3DS
 #define PLATFORM_FILE_PREFIX std::string("")
+#elif BUILD_PLAT == BUILD_3DS
+#define PLATFORM_FILE_PREFIX std::string("CrossCraft-Classic/")
 #else
 #define PLATFORM_FILE_PREFIX std::string("ux0:/data/CrossCraft-Classic/")
 #endif

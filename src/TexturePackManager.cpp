@@ -22,6 +22,8 @@ auto TexturePackManager::load_texture(std::string filename, u32 magFilter,
 
         std::string path =
             PLATFORM_FILE_PREFIX + "texturepacks/" + l + "/" + filename;
+
+        SC_APP_INFO("{}", path);
         std::fstream file(path);
 
         if (file.is_open()) {

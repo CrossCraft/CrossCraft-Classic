@@ -80,8 +80,13 @@ auto BlockRep::drawBlk(uint8_t type, int x, int y, int y_offset, float scale)
     -> void {
     Rendering::RenderContext::get().matrix_view(glm::mat4(1));
 
+#if BUILD_PLAT == BUILD_3DS
+    Rendering::RenderContext::get().matrix_translate(
+        {113.5f + x * 20, (8 + y * 24) + y_offset, -20});
+#else
     Rendering::RenderContext::get().matrix_translate(
         {153.5f + x * 20, (8 + y * 24) + y_offset, -20});
+#endif
 
     if (type == 6 || type == 37 || type == 38 || type == 39 || type == 40)
         Rendering::RenderContext::get().matrix_rotate({0.0f, 45.0f, 0});
