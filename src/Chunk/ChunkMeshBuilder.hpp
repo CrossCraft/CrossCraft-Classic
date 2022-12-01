@@ -12,17 +12,17 @@ class ChunkMesh;
 class ChunkMeshBuilder {
   public:
     static void try_add_face(ChunkMesh *chunkMesh, const World *wrld,
-                             std::array<float, 12> data, uint8_t blk,
-                             glm::vec3 pos, glm::vec3 posCheck,
+                             const std::array<float, 12>& data, uint8_t blk,
+        const glm::vec3& pos, const glm::vec3& posCheck,
                              uint32_t lightVal);
 
     static void add_face_to_mesh(ChunkMesh *chunkMesh,
-                                 std::array<float, 12> data,
+        const std::array<float, 12>& data,
                                  std::array<float, 8> uv, glm::vec3 pos,
                                  uint32_t lightVal, ChunkMeshSelection meshSel);
 
     static void add_face_to_mesh_wrld(ChunkMesh *chunkMesh, const World *wrld,
-                                 std::array<float, 12> data,
+        const std::array<float, 12>& data,
                                  std::array<float, 8> uv, glm::vec3 pos,
                                  uint32_t lightVal, ChunkMeshSelection meshSel);
 
@@ -32,11 +32,11 @@ class ChunkMeshBuilder {
 
     static void add_slab_to_mesh(ChunkMesh *chunkMesh, const World *wrld,
                                  uint8_t blk, glm::vec3 pos,
-                                 SurroundPos surround);
+                                 SurroundPos& surround);
 
     static void add_block_to_mesh(ChunkMesh *chunkMesh, const World *wrld,
-                                  uint8_t blk, glm::vec3 pos,
-                                  SurroundPos surround);
+                                  uint8_t blk, const glm::vec3& pos,
+                                  SurroundPos& surround);
 };
 
 } // namespace CrossCraft
