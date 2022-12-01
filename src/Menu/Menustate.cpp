@@ -624,7 +624,7 @@ void MenuState::bind_controls() {
         {(int)Input::VitaButtons::Down, KeyFlag::Press},
         {MenuState::down, this});
 
-    n3ds_controller->add_command({(int)Input::N3DSButtons::A, KeyFlag::Press},
+    n3ds_controller->add_command({(int)Input::N3DSButtons::B, KeyFlag::Press},
                                  {MenuState::trigger, this});
     n3ds_controller->add_command({(int)Input::N3DSButtons::Up, KeyFlag::Press},
                                  {MenuState::up, this});

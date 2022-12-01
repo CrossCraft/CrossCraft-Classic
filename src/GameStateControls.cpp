@@ -59,16 +59,16 @@ void GameState::bind_controls() {
         {Player::move_right, world->player.get()});
 
     n3ds_controller->add_command(
-        {(int)Input::N3DSButtons::Y, KeyFlag::Press | KeyFlag::Held},
+        {(int)Input::N3DSButtons::X, KeyFlag::Press | KeyFlag::Held},
         {Player::move_forward, world->player.get()});
     n3ds_controller->add_command(
-        {(int)Input::N3DSButtons::A, KeyFlag::Press | KeyFlag::Held},
+        {(int)Input::N3DSButtons::B, KeyFlag::Press | KeyFlag::Held},
         {Player::move_backward, world->player.get()});
     n3ds_controller->add_command(
-        {(int)Input::N3DSButtons::X, KeyFlag::Press | KeyFlag::Held},
+        {(int)Input::N3DSButtons::Y, KeyFlag::Press | KeyFlag::Held},
         {Player::move_left, world->player.get()});
     n3ds_controller->add_command(
-        {(int)Input::N3DSButtons::B, KeyFlag::Press | KeyFlag::Held},
+        {(int)Input::N3DSButtons::A, KeyFlag::Press | KeyFlag::Held},
         {Player::move_right, world->player.get()});
 
     vita_controller->add_command(
