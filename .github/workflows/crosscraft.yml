@@ -55,7 +55,6 @@ jobs:
           copy ext/zconf.h ext/zlib/zconf.h
           cmake --build . --config Release
           move Release\CrossCraft-Classic.exe CrossCraft-Classic.exe
-          move ZLib\Release\zlib.dll zlib.dll
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
