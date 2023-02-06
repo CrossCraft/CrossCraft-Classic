@@ -21,7 +21,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev libasound2-dev libjack-jackd2-dev oss4-dev libpulse-dev libsdl2-dev libsdl2-mixer-dev
-          git submodule update --init --recursive --remote
+          git submodule update --init --recursive
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: |
-          git submodule update --init --recursive --remote
+          git submodule update --init --recursive
           vcpkg install sdl2 --triplet x64-windows
           vcpkg install sdl2-mixer --triplet x64-windows
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 .
@@ -83,7 +83,7 @@ jobs:
       - name: Build
         run: |
           git config --global --add safe.directory /__w/CrossCraft-Classic/CrossCraft-Classic
-          git submodule update --init --recursive --remote
+          git submodule update --init --recursive
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$PSPDEV/psp/share/pspdev.cmake ..
@@ -117,7 +117,7 @@ jobs:
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
           git config --global --add safe.directory /__w/CrossCraft-Classic/CrossCraft-Classic
-          git submodule update --init --recursive --remote
+          git submodule update --init --recursive
           mkdir -p build
           cd build
           cmake -DVITA=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake ..
